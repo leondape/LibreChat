@@ -11,6 +11,8 @@
     "update": "node config/update.js",
     "add-balance": "node config/add-balance.js",
     "list-balances": "node config/list-balances.js",
+    "reset-balances": "node config/reset-balances.js",
+    "reset-balance": "node config/reset-balance.js",
     "user-stats": "node config/user-stats.js",
     "rebuild:package-lock": "node config/packages",
     "reinstall": "node config/update.js -l -g",
@@ -29,6 +31,7 @@
     "ban-user": "node config/ban-user.js",
     "delete-user": "node config/delete-user.js",
     "backend": "cross-env NODE_ENV=production node api/server/index.js",
+    "backend:cron": "cross-env NODE_ENV=production node api/server/index.js",
     "backend:dev": "cross-env NODE_ENV=development npx nodemon api/server/index.js",
     "backend:stop": "node config/stop-backend.js",
     "build:data-provider": "cd packages/data-provider && npm run build",
@@ -100,5 +103,8 @@
       "admin/",
       "packages/"
     ]
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3"
   }
 }

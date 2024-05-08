@@ -4,6 +4,7 @@ const { silentExit } = require('./helpers');
 const Conversation = require('~/models/schema/convoSchema');
 const Message = require('~/models/schema/messageSchema');
 const User = require('~/models/User');
+const Balance = require('~/models/Balance');
 const connect = require('./connect');
 
 (async () => {
@@ -21,11 +22,14 @@ const connect = require('./connect');
   for (const user of users) {
     let conversationsCount = (await Conversation.count({ user: user._id })) ?? 0;
     let messagesCount = (await Message.count({ user: user._id })) ?? 0;
+    let balance = await Balance.findOne({ user: user._id });
 
     userData.push({
       User: user.name,
       Conversations: conversationsCount,
       Messages: messagesCount,
+      Email: user.email,
+      Balance: balance ? balance.tokenCredits : 'disabled or 0',
     });
   }
 

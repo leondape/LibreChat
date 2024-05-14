@@ -109,7 +109,7 @@ const registerUser = async (user) => {
     newUser.password = hash;
     await newUser.save();
 
-    // Check if CHECK_BALANCE is true before adding balance
+    // Check if CHECK_BALANCE is true before adding balance !WORKS ONLY FOR EMAIL or manual, NOT OPENID!
     if (process.env.CHECK_BALANCE === 'true') {
       const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
 

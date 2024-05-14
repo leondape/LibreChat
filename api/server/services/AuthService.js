@@ -8,6 +8,9 @@ const { sendEmail } = require('~/server/utils');
 const Session = require('~/models/Session');
 const { logger } = require('~/config');
 const User = require('~/models/User');
+const { exec } = require('child_process');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const domains = {
   client: process.env.DOMAIN_CLIENT,
@@ -105,6 +108,29 @@ const registerUser = async (user) => {
     const hash = bcrypt.hashSync(newUser.password, salt);
     newUser.password = hash;
     await newUser.save();
+
+    // Check if CHECK_BALANCE is true before adding balance
+    if (process.env.CHECK_BALANCE === 'true') {
+      const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
+
+      if (!resetBalanceAmount) {
+        logger.error('RESET_BALANCE_AMOUNT is not set in the .env file!');
+        return { status: 500, message: 'Balance amount not configured' };
+      }
+
+      const command = `node ${path.resolve(
+        'config/add-balance.js',
+      )} ${email} ${resetBalanceAmount}`;
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          logger.error('Error adding balance:', error.message);
+          logger.error(stderr);
+        } else {
+          logger.info('Balance added successfully for user:', email);
+          logger.info(stdout);
+        }
+      });
+    }
 
     return { status: 200, user: newUser };
   } catch (err) {

@@ -192,7 +192,9 @@ async function setupOpenId() {
               throw new Error('RESET_BALANCE_AMOUNT is not set in the .env file!');
             }
 
-            const command = `node ${path.resolve('config/add-balance.js')} ${user.email} ${resetBalanceAmount}`;
+            const command = `node ${path.resolve('config/add-balance.js')} ${
+              user.email
+            } ${resetBalanceAmount}`;
             exec(command, (error, stdout, stderr) => {
               if (error) {
                 console.error('Error adding balance:', error.message);
@@ -203,9 +205,6 @@ async function setupOpenId() {
               }
             });
           }
-
-
-
 
           done(null, user);
         } catch (err) {

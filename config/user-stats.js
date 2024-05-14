@@ -26,9 +26,9 @@ const connect = require('./connect');
 
     userData.push({
       User: user.name,
+      Email: user.email,
       Conversations: conversationsCount,
       Messages: messagesCount,
-      Email: user.email,
       Balance: balance ? balance.tokenCredits : 'disabled or 0',
     });
   }

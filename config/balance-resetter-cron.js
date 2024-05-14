@@ -1,10 +1,7 @@
 require('dotenv').config();
-const cron = require('node-cron');
 const { exec } = require('child_process');
 
 const {
-  RESET_BALANCE,
-  RESET_BALANCE_TIME,
   RESET_BALANCE_AMOUNT,
   RESET_AMOUNT_PRIVILEGED_USERS,
   RESET_AMOUNT_PRIVILEGED,
@@ -22,7 +19,7 @@ function resetBalances(callback) {
     if (stderr) {
       console.error(`stderr: ${stderr}`);
     }
-    if (callback) {callback();}
+    if (callback) { callback(); }
   });
 }
 
@@ -45,25 +42,5 @@ function resetBalanceForPrivilegedUsers() {
   });
 }
 
-// Main function to setup cron jobs
-function setupCronJobs() {
-  if (RESET_BALANCE.toLowerCase() === 'true') {
-    // Schedule task to reset balances
-    cron.schedule(
-      RESET_BALANCE_TIME,
-      () => {
-        resetBalances(resetBalanceForPrivilegedUsers);
-      },
-      {
-        scheduled: true,
-        timezone: 'Europe/Berlin',
-      },
-    );
-
-    console.log('Cron jobs set up at ' + RESET_BALANCE_TIME);
-  } else {
-    console.log('Reset balance is disabled.');
-  }
-}
-
-setupCronJobs();
+// Run the tasks
+resetBalances(resetBalanceForPrivilegedUsers);

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const cron = require('node-cron');
-const { resetBalancesCallback } = require('./reset-balance-auto.js'); // Update the path accordingly
+const { resetBalancesCallback } = require('./reset-balances-auto.js'); // Update the path accordingly
 
 const { RESET_BALANCE, RESET_BALANCE_TIME } = process.env;
 

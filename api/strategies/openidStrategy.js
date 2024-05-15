@@ -88,6 +88,7 @@ async function setupOpenId() {
       async (tokenset, userinfo, done) => {
         try {
           let user = await User.findOne({ openidId: userinfo.sub });
+          let isNewUser = false;
 
           if (!user) {
             user = await User.findOne({ email: userinfo.email });
@@ -147,6 +148,7 @@ async function setupOpenId() {
               emailVerified: userinfo.email_verified || false,
               name: fullName,
             });
+            isNewUser = true; // new user created
           } else {
             user.provider = 'openid';
             user.openidId = userinfo.sub;
@@ -184,8 +186,9 @@ async function setupOpenId() {
           }
 
           await user.save();
-          // Add balance if CHECK_BALANCE is true
-          if (process.env.CHECK_BALANCE === 'true') {
+
+          // Only add balance if the user was newly created
+          if (isNewUser && process.env.CHECK_BALANCE === 'true') {
             const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
 
             if (!resetBalanceAmount) {

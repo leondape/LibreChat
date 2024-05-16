@@ -14,7 +14,7 @@ import {
   DynamicSwitch,
   DynamicInput,
   DynamicTags,
-} from './';
+} from '.';
 
 const settingsConfiguration: SettingsConfiguration = [
   {

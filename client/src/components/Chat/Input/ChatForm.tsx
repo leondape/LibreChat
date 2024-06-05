@@ -1,6 +1,6 @@
+import { memo, useCallback, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { memo, useCallback, useRef, useMemo } from 'react';
 import {
   supportsFiles,
   mergeFileConfig,
@@ -11,16 +11,16 @@ import { useChatContext, useAssistantsMapContext } from '~/Providers';
 import { useRequiresKey, useTextarea } from '~/hooks';
 import { TextareaAutosize } from '~/components/ui';
 import { useGetFileConfig } from '~/data-provider';
-import { cn, removeFocusOutlines } from '~/utils';
+import { cn, removeFocusRings } from '~/utils';
+import { mainTextareaId } from '~/common';
+import store from '~/store';
 import AttachFile from './Files/AttachFile';
 import AudioRecorder from './AudioRecorder';
-import { mainTextareaId } from '~/common';
 import StreamAudio from './StreamAudio';
 import StopButton from './StopButton';
 import SendButton from './SendButton';
 import FileRow from './Files/FileRow';
 import Mention from './Mention';
-import store from '~/store';
 
 const ChatForm = ({ index = 0 }) => {
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -142,8 +142,8 @@ const ChatForm = ({ index = 0 }) => {
                     : 'pl-3 md:pl-4',
                   'm-0 w-full resize-none border-0 bg-transparent py-[10px] placeholder-black/50 focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:placeholder-white/50 md:py-3.5  ',
                   SpeechToText ? 'pr-20 md:pr-[85px]' : 'pr-10 md:pr-12',
-                  removeFocusOutlines,
                   'max-h-[65vh] md:max-h-[75vh]',
+                  removeFocusRings,
                 )}
               />
             )}

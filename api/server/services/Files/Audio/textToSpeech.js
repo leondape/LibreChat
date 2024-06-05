@@ -1,8 +1,8 @@
 const axios = require('axios');
-const getCustomConfig = require('~/server/services/Config/getCustomConfig');
-const { getRandomVoiceId, createChunkProcessor, splitTextIntoChunks } = require('./streamAudio');
 const { extractEnvVariable } = require('librechat-data-provider');
+const getCustomConfig = require('~/server/services/Config/getCustomConfig');
 const { logger } = require('~/config');
+const { getRandomVoiceId, createChunkProcessor, splitTextIntoChunks } = require('./streamAudio');
 
 /**
  * getProvider function
@@ -300,7 +300,7 @@ async function textToSpeech(req, res) {
           break;
         }
       } catch (innerError) {
-        logger.error('Error processing update:', chunk, innerError);
+        logger.error('Error processing manual update:', chunk, innerError);
         if (!res.headersSent) {
           res.status(500).end();
         }
@@ -312,7 +312,10 @@ async function textToSpeech(req, res) {
       res.end();
     }
   } catch (error) {
-    logger.error('An error occurred while creating the audio stream:', error);
+    logger.error(
+      'Error creating the audio stream. Suggestion: check your provider quota. Error:',
+      error,
+    );
     res.status(500).send('An error occurred');
   }
 }

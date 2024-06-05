@@ -1,5 +1,4 @@
 const OpenAI = require('openai');
-const { OllamaClient } = require('./OllamaClient');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const {
   Constants,
@@ -19,6 +18,12 @@ const {
   getModelMaxTokens,
   genAzureChatCompletion,
 } = require('~/utils');
+const { encodeAndFormat } = require('~/server/services/Files/images/encode');
+const { updateTokenWebsocket } = require('~/server/services/Files/Audio');
+const { isEnabled, sleep } = require('~/server/utils');
+const spendTokens = require('~/models/spendTokens');
+const { logger } = require('~/config');
+const { OllamaClient } = require('./OllamaClient');
 const {
   truncateText,
   formatMessage,
@@ -26,18 +31,13 @@ const {
   titleInstruction,
   createContextHandlers,
 } = require('./prompts');
-const { encodeAndFormat } = require('~/server/services/Files/images/encode');
-const { updateTokenWebsocket } = require('~/server/services/Files/Audio');
-const { isEnabled, sleep } = require('~/server/utils');
 const { handleOpenAIErrors } = require('./tools/util');
-const spendTokens = require('~/models/spendTokens');
 const { createLLM, RunManager } = require('./llm');
 const ChatGPTClient = require('./ChatGPTClient');
 const { summaryBuffer } = require('./memory');
 const { runTitleChain } = require('./chains');
 const { tokenSplit } = require('./document');
 const BaseClient = require('./BaseClient');
-const { logger } = require('~/config');
 
 // Cache to store Tiktoken instances
 const tokenizersCache = {};
@@ -589,7 +589,7 @@ class OpenAIClient extends BaseClient {
     let streamResult = null;
     this.modelOptions.user = this.user;
     const invalidBaseUrl = this.completionsUrl && extractBaseURL(this.completionsUrl) === null;
-    const useOldMethod = !!(invalidBaseUrl || !this.isChatCompletion || typeof Bun !== 'undefined');
+    const useOldMethod = !!(invalidBaseUrl || !this.isChatCompletion);
     if (typeof opts.onProgress === 'function' && useOldMethod) {
       const completionResult = await this.getCompletion(
         payload,
@@ -829,7 +829,7 @@ class OpenAIClient extends BaseClient {
 
       const instructionsPayload = [
         {
-          role: 'system',
+          role: this.options.titleMessageRole ?? 'system',
           content: `Please generate ${titleInstruction}
 
 ${convo}
@@ -1108,7 +1108,12 @@ ${convo}
       }
 
       if (this.azure || this.options.azure) {
-        // Azure does not accept `model` in the body, so we need to remove it.
+        /* Azure Bug, extremely short default `max_tokens` response */
+        if (!modelOptions.max_tokens && modelOptions.model === 'gpt-4-vision-preview') {
+          modelOptions.max_tokens = 4000;
+        }
+
+        /* Azure does not accept `model` in the body, so we need to remove it. */
         delete modelOptions.model;
 
         opts.baseURL = this.langchainProxy
@@ -1129,6 +1134,7 @@ ${convo}
       let chatCompletion;
       /** @type {OpenAI} */
       const openai = new OpenAI({
+        fetch: this.fetch,
         apiKey: this.apiKey,
         ...opts,
       });

@@ -1,8 +1,8 @@
+import { useEffect, useState, useCallback } from 'react';
 import { v4 } from 'uuid';
 import { useSetRecoilState } from 'recoil';
 import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useCallback } from 'react';
 import {
   /* @ts-ignore */
   SSE,
@@ -32,10 +32,10 @@ import {
   getConversationById,
 } from '~/utils';
 import { useGenTitleMutation } from '~/data-provider';
+import store from '~/store';
 import useContentHandler from './useContentHandler';
 import { useAuthContext } from '../AuthContext';
 import useChatHelpers from '../useChatHelpers';
-import store from '~/store';
 
 type TResData = {
   plugin?: TResPlugin;
@@ -282,6 +282,12 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
       setShowStopButton(false);
       setCompleted((prev) => new Set(prev.add(submission?.initialResponse?.messageId)));
 
+      const currentMessages = getMessages();
+      // Early return if messages are empty; i.e., the user navigated away
+      if (!currentMessages?.length) {
+        return setIsSubmitting(false);
+      }
+
       // update the messages; if assistants endpoint, client doesn't receive responseMessage
       if (runMessages) {
         setMessages([...runMessages]);
@@ -323,7 +329,15 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
 
       setIsSubmitting(false);
     },
-    [genTitle, queryClient, setMessages, setConversation, setIsSubmitting, setShowStopButton],
+    [
+      genTitle,
+      queryClient,
+      getMessages,
+      setMessages,
+      setConversation,
+      setIsSubmitting,
+      setShowStopButton,
+    ],
   );
 
   const errorHandler = useCallback(
@@ -353,7 +367,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
       if (!data) {
         const convoId = conversationId ?? v4();
         const errorResponse = parseErrorResponse({
-          text: 'Error connecting to server',
+          text: 'Error connecting to server, try refreshing the page.',
           ...submission,
           conversationId: convoId,
         });

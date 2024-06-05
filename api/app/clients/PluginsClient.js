@@ -1,17 +1,17 @@
-const OpenAIClient = require('./OpenAIClient');
 const { CallbackManager } = require('langchain/callbacks');
 const { BufferMemory, ChatMessageHistory } = require('langchain/memory');
-const { initializeCustomAgent, initializeFunctionsAgent } = require('./agents');
-const { addImages, buildErrorInput, buildPromptPrefix } = require('./output_parsers');
-const { processFileURL } = require('~/server/services/Files/process');
 const { EModelEndpoint } = require('librechat-data-provider');
-const { formatLangChainMessages } = require('./prompts');
+const { processFileURL } = require('~/server/services/Files/process');
 const checkBalance = require('~/models/checkBalance');
-const { SelfReflectionTool } = require('./tools');
 const { isEnabled } = require('~/server/utils');
 const { extractBaseURL } = require('~/utils');
-const { loadTools } = require('./tools/util');
 const { logger } = require('~/config');
+const { initializeCustomAgent, initializeFunctionsAgent } = require('./agents');
+const { addImages, buildErrorInput, buildPromptPrefix } = require('./output_parsers');
+const { formatLangChainMessages } = require('./prompts');
+const { SelfReflectionTool } = require('./tools');
+const { loadTools } = require('./tools/util');
+const OpenAIClient = require('./OpenAIClient');
 
 class PluginsClient extends OpenAIClient {
   constructor(apiKey, options = {}) {
@@ -268,7 +268,7 @@ class PluginsClient extends OpenAIClient {
     if (opts.progressCallback) {
       opts.onProgress = opts.progressCallback.call(null, {
         ...(opts.progressOptions ?? {}),
-        parentMessageId: opts.progressOptions?.parentMessageId ?? userMessage.messageId,
+        parentMessageId: userMessage.messageId,
         messageId: responseMessageId,
       });
     }

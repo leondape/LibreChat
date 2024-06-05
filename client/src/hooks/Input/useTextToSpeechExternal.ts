@@ -1,5 +1,5 @@
-import { useRecoilValue } from 'recoil';
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
 import { useTextToSpeechMutation } from '~/data-provider';
 import useAudioRef from '~/hooks/Audio/useAudioRef';
 import useLocalize from '~/hooks/useLocalize';
@@ -37,7 +37,7 @@ function useTextToSpeechExternal(messageId: string, isLast: boolean, index = 0) 
   const playAudioPromise = (blobUrl: string) => {
     const newAudio = new Audio(blobUrl);
     const initializeAudio = () => {
-      if (playbackRate && playbackRate !== 1) {
+      if (playbackRate && playbackRate !== 1 && playbackRate > 0) {
         newAudio.playbackRate = playbackRate;
       }
     };

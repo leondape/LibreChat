@@ -1,7 +1,7 @@
 const Keyv = require('keyv');
 const { CacheKeys, ViolationTypes } = require('librechat-data-provider');
-const { logFile, violationFile } = require('./keyvFiles');
 const { math, isEnabled } = require('~/server/utils');
+const { logFile, violationFile } = require('./keyvFiles');
 const keyvRedis = require('./keyvRedis');
 const keyvMongo = require('./keyvMongo');
 
@@ -60,6 +60,8 @@ const namespaces = {
   message_limit: createViolationInstance('message_limit'),
   token_balance: createViolationInstance(ViolationTypes.TOKEN_BALANCE),
   registrations: createViolationInstance('registrations'),
+  [ViolationTypes.TTS_LIMIT]: createViolationInstance(ViolationTypes.TTS_LIMIT),
+  [ViolationTypes.STT_LIMIT]: createViolationInstance(ViolationTypes.STT_LIMIT),
   [ViolationTypes.FILE_UPLOAD_LIMIT]: createViolationInstance(ViolationTypes.FILE_UPLOAD_LIMIT),
   [ViolationTypes.ILLEGAL_MODEL_REQUEST]: createViolationInstance(
     ViolationTypes.ILLEGAL_MODEL_REQUEST,

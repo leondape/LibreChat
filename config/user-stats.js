@@ -1,10 +1,10 @@
 const path = require('path');
 require('module-alias')({ base: path.resolve(__dirname, '..', 'api') });
-const { silentExit } = require('./helpers');
 const Conversation = require('~/models/schema/convoSchema');
 const Message = require('~/models/schema/messageSchema');
 const User = require('~/models/User');
 const Balance = require('~/models/Balance');
+const { silentExit } = require('./helpers');
 const connect = require('./connect');
 
 (async () => {
@@ -29,7 +29,9 @@ const connect = require('./connect');
       Email: user.email,
       Conversations: conversationsCount,
       Messages: messagesCount,
-      Balance: balance ? balance.tokenCredits : 'disabled or 0',
+      Balance: balance
+        ? '$ ' + (parseFloat(balance.tokenCredits) / 1000000).toFixed(2).toString()
+        : 'disabled or 0',
     });
   }
 

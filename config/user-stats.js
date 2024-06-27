@@ -29,9 +29,7 @@ const connect = require('./connect');
       Email: user.email,
       Conversations: conversationsCount,
       Messages: messagesCount,
-      Balance: balance
-        ? '$ ' + (parseFloat(balance.tokenCredits) / 1000000).toFixed(2).toString()
-        : 'disabled or 0',
+      Balance: balance ? balance.tokenCredits : 'disabled or 0',
     });
   }
 

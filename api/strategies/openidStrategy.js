@@ -3,7 +3,8 @@ const path = require('path');
 const fetch = require('node-fetch');
 const passport = require('passport');
 const jwtDecode = require('jsonwebtoken/decode');
-const { Issuer, Strategy: OpenIDStrategy } = require('openid-client');
+const { HttpsProxyAgent } = require('https-proxy-agent');
+const { Issuer, Strategy: OpenIDStrategy, custom } = require('openid-client');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { findUser, createUser, updateUser } = require('~/models/userMethods');
 const { logger } = require('~/config');
@@ -27,12 +28,18 @@ const downloadImage = async (url, accessToken) => {
   }
 
   try {
-    const response = await fetch(url, {
+    const options = {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    });
+    };
+
+    if (process.env.PROXY) {
+      options.agent = new HttpsProxyAgent(process.env.PROXY);
+    }
+
+    const response = await fetch(url, options);
 
     if (response.ok) {
       const buffer = await response.buffer();
@@ -70,6 +77,13 @@ function convertToUsername(input, defaultValue = '') {
 
 async function setupOpenId() {
   try {
+    if (process.env.PROXY) {
+      const proxyAgent = new HttpsProxyAgent(process.env.PROXY);
+      custom.setHttpOptionsDefaults({
+        agent: proxyAgent,
+      });
+      logger.info(`[openidStrategy] proxy agent added: ${process.env.PROXY}`);
+    }
     const issuer = await Issuer.discover(process.env.OPENID_ISSUER);
     const client = new issuer.Client({
       client_id: process.env.OPENID_CLIENT_ID,
@@ -160,8 +174,7 @@ async function setupOpenId() {
               emailVerified: userinfo.email_verified || false,
               name: fullName,
             };
-            const userId = await createUser();
-            user._id = userId;
+            user = await createUser(user, true, true);
             isNewUser = true; // new user created
           } else {
             user.provider = 'openid';

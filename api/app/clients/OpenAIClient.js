@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const { OllamaClient } = require('./OllamaClient');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const {
   Constants,
@@ -18,12 +19,6 @@ const {
   getModelMaxTokens,
   genAzureChatCompletion,
 } = require('~/utils');
-const { encodeAndFormat } = require('~/server/services/Files/images/encode');
-const { updateTokenWebsocket } = require('~/server/services/Files/Audio');
-const { isEnabled, sleep } = require('~/server/utils');
-const spendTokens = require('~/models/spendTokens');
-const { logger } = require('~/config');
-const { OllamaClient } = require('./OllamaClient');
 const {
   truncateText,
   formatMessage,
@@ -31,13 +26,17 @@ const {
   titleInstruction,
   createContextHandlers,
 } = require('./prompts');
+const { encodeAndFormat } = require('~/server/services/Files/images/encode');
+const { isEnabled, sleep } = require('~/server/utils');
 const { handleOpenAIErrors } = require('./tools/util');
+const spendTokens = require('~/models/spendTokens');
 const { createLLM, RunManager } = require('./llm');
 const ChatGPTClient = require('./ChatGPTClient');
 const { summaryBuffer } = require('./memory');
 const { runTitleChain } = require('./chains');
 const { tokenSplit } = require('./document');
 const BaseClient = require('./BaseClient');
+const { logger } = require('~/config');
 
 // Cache to store Tiktoken instances
 const tokenizersCache = {};
@@ -595,7 +594,6 @@ class OpenAIClient extends BaseClient {
         payload,
         (progressMessage) => {
           if (progressMessage === '[DONE]') {
-            updateTokenWebsocket('[DONE]');
             return;
           }
 

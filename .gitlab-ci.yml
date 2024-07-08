@@ -1,0 +1,51 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  COMMIT_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  LATEST_TAG: $CI_REGISTRY_IMAGE:latest
+  DEPLOY_USER: $CI_DEPLOY_USER
+  DEPLOY_SERVER: $CI_DEPLOY_SERVER
+  DEPLOY_DIR: ~/leochat
+
+before_script:
+  - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_TAG -f Dockerfile.ci .
+    - docker tag $IMAGE_TAG $LATEST_TAG
+    - docker tag $IMAGE_TAG $COMMIT_TAG
+    - docker push $IMAGE_TAG
+    - docker push $LATEST_TAG
+    - docker push $COMMIT_TAG
+  tags:
+    - runner-01
+  only:
+    - tags
+
+deploy:
+  stage: deploy
+  tags: 
+    - runner-01
+  only:
+    - tags
+  script:
+    # Pre-deploy steps
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER >> ~/.ssh/known_hosts
+    
+    # Deploy steps
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.ci.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.yml
+    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER "
+        echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
+        docker pull $LATEST_TAG &&
+        docker compose -f $DEPLOY_DIR/docker-compose.yml up -d
+      "

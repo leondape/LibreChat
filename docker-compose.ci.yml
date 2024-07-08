@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+# LOCAL BUILD
+  api:
+    image: registry.leoninestudios.com/l9ai/chat-services/leochat:0.7.3 # added tracking,
+    ports: !reset []
+    container_name: LeoChat
+    command: sh -c "npm run backend & node config/cron.js" # schedule cron for balance reset
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+# TRAEFIK Config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chat1.rule=Host(`chat.leoninestudios.ai`)"
+      - "traefik.http.routers.chat1.entrypoints=web,websecure"
+      # - "traefik.http.services.chat1.loadbalancer.server.port=3080"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.chat1.tls=true" 
+    networks:
+      - proxy
+      - default
+      
+
+networks:
+  proxy:
+    external: true

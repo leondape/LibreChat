@@ -3,7 +3,7 @@ version: '3.4'
 services:
 # LOCAL BUILD
   api:
-    image: registry.leoninestudios.com/l9ai/chat-services/leochat:0.7.3 # added tracking,
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME} # added tracking,
     ports: !reset []
     container_name: LeoChat
     command: sh -c "npm run backend & node config/cron.js" # schedule cron for balance reset

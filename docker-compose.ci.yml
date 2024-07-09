@@ -12,7 +12,7 @@ services:
 # TRAEFIK Config
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.chat1.rule=Host(`chat.leoninestudios.ai`)"
+      - "traefik.http.routers.chat1.rule=Host(`proxytest.leoninestudios.ai`)"
       - "traefik.http.routers.chat1.entrypoints=web,websecure"
       # - "traefik.http.services.chat1.loadbalancer.server.port=3080"
       - "traefik.docker.network=proxy"

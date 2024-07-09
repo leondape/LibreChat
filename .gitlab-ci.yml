@@ -19,15 +19,16 @@ build:
   stage: build
   script:
     - docker build -t $IMAGE_TAG -f Dockerfile.ci .
-    - docker tag $IMAGE_TAG $LATEST_TAG
+    # - docker tag $IMAGE_TAG $LATEST_TAG
     - docker tag $IMAGE_TAG $COMMIT_TAG
     - docker push $IMAGE_TAG
-    - docker push $LATEST_TAG
+    # - docker push $LATEST_TAG
     - docker push $COMMIT_TAG
   tags:
     - runner-01
   only:
     - tags
+    
 
 deploy:
   stage: deploy
@@ -35,6 +36,7 @@ deploy:
     - runner-01
   only:
     - tags
+    
   script:
     # Pre-deploy steps
     - mkdir -p ~/.ssh

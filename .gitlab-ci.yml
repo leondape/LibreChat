@@ -18,7 +18,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -t $IMAGE_TAG -f Dockerfile.ci .
+    - docker build -t $IMAGE_TAG -f Dockerfile .
     # - docker tag $IMAGE_TAG $LATEST_TAG
     - docker tag $IMAGE_TAG $COMMIT_TAG
     - docker push $IMAGE_TAG
@@ -45,10 +45,11 @@ deploy:
     - ssh-keyscan -p 35039 $DEPLOY_SERVER >> ~/.ssh/known_hosts
     
     # Deploy steps
-    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.ci.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.ci.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.ci.yml
     - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER "
         echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
         export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE} &&
         export CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} && 
-        docker compose -f $DEPLOY_DIR/docker-compose.yml up -d
+        docker compose -f $DEPLOY_DIR/docker-compose.yml -f $DEPLOY_DIR/docker-compose.ci.yml up -d
       "

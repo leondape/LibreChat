@@ -1,10 +1,10 @@
 import reactRouter from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import { render, waitFor, screen } from 'test/layout-test-utils';
 import * as mockDataProvider from 'librechat-data-provider/react-query';
 import type { TStartupConfig } from 'librechat-data-provider';
 import Registration from '~/components/Auth/Registration';
 import AuthLayout from '~/components/Auth/AuthLayout';
-import { render, waitFor, screen } from 'test/layout-test-utils';
 
 jest.mock('librechat-data-provider/react-query');
 

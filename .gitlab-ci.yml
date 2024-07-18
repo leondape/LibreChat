@@ -50,5 +50,5 @@ deploy:
     - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/launch.sh
     - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER "
         echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
-        bash launch.sh
+        bash $DEPLOY_DIR/launch.sh
       "

@@ -47,7 +47,7 @@ deploy:
     # Deploy steps
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.yml
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.ci.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.ci.yml
-    - scp -P 35039 -o StrictHostKeyChecking=no start.sh $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/start.sh
+    - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/launch.sh
     - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER "
         echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
         launch.sh

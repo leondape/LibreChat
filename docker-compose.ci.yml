@@ -3,7 +3,7 @@ version: '3.4'
 services:
 # LOCAL BUILD
   api:
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME} # added tracking,
+    image: registry.leoninestudios.com/l9ai/chat-services/leochat:0.7.3 # change version to the latest
     ports: !reset []
     container_name: LeoChat
     command: sh -c "npm run backend & node config/cron.js" # schedule cron for balance reset
@@ -12,7 +12,7 @@ services:
 # TRAEFIK Config
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.chat1.rule=Host(`proxytest.leoninestudios.ai`)"
+      - "traefik.http.routers.chat1.rule=Host(`chat.leoninestudios.ai`)"
       - "traefik.http.routers.chat1.entrypoints=web,websecure"
       # - "traefik.http.services.chat1.loadbalancer.server.port=3080"
       - "traefik.docker.network=proxy"

@@ -2,15 +2,15 @@ image: docker:latest
 
 stages:
   - build
-  - deploy
+  - deploy-prod
 
 variables:
   COMMIT_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   LATEST_TAG: $CI_REGISTRY_IMAGE:latest
   DEPLOY_USER: $CI_DEPLOY_USER
-  DEPLOY_SERVER: $CI_DEPLOY_SERVER
-  DEPLOY_DIR: /deployments/leochat
+  DEPLOY_SERVER_PROD: $CI_DEPLOY_SERVER_PROD
+  DEPLOY_DIR_PROD: /deployments/leochat
 
 before_script:
   - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
@@ -30,8 +30,8 @@ build:
     - tags
     
 
-deploy:
-  stage: deploy
+deploy-prod:
+  stage: deploy-prod
   tags: 
     - runner-01
   only:
@@ -42,13 +42,13 @@ deploy:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p 35039 $DEPLOY_SERVER >> ~/.ssh/known_hosts
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER_PROD >> ~/.ssh/known_hosts
     
     # Deploy steps
-    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.yml
-    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.ci.yml $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/docker-compose.ci.yml
-    - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_DIR/launch.sh
-    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER "
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/docker-compose.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.prod.yml $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/docker-compose.prod.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/launch.sh
+    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD "
         echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
-        cd $DEPLOY_DIR && bash launch.sh
+        cd $DEPLOY_DIR_PROD && bash launch.sh
       "

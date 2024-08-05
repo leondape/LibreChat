@@ -13,6 +13,7 @@ variables:
   DEPLOY_SERVER_DEV: $CI_DEPLOY_SERVER_DEV
   DEPLOY_DIR_PROD: /deployments/leochat
   DEPLOY_DIR_DEV: /development/leochat
+  CI_VERBOSE: "true"
 
 before_script:
   - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY

@@ -70,7 +70,7 @@ deploy-dev:
     - ssh-keyscan -p 35039 $DEPLOY_SERVER_DEV >> ~/.ssh/known_hosts
 
     # Export commit tag
-    - export COMMIT_TAG=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+    # - export COMMIT_TAG=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
     
     # Deploy steps
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.yml

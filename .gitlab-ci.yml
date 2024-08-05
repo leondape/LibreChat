@@ -77,4 +77,4 @@ deploy-dev:
     # # Deploy steps
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.yml
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.dev.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.dev.yml
-    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD "echo \"$CI_REGISTRY_PASSWORD\" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY && cd $DEPLOY_DIR_PROD && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
+    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_DEV "echo \"$CI_REGISTRY_PASSWORD\" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY && cd $DEPLOY_DIR_DEV && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"

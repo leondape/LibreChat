@@ -5,7 +5,7 @@ services:
   api:
     image: ${COMMIT_TAG} # change version to the latest
     ports: !reset []
-    container_name: LeoChat
+    container_name: LeoChat_dev
     command: sh -c "npm run backend" # schedule cron for balance reset
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
@@ -20,6 +20,15 @@ services:
     networks:
       - proxy
       - default
+
+  mongodb:
+    container_name: chat-mongodb_dev
+  meilisearch:
+    container_name: chat-meilisearch_dev
+  vectordb:
+    container_name: vectordb_dev
+  rag_api:
+    container_name: rag_api_dev
       
 
 networks:

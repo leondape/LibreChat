@@ -79,8 +79,9 @@ deploy-dev:
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.dev.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.dev.yml
     - |
       ssh -p 35039 -o StrictHostKeyChecking=no \
-          export $COMMIT_TAG && \
           $DEPLOY_USER@$DEPLOY_SERVER_DEV \
-          echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY" && 
-          cd "$DEPLOY_DIR_DEV" && 
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+          "export COMMIT_TAG=$COMMIT_TAG && \
+          echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin \"$CI_REGISTRY\" && \
+          cd \"$DEPLOY_DIR_DEV\" && \
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
+

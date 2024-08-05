@@ -2,7 +2,7 @@ image: docker:latest
 
 stages:
   - build
-  - deploy-prod
+  - deploy
 
 variables:
   COMMIT_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
@@ -10,7 +10,9 @@ variables:
   LATEST_TAG: $CI_REGISTRY_IMAGE:latest
   DEPLOY_USER: $CI_DEPLOY_USER
   DEPLOY_SERVER_PROD: $CI_DEPLOY_SERVER_PROD
+  DEPLOY_SERVER_DEV: $CI_DEPLOY_SERVER_DEV
   DEPLOY_DIR_PROD: /deployments/leochat
+  DEPLOY_DIR_DEV: /development/leochat
 
 before_script:
   - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
@@ -29,9 +31,8 @@ build:
   only:
     - tags
     
-
 deploy-prod:
-  stage: deploy-prod
+  stage: deploy
   tags: 
     - runner-01
   only:
@@ -51,4 +52,29 @@ deploy-prod:
     - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD "
         echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
         cd $DEPLOY_DIR_PROD && bash launch.sh
+      "
+
+deploy-dev:
+  stage: deploy
+  tags: 
+    - runner-01
+  only:
+    - main
+    
+  script:
+    # Pre-deploy steps
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER_DEV >> ~/.ssh/known_hosts
+
+    # Export commit tag
+    - export COMMIT_TAG=$COMMIT_TAG
+    
+    # Deploy steps
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.dev.yml $DEPLOY_USER@$DEPLOY_SERVER_DEV:$DEPLOY_DIR_DEV/docker-compose.dev.yml
+    - ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_DEV "
+        echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY &&
+        cd $DEPLOY_DIR_DEV && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
       "

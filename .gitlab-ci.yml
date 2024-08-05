@@ -69,8 +69,7 @@ deploy-dev:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ping $DEPLOY_SERVER_DEV
-    # - ssh-keyscan -p 35039 $DEPLOY_SERVER_DEV >> ~/.ssh/known_hosts
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER_PROD >> ~/.ssh/known_hosts
 
     # # Export commit tag
     # - export COMMIT_TAG=$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA

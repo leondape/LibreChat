@@ -30,6 +30,7 @@ build:
     - runner-01
   only:
     - tags
+    - main
     
 deploy-prod:
   stage: deploy

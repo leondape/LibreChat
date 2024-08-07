@@ -5,7 +5,7 @@
       "type": "node",
       "request": "launch",
       "name": "Debug Backend",
-      "runtimeExecutable": "node",
+      "runtimeExecutable": "/home/danilo.pejakovic/.nvm/versions/node/v22.6.0/bin/node",
       "runtimeArgs": ["--experimental-modules", "${workspaceFolder}/api/server/index.js"],
       "outFiles": ["${workspaceFolder}/api/server/**/*.js"],
       "env": {

@@ -31,7 +31,7 @@ build:
     - runner-01
   only:
     - tags
-    - main
+    - develop
     
 deploy-prod:
   stage: deploy
@@ -61,7 +61,7 @@ deploy-dev:
   tags: 
     - runner-01
   only:
-    - main
+    - develop
     
   script:
     # Pre-deploy steps

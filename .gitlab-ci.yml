@@ -31,6 +31,7 @@ build:
     - runner-01
   only:
     - tags
+    - main
     - develop
     
 deploy-prod:
@@ -61,6 +62,7 @@ deploy-dev:
   tags: 
     - runner-01
   only:
+    - main
     - develop
     
   script:

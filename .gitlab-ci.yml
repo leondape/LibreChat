@@ -12,7 +12,7 @@ variables:
   DEPLOY_SERVER_PROD: $CI_DEPLOY_SERVER_PROD
   DEPLOY_SERVER_DEV: $CI_DEPLOY_SERVER_DEV
   DEPLOY_DIR_PROD: /deployments/leochat
-  DEPLOY_DIR_DEV: /development/leochat
+  DEPLOY_DIR_DEV: /development/leochat_dev
   # CI_VERBOSE: "true"
 
 before_script:

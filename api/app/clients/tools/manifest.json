@@ -15,7 +15,7 @@
   {
     "name": "Google",
     "pluginKey": "google",
-    "description": "Use Google Search to find information about the weather, news, sports, and more.",
+    "description": "Nutze Google für aktuelle Abfragen. ACHTUNG: Nutze Google nicht mit sensiblen Themen!",
     "icon": "https://i.imgur.com/SMmVkNB.png",
     "authConfig": [
       {

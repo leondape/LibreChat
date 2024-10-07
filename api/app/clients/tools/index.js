@@ -19,7 +19,7 @@ const GoogleSearchAPI = require('./structured/GoogleSearch');
 const StructuredWolfram = require('./structured/Wolfram');
 const TavilySearchResults = require('./structured/TavilySearchResults');
 const TraversaalSearch = require('./structured/TraversaalSearch');
-
+const YouTubeTool = require('./structured/YouTube');
 module.exports = {
   availableTools,
   // Basic Tools
@@ -36,6 +36,7 @@ module.exports = {
   CodeSherpa,
   StructuredSD,
   StructuredACS,
+  YouTubeTool,
   GoogleSearchAPI,
   CodeSherpaTools,
   TraversaalSearch,

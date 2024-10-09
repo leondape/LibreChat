@@ -197,5 +197,18 @@
     "description": "Use 'CodeBrew' to virtually interpret Python, Node, C, C++, Java, C#, PHP, MySQL, Rust or Go code.",
     "icon": "https://imgur.com/iLE5ceA.png",
     "authConfig": []
+  },
+  {
+    "name": "YouTube",
+    "pluginKey": "youtube",
+    "description": "Search for YouTube videos, get video information, and retrieve comments.",
+    "icon": "https://www.youtube.com/s/desktop/7449ebf7/img/favicon_144x144.png",
+    "authConfig": [
+      {
+        "authField": "YOUTUBE_API_KEY",
+        "label": "YouTube API Key",
+        "description": "Your YouTube Data API v3 key."
+      }
+    ]
   }
 ]

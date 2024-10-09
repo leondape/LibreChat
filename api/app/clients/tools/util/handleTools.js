@@ -23,6 +23,7 @@ const {
   TraversaalSearch,
   StructuredWolfram,
   TavilySearchResults,
+  YouTubeTool,
 } = require('../');
 const createFileSearchTool = require('./createFileSearchTool');
 const { loadToolSuite } = require('./loadToolSuite');
@@ -167,6 +168,7 @@ const loadTools = async ({
     'azure-ai-search': functions ? StructuredACS : AzureAISearch,
     CodeBrew: CodeBrew,
     traversaal_search: TraversaalSearch,
+    youtube: YouTubeTool,
   };
 
   const customConstructors = {
@@ -238,6 +240,7 @@ const loadTools = async ({
     dalle: imageGenOptions,
     'dall-e': imageGenOptions,
     'stable-diffusion': imageGenOptions,
+    youtube: { YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY },
   };
 
   const toolAuthFields = {};

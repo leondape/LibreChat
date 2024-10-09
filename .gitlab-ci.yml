@@ -59,7 +59,8 @@ deploy-prod:
     - |
       ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD \
       "echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY && \
-      cd $DEPLOY_DIR_PROD && bash launch.sh"
+      cd $DEPLOY_DIR_PROD && \
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
 
 deploy-dev:
   stage: deploy

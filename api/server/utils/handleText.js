@@ -1,6 +1,8 @@
 const {
   Capabilities,
   EModelEndpoint,
+  isAgentsEndpoint,
+  AgentCapabilities,
   isAssistantsEndpoint,
   defaultRetrievalModels,
   defaultAssistantsVersion,
@@ -19,8 +21,7 @@ const createOnProgress = ({ generation = '', onProgress: _onProgress }) => {
 
   const basePayload = Object.assign({}, base, { text: tokens || '' });
 
-  const progressCallback = (partial, { res, text, ...rest }) => {
-    let chunk = partial === text ? '' : partial;
+  const progressCallback = (chunk, { res, ...rest }) => {
     basePayload.text = basePayload.text + chunk;
 
     const payload = Object.assign({}, basePayload, rest);
@@ -161,8 +162,8 @@ const isUserProvided = (value) => value === 'user_provided';
 /**
  * Generate the configuration for a given key and base URL.
  * @param {string} key
- * @param {string} baseURL
- * @param {string} endpoint
+ * @param {string} [baseURL]
+ * @param {string} [endpoint]
  * @returns {boolean | { userProvide: boolean, userProvideURL?: boolean }}
  */
 function generateConfig(key, baseURL, endpoint) {
@@ -178,7 +179,7 @@ function generateConfig(key, baseURL, endpoint) {
   }
 
   const assistants = isAssistantsEndpoint(endpoint);
-
+  const agents = isAgentsEndpoint(endpoint);
   if (assistants) {
     config.retrievalModels = defaultRetrievalModels;
     config.capabilities = [
@@ -188,6 +189,18 @@ function generateConfig(key, baseURL, endpoint) {
       Capabilities.actions,
       Capabilities.tools,
     ];
+  }
+
+  if (agents) {
+    config.capabilities = [
+      AgentCapabilities.file_search,
+      AgentCapabilities.actions,
+      AgentCapabilities.tools,
+    ];
+
+    if (key === 'EXPERIMENTAL_RUN_CODE') {
+      config.capabilities.push(AgentCapabilities.execute_code);
+    }
   }
 
   if (assistants && endpoint === EModelEndpoint.azureAssistants) {

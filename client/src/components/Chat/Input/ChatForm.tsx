@@ -1,4 +1,4 @@
-import { memo, useRef, useMemo } from 'react';
+import { memo, useRef, useMemo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   supportsFiles,
@@ -17,6 +17,7 @@ import {
   useAutoSave,
   useRequiresKey,
   useHandleKeyUp,
+  useQueryParams,
   useSubmitMessage,
 } from '~/hooks';
 import { TextareaAutosize } from '~/components/ui';
@@ -37,16 +38,21 @@ import store from '~/store';
 const ChatForm = ({ index = 0 }) => {
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  useQueryParams({ textAreaRef });
 
   const SpeechToText = useRecoilValue(store.speechToText);
   const TextToSpeech = useRecoilValue(store.textToSpeech);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
 
+  const isSearching = useRecoilValue(store.isSearching);
   const [showStopButton, setShowStopButton] = useRecoilState(store.showStopButtonByIndex(index));
   const [showPlusPopover, setShowPlusPopover] = useRecoilState(store.showPlusPopoverFamily(index));
   const [showMentionPopover, setShowMentionPopover] = useRecoilState(
     store.showMentionPopoverFamily(index),
   );
+
+  const chatDirection = useRecoilValue(store.chatDirection).toLowerCase();
+  const isRTL = chatDirection === 'rtl';
 
   const { requiresKey } = useRequiresKey();
   const handleKeyUp = useHandleKeyUp({
@@ -58,7 +64,7 @@ const ChatForm = ({ index = 0 }) => {
   const { handlePaste, handleKeyDown, handleCompositionStart, handleCompositionEnd } = useTextarea({
     textAreaRef,
     submitButtonRef,
-    disabled: !!requiresKey,
+    disabled: !!(requiresKey ?? false),
   });
 
   const {
@@ -102,12 +108,12 @@ const ChatForm = ({ index = 0 }) => {
   const invalidAssistant = useMemo(
     () =>
       isAssistantsEndpoint(conversation?.endpoint) &&
-      (!conversation?.assistant_id ||
-        !assistantMap?.[conversation?.endpoint ?? '']?.[conversation?.assistant_id ?? '']),
+      (!(conversation?.assistant_id ?? '') ||
+        !assistantMap?.[conversation?.endpoint ?? ''][conversation?.assistant_id ?? '']),
     [conversation?.assistant_id, conversation?.endpoint, assistantMap],
   );
   const disableInputs = useMemo(
-    () => !!(requiresKey || invalidAssistant),
+    () => !!((requiresKey ?? false) || invalidAssistant),
     [requiresKey, invalidAssistant],
   );
 
@@ -117,6 +123,12 @@ const ChatForm = ({ index = 0 }) => {
       methods.setValue('text', e.target.value, { shouldValidate: true });
     },
   });
+
+  useEffect(() => {
+    if (!isSearching && textAreaRef.current && !disableInputs) {
+      textAreaRef.current.focus();
+    }
+  }, [isSearching, disableInputs]);
 
   return (
     <form
@@ -131,7 +143,7 @@ const ChatForm = ({ index = 0 }) => {
               newConversation={generateConversation}
               textAreaRef={textAreaRef}
               commandChar="+"
-              placeholder="com_ui_add"
+              placeholder="com_ui_add_model_preset"
               includeAssistants={false}
             />
           )}
@@ -149,6 +161,7 @@ const ChatForm = ({ index = 0 }) => {
               files={files}
               setFiles={setFiles}
               setFilesLoading={setFilesLoading}
+              isRTL={isRTL}
               Wrapper={({ children }) => (
                 <div className="mx-2 mt-2 flex flex-wrap gap-2 px-2.5 md:pl-0 md:pr-4">
                   {children}
@@ -158,7 +171,6 @@ const ChatForm = ({ index = 0 }) => {
             {endpoint && (
               <TextareaAutosize
                 {...registerProps}
-                autoFocus
                 ref={(e) => {
                   ref(e);
                   textAreaRef.current = e;
@@ -179,7 +191,7 @@ const ChatForm = ({ index = 0 }) => {
                     ? ' pl-10 md:pl-[55px]'
                     : 'pl-3 md:pl-4',
                   'm-0 w-full resize-none border-0 bg-transparent py-[10px] placeholder-black/50 focus:ring-0 focus-visible:ring-0 dark:bg-transparent dark:placeholder-white/50 md:py-3.5  ',
-                  SpeechToText ? 'pr-20 md:pr-[85px]' : 'pr-10 md:pr-12',
+                  SpeechToText && !isRTL ? 'pr-20 md:pr-[85px]' : 'pr-10 md:pr-12',
                   'max-h-[65vh] md:max-h-[75vh]',
                   removeFocusRings,
                 )}
@@ -188,15 +200,21 @@ const ChatForm = ({ index = 0 }) => {
             <AttachFile
               endpoint={_endpoint ?? ''}
               endpointType={endpointType}
+              isRTL={isRTL}
               disabled={disableInputs}
             />
             {(isSubmitting || isSubmittingAdded) && (showStopButton || showStopAdded) ? (
-              <StopButton stop={handleStopGenerating} setShowStopButton={setShowStopButton} />
+              <StopButton
+                stop={handleStopGenerating}
+                setShowStopButton={setShowStopButton}
+                isRTL={isRTL}
+              />
             ) : (
               endpoint && (
                 <SendButton
                   ref={submitButtonRef}
                   control={methods.control}
+                  isRTL={isRTL}
                   disabled={!!(filesLoading || isSubmitting || disableInputs)}
                 />
               )
@@ -206,6 +224,7 @@ const ChatForm = ({ index = 0 }) => {
                 disabled={!!disableInputs}
                 textAreaRef={textAreaRef}
                 ask={submitMessage}
+                isRTL={isRTL}
                 methods={methods}
               />
             )}

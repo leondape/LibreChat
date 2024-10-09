@@ -1,7 +1,8 @@
 const throttle = require('lodash/throttle');
-const { getResponseSender, Constants, EModelEndpoint } = require('librechat-data-provider');
+const { getResponseSender, Constants, CacheKeys, Time } = require('librechat-data-provider');
 const { createAbortController, handleAbortError } = require('~/server/middleware');
 const { sendMessage, createOnProgress } = require('~/server/utils');
+const { getLogStores } = require('~/cache');
 const { saveMessage } = require('~/models');
 const { logger } = require('~/config');
 
@@ -15,7 +16,12 @@ const AskController = async (req, res, next, initializeClient, addTitle) => {
     overrideParentMessageId = null,
   } = req.body;
 
-  logger.debug('[AskController]', { text, conversationId, ...endpointOption });
+  logger.debug('[AskController]', {
+    text,
+    conversationId,
+    ...endpointOption,
+    modelsConfig: endpointOption.modelsConfig ? 'exists' : '',
+  });
 
   let userMessage;
   let userMessagePromise;
@@ -51,11 +57,13 @@ const AskController = async (req, res, next, initializeClient, addTitle) => {
 
   try {
     const { client } = await initializeClient({ req, res, endpointOption });
-    const unfinished = endpointOption.endpoint === EModelEndpoint.google ? false : true;
+    const messageCache = getLogStores(CacheKeys.MESSAGES);
     const { onProgress: progressCallback, getPartialText } = createOnProgress({
       onProgress: throttle(
         ({ text: partialText }) => {
-          saveMessage({
+          /*
+              const unfinished = endpointOption.endpoint === EModelEndpoint.google ? false : true;
+          messageCache.set(responseMessageId, {
             messageId: responseMessageId,
             sender,
             conversationId,
@@ -65,7 +73,10 @@ const AskController = async (req, res, next, initializeClient, addTitle) => {
             unfinished,
             error: false,
             user,
-          });
+          }, Time.FIVE_MINUTES);
+          */
+
+          messageCache.set(responseMessageId, partialText, Time.FIVE_MINUTES);
         },
         3000,
         { trailing: false },
@@ -112,17 +123,11 @@ const AskController = async (req, res, next, initializeClient, addTitle) => {
       progressCallback,
       progressOptions: {
         res,
-        text,
         // parentMessageId: overrideParentMessageId || userMessageId,
       },
     };
 
     let response = await client.sendMessage(text, messageOptions);
-
-    if (overrideParentMessageId) {
-      response.parentMessageId = overrideParentMessageId;
-    }
-
     response.endpoint = endpointOption.endpoint;
 
     const { conversation = {} } = await client.responsePromise;
@@ -145,11 +150,17 @@ const AskController = async (req, res, next, initializeClient, addTitle) => {
       });
       res.end();
 
-      await saveMessage({ ...response, user });
+      await saveMessage(
+        req,
+        { ...response, user },
+        { context: 'api/server/controllers/AskController.js - response end' },
+      );
     }
 
     if (!client.skipSaveUserMessage) {
-      await saveMessage(userMessage);
+      await saveMessage(req, userMessage, {
+        context: 'api/server/controllers/AskController.js - don\'t skip saving user message',
+      });
     }
 
     if (addTitle && parentMessageId === Constants.NO_PARENT && newConvo) {

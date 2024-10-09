@@ -22,12 +22,13 @@ const SearchContent = ({ message }: { message: TMessage }) => {
                 key={`display-${messageId}-${idx}`}
                 showCursor={false}
                 isSubmitting={false}
+                isCreatedByUser={message.isCreatedByUser}
+                messageId={message.messageId}
                 part={part}
-                message={message}
               />
             );
           })}
-        {message.unfinished && (
+        {message.unfinished === true && (
           <Suspense>
             <DelayedRender delay={250}>
               <UnfinishedMessage message={message} key={`unfinished-${messageId}`} />
@@ -46,7 +47,7 @@ const SearchContent = ({ message }: { message: TMessage }) => {
       )}
       dir="auto"
     >
-      <MarkdownLite content={message.text ?? ''} />
+      <MarkdownLite content={message.text || ''} />
     </div>
   );
 };

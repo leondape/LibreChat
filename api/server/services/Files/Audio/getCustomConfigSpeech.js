@@ -1,4 +1,5 @@
 const getCustomConfig = require('~/server/services/Config/getCustomConfig');
+const { logger } = require('~/config');
 
 /**
  * This function retrieves the speechTab settings from the custom configuration
@@ -16,34 +17,49 @@ async function getCustomConfigSpeech(req, res) {
   try {
     const customConfig = await getCustomConfig();
 
-    if (!customConfig || !customConfig.speech?.speechTab) {
-      throw new Error('Configuration or speechTab schema is missing');
+    if (!customConfig) {
+      return res.status(200).send({
+        message: 'not_found',
+      });
     }
 
-    const ttsSchema = customConfig.speech?.speechTab;
-    let settings = {};
+    const sttExternal = !!customConfig.speech?.stt;
+    const ttsExternal = !!customConfig.speech?.tts;
+    let settings = {
+      sttExternal,
+      ttsExternal,
+    };
 
-    if (ttsSchema.advancedMode !== undefined) {
-      settings.advancedMode = ttsSchema.advancedMode;
+    if (!customConfig.speech?.speechTab) {
+      return res.status(200).send(settings);
     }
-    if (ttsSchema.speechToText) {
-      for (const key in ttsSchema.speechToText) {
-        if (ttsSchema.speechToText[key] !== undefined) {
-          settings[key] = ttsSchema.speechToText[key];
+
+    const speechTab = customConfig.speech.speechTab;
+
+    if (speechTab.advancedMode !== undefined) {
+      settings.advancedMode = speechTab.advancedMode;
+    }
+
+    if (speechTab.speechToText) {
+      for (const key in speechTab.speechToText) {
+        if (speechTab.speechToText[key] !== undefined) {
+          settings[key] = speechTab.speechToText[key];
         }
       }
     }
-    if (ttsSchema.textToSpeech) {
-      for (const key in ttsSchema.textToSpeech) {
-        if (ttsSchema.textToSpeech[key] !== undefined) {
-          settings[key] = ttsSchema.textToSpeech[key];
+
+    if (speechTab.textToSpeech) {
+      for (const key in speechTab.textToSpeech) {
+        if (speechTab.textToSpeech[key] !== undefined) {
+          settings[key] = speechTab.textToSpeech[key];
         }
       }
     }
 
-    res.json(settings);
+    return res.status(200).send(settings);
   } catch (error) {
-    res.status(200).send();
+    logger.error('Failed to get custom config speech settings:', error);
+    res.status(500).send('Internal Server Error');
   }
 }
 

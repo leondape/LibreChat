@@ -1,5 +1,4 @@
 import type { TModelSelectProps } from '~/common';
-import { ESide } from '~/common';
 import {
   Switch,
   Label,
@@ -10,8 +9,9 @@ import {
   HoverCardTrigger,
 } from '~/components';
 import { cn, optionText, defaultTextProps, removeFocusRings } from '~/utils';
-import { useLocalize } from '~/hooks';
 import OptionHover from './OptionHover';
+import { useLocalize } from '~/hooks';
+import { ESide } from '~/common';
 
 export default function Settings({ conversation, setOption, models, readonly }: TModelSelectProps) {
   const localize = useLocalize();

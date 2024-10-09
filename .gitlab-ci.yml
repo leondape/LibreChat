@@ -58,7 +58,8 @@ deploy-prod:
     - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/launch.sh
     - |
       ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD \
-      "echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY && \
+      "export COMMIT_TAG=$COMMIT_TAG && \
+      echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin $CI_REGISTRY && \
       cd $DEPLOY_DIR_PROD && \
           docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
 

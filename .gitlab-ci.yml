@@ -39,7 +39,7 @@ deploy-prod:
   tags: 
     - runner-01
   only:
-    - tags
+    - main
     
   script:
     # Pre-deploy steps

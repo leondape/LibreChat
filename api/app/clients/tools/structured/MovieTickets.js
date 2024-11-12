@@ -1,6 +1,7 @@
 const { z } = require('zod');
 const { Tool } = require('@langchain/core/tools');
 const { logger } = require('~/config');
+const { User } = require('~/models');
 
 class MovieTickets extends Tool {
   constructor(fields = {}) {
@@ -31,18 +32,20 @@ class MovieTickets extends Tool {
       ticket_count: z.number().min(1).optional(),
     });
 
-    // Get user email from the request context
-    this.req = fields.req;
-    this.user = fields.user;
+    this.userId = fields.userId;
   }
 
-  getUserEmail() {
-    // The email should be available in the user object from the request
-    if (!this.user?.email) {
-      throw new Error('User email not found in session. Please ensure you are logged in.');
+  async getUserEmail() {
+    try {
+      const user = await User.findById(this.userId);
+      if (!user?.email) {
+        throw new Error('User email not found. Please ensure you are logged in.');
+      }
+      return user.email;
+    } catch (error) {
+      logger.error('[MovieTickets] Error getting user email:', error);
+      throw new Error('Could not retrieve user email. Please ensure you are logged in.');
     }
-    console.log('User email:', this.user.email);
-    return this.user.email;
   }
 
   async _call(data) {
@@ -72,7 +75,7 @@ class MovieTickets extends Tool {
   }
 
   async requestTickets({ country, movie_name, ticket_count }) {
-    const email = this.getUserEmail();
+    const email = await this.getUserEmail();
 
     // TODO: Implement actual API call to request tickets
     return JSON.stringify({

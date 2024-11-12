@@ -24,6 +24,7 @@ const {
   StructuredWolfram,
   TavilySearchResults,
   YouTubeTool,
+  MovieTickets,
 } = require('../');
 const { primeFiles } = require('~/server/services/Files/Code/process');
 const createFileSearchTool = require('./createFileSearchTool');
@@ -170,6 +171,7 @@ const loadTools = async ({
     CodeBrew: CodeBrew,
     traversaal_search: TraversaalSearch,
     youtube: YouTubeTool,
+    l9_ticketing: MovieTickets,
   };
 
   const customConstructors = {

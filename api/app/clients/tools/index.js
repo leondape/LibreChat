@@ -20,6 +20,8 @@ const StructuredWolfram = require('./structured/Wolfram');
 const TavilySearchResults = require('./structured/TavilySearchResults');
 const TraversaalSearch = require('./structured/TraversaalSearch');
 const YouTubeTool = require('./structured/YouTube');
+const MovieTickets = require('./structured/MovieTickets');
+
 module.exports = {
   availableTools,
   // Basic Tools
@@ -42,4 +44,5 @@ module.exports = {
   TraversaalSearch,
   StructuredWolfram,
   TavilySearchResults,
+  MovieTickets,
 };

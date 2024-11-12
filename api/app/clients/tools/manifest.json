@@ -210,5 +210,12 @@
         "description": "Your YouTube Data API v3 key."
       }
     ]
+  },
+  {
+    "name": "L9-Ticketing-Plugin",
+    "pluginKey": "l9_ticketing",
+    "description": "Request movie tickets for employees in Germany and Austria.",
+    "icon": "https://cdn.vectorstock.com/i/1000v/47/67/movie-icon-vector-23534767.jpg",
+    "authConfig": []
   }
 ]

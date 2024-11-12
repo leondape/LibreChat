@@ -3,7 +3,7 @@ version: '3.4'
 services:
 # LOCAL BUILD
   api:
-    image: ${COMMIT_TAG} # change version to the latest
+    image: ${COMMIT_TAG} # change version to the latest: trying minor change
     ports: !reset []
     container_name: LeoChat_dev
     command: sh -c "npm run backend" # schedule cron for balance reset

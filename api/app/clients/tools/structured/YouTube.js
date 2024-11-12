@@ -1,4 +1,4 @@
-const { Tool } = require('langchain/tools');
+const { Tool } = require('@langchain/core/tools');
 const { z } = require('zod');
 const { youtube } = require('@googleapis/youtube');
 const { YoutubeTranscript } = require('youtube-transcript');
@@ -146,7 +146,14 @@ class YouTubeTool extends Tool {
   }
 
   extractVideoId(url) {
-    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/;
+    // First, try to match a raw video ID (11 characters)
+    const rawIdRegex = /^[a-zA-Z0-9_-]{11}$/;
+    if (rawIdRegex.test(url)) {
+      return url;
+    }
+
+    // Then try various URL formats
+    const regex = /(?:youtu\.be\/|youtube(?:\.com)?\/(?:(?:watch\?v=)|(?:embed\/)|(?:shorts\/)|(?:live\/)|(?:v\/)|(?:\/))?)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
     const match = url.match(regex);
     return match ? match[1] : null;
   }

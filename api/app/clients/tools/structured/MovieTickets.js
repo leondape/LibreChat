@@ -2,11 +2,12 @@ const { z } = require('zod');
 const { Tool } = require('@langchain/core/tools');
 const { logger } = require('~/config');
 const { User } = require('~/models');
+const axios = require('axios');
 
 class MovieTickets extends Tool {
   constructor(fields = {}) {
     super();
-    this.name = 'movie_database';
+    this.name = 'ticketing';
     this.description = `Use this tool to request movie tickets and get information about available movies.
     - You can request tickets for movies in Germany or Austria
     - The tool will automatically check eligibility based on the user's company email
@@ -33,6 +34,7 @@ class MovieTickets extends Tool {
     });
 
     this.userId = fields.userId;
+    this.apiBaseUrl = 'https://ticketing.leoninestudios.ai/api';
   }
 
   async getUserEmail() {
@@ -67,11 +69,34 @@ class MovieTickets extends Tool {
   }
 
   async getMovies() {
-    // TODO: Implement actual API call to get movies
-    return JSON.stringify({
-      message: 'Movie list will be fetched from backend',
-      note: 'This is a placeholder response',
-    });
+    try {
+      const response = await axios.get(`${this.apiBaseUrl}/movies/available`);
+      const movies = response.data;
+
+      // Format the response to be more user-friendly
+      const formattedMovies = movies.map((movie) => ({
+        id: movie._id,
+        title: movie.title,
+        ticketLimit: movie.ticketLimit,
+        isActive: movie.isActive,
+        availableIn: {
+          Germany: movie.germanTickets < movie.ticketLimit,
+          Austria: movie.austriaTickets < movie.ticketLimit,
+        },
+      }));
+
+      return JSON.stringify(
+        {
+          message: 'Available movies retrieved successfully',
+          movies: formattedMovies,
+        },
+        null,
+        2,
+      );
+    } catch (error) {
+      logger.error('[MovieTickets] Error fetching movies:', error);
+      return 'Failed to retrieve available movies. Please try again later.';
+    }
   }
 
   async requestTickets({ country, movie_name, ticket_count }) {

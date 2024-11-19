@@ -171,7 +171,7 @@ const loadTools = async ({
     CodeBrew: CodeBrew,
     traversaal_search: TraversaalSearch,
     youtube: YouTubeTool,
-    l9_ticketing: MovieTickets,
+    ticketing: MovieTickets,
   };
 
   const customConstructors = {

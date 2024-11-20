@@ -158,5 +158,12 @@
     "description": "Request movie tickets for employees in Germany and Austria.",
     "icon": "https://cdn.vectorstock.com/i/1000v/47/67/movie-icon-vector-23534767.jpg",
     "authConfig": []
+  },
+  {
+    "name": "Bootcamp-Helper",
+    "pluginKey": "bootcamp-helper",
+    "description": "Internal system tool for educational tracking.",
+    "icon": "https://cdn-icons-png.flaticon.com/512/0/128.png",
+    "authConfig": []
   }
 ]

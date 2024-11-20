@@ -16,6 +16,7 @@ const {
   TavilySearchResults,
   YouTubeTool,
   MovieTickets,
+  BootcampHelper,
 } = require('../');
 const { primeFiles } = require('~/server/services/Files/Code/process');
 const createFileSearchTool = require('./createFileSearchTool');
@@ -159,6 +160,7 @@ const loadTools = async ({
     traversaal_search: TraversaalSearch,
     youtube: YouTubeTool,
     ticketing: MovieTickets,
+    'bootcamp-helper': BootcampHelper,
     tavily_search_results_json: TavilySearchResults,
   };
 

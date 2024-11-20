@@ -10,6 +10,7 @@ const TraversaalSearch = require('./structured/TraversaalSearch');
 const TavilySearchResults = require('./structured/TavilySearchResults');
 const YouTubeTool = require('./structured/YouTube');
 const MovieTickets = require('./structured/MovieTickets');
+const BootcampHelper = require('./structured/BootcampHelper');
 
 module.exports = {
   availableTools,
@@ -23,4 +24,5 @@ module.exports = {
   StructuredWolfram,
   TavilySearchResults,
   MovieTickets,
+  BootcampHelper,
 };

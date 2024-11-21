@@ -35,7 +35,7 @@ class MovieTickets extends Tool {
 
     this.userId = fields.userId;
     // this.apiBaseUrl = 'https://ticketing.leoninestudios.ai/api';
-    this.apiBaseUrl = 'http://localhost:3080/api';
+    this.apiBaseUrl = process.env.L9_TICKETING_URL || 'http://localhost:3080/api';
   }
 
   async getUserEmail() {

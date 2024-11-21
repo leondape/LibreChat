@@ -17,9 +17,9 @@ class MovieTickets extends Tool {
     this.description_for_model = `// Use this tool to help users request movie tickets and get movie information.
     // The user's email is automatically retrieved from their account - do not ask for it.
     // For ticket requests, you need:
-    // - Movie name (will be mapped to ID)
     // - Number of tickets
     // - Country (Germany or Austria)
+    // - Movie ID. Use the ID provided by the get_movies tool. You will use this ID for ticket requests, the user will interact with the movie name.
     // Guidelines:
     // - Always verify the movie exists before requesting tickets
     // - Inform users about any limitations or availability issues
@@ -29,12 +29,13 @@ class MovieTickets extends Tool {
     this.schema = z.object({
       action: z.enum(['get_movies', 'request_tickets']),
       country: z.enum(['Germany', 'Austria']).optional(),
-      movie_name: z.string().optional(),
+      movieName: z.string().optional(),
       ticket_count: z.number().min(1).optional(),
     });
 
     this.userId = fields.userId;
-    this.apiBaseUrl = 'https://ticketing.leoninestudios.ai/api';
+    // this.apiBaseUrl = 'https://ticketing.leoninestudios.ai/api';
+    this.apiBaseUrl = 'http://localhost:3080/api';
   }
 
   async getUserEmail() {
@@ -70,49 +71,82 @@ class MovieTickets extends Tool {
 
   async getMovies() {
     try {
-      const response = await axios.get(`${this.apiBaseUrl}/movies/available`);
-      const movies = response.data;
+      console.log('[MovieTickets] Fetching movies from:', `${this.apiBaseUrl}/movies/available`);
 
-      // Format the response to be more user-friendly
-      const formattedMovies = movies.map((movie) => ({
-        id: movie._id,
-        title: movie.title,
-        ticketLimit: movie.ticketLimit,
-        isActive: movie.isActive,
-        availableIn: {
-          Germany: movie.germanTickets < movie.ticketLimit,
-          Austria: movie.austriaTickets < movie.ticketLimit,
-        },
-      }));
+      const response = await axios.get(`${this.apiBaseUrl}/movies?available=true`);
+      console.log('[MovieTickets] Movies response:', response.data);
 
+      // Just return titles for display
       return JSON.stringify(
         {
           message: 'Available movies retrieved successfully',
-          movies: formattedMovies,
+          movies: response.data.map((movie) => ({
+            title: movie.title,
+            id: movie._id,
+          })),
         },
         null,
         2,
       );
     } catch (error) {
-      logger.error('[MovieTickets] Error fetching movies:', error);
+      console.error('[MovieTickets] Error fetching movies:', error);
       return 'Failed to retrieve available movies. Please try again later.';
     }
   }
 
-  async requestTickets({ country, movie_name, ticket_count }) {
-    const email = await this.getUserEmail();
+  async requestTickets({ country, movieName, ticket_count }) {
+    try {
+      console.log('[MovieTickets] Starting ticket request for movie:', movieName);
 
-    // TODO: Implement actual API call to request tickets
-    return JSON.stringify({
-      message: 'Ticket request will be processed by backend',
-      details: {
-        email,
+      // Get movie info using the correct endpoint
+      const movieResponse = await axios.get(
+        `${this.apiBaseUrl}/movies?available=true&title=${encodeURIComponent(movieName)}`,
+      );
+      console.log('[MovieTickets] Movie lookup response:', movieResponse.data);
+
+      if (!movieResponse.data || movieResponse.data.length === 0) {
+        return `Movie "${movieName}" not found or not available. Please check if the movie is still available.`;
+      }
+
+      const movie = movieResponse.data[0];
+      const email = await this.getUserEmail();
+
+      const ticketPayload = {
+        userEmail: email,
+        numberOfTickets: ticket_count,
+        movieId: movie._id, // Using the _id from the movie object
         country,
-        movie_name,
-        ticket_count,
-      },
-      note: 'This is a placeholder response',
-    });
+      };
+
+      console.log('[MovieTickets] Sending ticket request:', {
+        endpoint: `${this.apiBaseUrl}/email/send`,
+        payload: ticketPayload,
+      });
+
+      const response = await axios.post(`${this.apiBaseUrl}/email/send`, ticketPayload);
+
+      return JSON.stringify(
+        {
+          message: 'Ticket request processed successfully',
+          details: {
+            movie: movie.title,
+            tickets: ticket_count,
+            country,
+            status: response.data,
+          },
+        },
+        null,
+        2,
+      );
+    } catch (error) {
+      console.error('[MovieTickets] Request failed:', {
+        error: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
+      return `Ticket request failed: ${error.response?.data || error.message}`;
+    }
   }
 }
 

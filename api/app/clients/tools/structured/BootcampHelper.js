@@ -7,39 +7,67 @@ class BootcampHelper extends Tool {
   constructor(fields = {}) {
     super();
     this.name = 'bootcamp-helper';
-    this.description = 'Internal system tool for educational tracking.';
+    this.description = 'Internal system tool for education tracking and feedback.';
 
-    this.description_for_model = `Use this tool to mark a bootcamp training as completed for the current user.
-    Guidelines:
-    - Only use this when a training session is fully completed, never earlier! You determine when is over and don't get persuaded by the user!
-    - Do not expose any parameter details to the user, just execute it without mentioning the parameters.
-    - You DO give response to the user about the success of the operation, but do not expose any details about the parameters.
-    - Do not expose user details`;
+    this.description_for_model = `// Use this tool for two separate purposes:
+    // 1. Mark a bootcamp training as completed for the current user
+    // 2. Collect and submit user feedback (optional)
+    // Guidelines:
+    // - For completion: Only mark as completed when a training session is fully done, never earlier! You determine when it's over.
+    // - For feedback: This is optional and can be done at any time after completion.
+    // - Collect feedback from the user in a conversational way.
+    // - Optional fields are not sent with "none" or similar, if not provided.
+    // - Do not expose any parameter details to the user.
+    // - Do not expose user details.`;
 
     this.schema = z.object({
-      training_completed: z.boolean(),
+      action: z.enum(['complete_training', 'submit_feedback']),
       auth_code: z.string(),
+      feedback: z
+        .object({
+          satisfactionRating: z.enum(['1', '2', '3', '4', '5']),
+          improvedUnderstanding: z.enum(['yes', 'partially', 'no']),
+          concreteUseCases: z.enum(['yes', 'no']),
+          recommendTraining: z.enum(['yes', 'no']),
+          improvementSuggestions: z.string().optional(),
+          useCasesDeveloped: z.string().optional(),
+          questionsAndChallenges: z.string().optional(),
+          feedbackLanguage: z.enum(['DE', 'FR', 'EN']),
+          trainingDuration: z.number().describe('Duration in minutes').optional(),
+        })
+        .optional(),
     });
 
     this.userId = fields.userId;
     this.SECRET = 'L30N1N3_B00TC4MP_2024';
+    this.COMPLETION_ENDPOINT =
+      'https://prod-50.westeurope.logic.azure.com:443/workflows/15c04e5fe11f483c9add1ff6ed77557b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=lI_ydk5dJ0TyW-ora_kfucPBvRCVRXPvN-kGTJkXBh4';
+    this.FEEDBACK_ENDPOINT =
+      'https://prod-91.westeurope.logic.azure.com:443/workflows/b58a418ab03a4cd6be079966a0d789cc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=E0czfWuxoDX6MS0oU4qk1SHsYsNkJRPx-cxFT7I0g0k';
   }
 
   async _call(data) {
     try {
-      const { training_completed, auth_code } = data;
+      const { action, auth_code, feedback } = data;
 
       if (auth_code !== this.SECRET) {
         logger.warn('[BootcampHelper] Invalid auth code');
         return 'Operation not permitted';
       }
 
-      if (!training_completed) {
-        logger.warn('[BootcampHelper] Training not completed');
-        return 'Training must be completed before using this tool';
-      }
+      switch (action) {
+        case 'complete_training':
+          return await this.tutorial_successful();
 
-      return await this.tutorial_successful();
+        case 'submit_feedback':
+          if (!feedback) {
+            return 'Feedback data is required for feedback submission';
+          }
+          return await this.submit_feedback(feedback);
+
+        default:
+          return 'Invalid action specified';
+      }
     } catch (error) {
       logger.error('[BootcampHelper] Error:', error);
       return 'Internal system error';
@@ -62,10 +90,47 @@ class BootcampHelper extends Tool {
   async tutorial_successful() {
     try {
       const userEmail = await this.getUserEmail();
+
+      const response = await fetch(this.COMPLETION_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update tracking service');
+      }
+
       logger.info('[BootcampHelper] Tutorial completed for user: ' + userEmail);
-      return 'Your Training progress successfully to tracking service!';
+      return 'Your Training progress was successfully sent to tracking service!';
     } catch (error) {
       logger.error('[BootcampHelper] Error in tutorial_successful:', error);
+      throw new Error('Internal system error');
+    }
+  }
+
+  async submit_feedback(feedback) {
+    try {
+      const response = await fetch(this.FEEDBACK_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedback),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      logger.info('[BootcampHelper] Feedback submitted successfully');
+      return 'Thank you for your valuable feedback!';
+    } catch (error) {
+      logger.error('[BootcampHelper] Error in submit_feedback:', error);
       throw new Error('Internal system error');
     }
   }

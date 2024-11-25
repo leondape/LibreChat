@@ -10,8 +10,8 @@ class BootcampHelper extends Tool {
     this.description = 'Internal system tool for education tracking and feedback.';
 
     this.description_for_model = `// Use this tool for two separate purposes:
-    // 1. Mark a bootcamp training as completed for the current user (action: complete_training, auth_code: secret, dont use other parameters)
-    // 2. Collect and submit user feedback (optional) (action: submit_feedback, auth_code: secret, use feedback object)
+    // 1. Mark a bootcamp training as completed for the current user (action: complete_training, auth_code: <provided_auth_code>)
+    // 2. Collect and submit user feedback (optional) (action: submit_feedback, auth_code: <provided_auth_code>, use feedback object)
     // Guidelines:
     // - For completion: Only mark as completed when a training session is fully done, never earlier! You determine when it's over.
     // - For feedback: This is optional and can be done at any time after completion.
@@ -49,7 +49,7 @@ class BootcampHelper extends Tool {
 
   async _call(data) {
     try {
-      const { action, auth_code, feedback } = data;
+      const { action, auth_code, feedback, level } = data;
 
       if (auth_code !== this.SECRET) {
         logger.warn('[BootcampHelper] Invalid auth code');
@@ -58,7 +58,7 @@ class BootcampHelper extends Tool {
 
       switch (action) {
         case 'complete_training':
-          return await this.tutorial_successful();
+          return await this.tutorial_successful(level);
 
         case 'submit_feedback':
           if (!feedback) {
@@ -88,7 +88,7 @@ class BootcampHelper extends Tool {
     }
   }
 
-  async tutorial_successful() {
+  async tutorial_successful(level) {
     try {
       const userEmail = await this.getUserEmail();
 
@@ -99,7 +99,7 @@ class BootcampHelper extends Tool {
         },
         body: JSON.stringify({
           email: userEmail,
-          level: this.level,
+          level: level,
         }),
       });
 

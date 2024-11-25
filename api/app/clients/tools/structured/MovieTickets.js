@@ -19,6 +19,7 @@ class MovieTickets extends Tool {
     // For ticket requests, you need:
     // - Number of tickets
     // - Country (Germany or Austria)
+    // - CRITICAL: Never query movie without having asked for country first!
     // - Movie ID. Use the ID provided by the get_movies tool. You will use this ID for ticket requests, the user will interact with the movie name.
     // Guidelines:
     // - Always verify the movie exists before requesting tickets

@@ -3,10 +3,10 @@ const { Tool } = require('@langchain/core/tools');
 const { logger } = require('~/config');
 const { User } = require('~/models');
 
-class BootcampHelper extends Tool {
+class BootcampUtils extends Tool {
   constructor(fields = {}) {
     super();
-    this.name = 'bootcamp-helper';
+    this.name = 'bootcamp-utils';
     this.description = 'Internal system tool for education tracking and feedback.';
 
     this.description_for_model = `// Use this tool for two separate purposes:
@@ -52,7 +52,7 @@ class BootcampHelper extends Tool {
       const { action, auth_code, feedback, level } = data;
 
       if (auth_code !== this.SECRET) {
-        logger.warn('[BootcampHelper] Invalid auth code');
+        logger.warn('[BootcampUtils] Invalid auth code');
         return 'Operation not permitted';
       }
 
@@ -70,7 +70,7 @@ class BootcampHelper extends Tool {
           return 'Invalid action specified';
       }
     } catch (error) {
-      logger.error('[BootcampHelper] Error:', error);
+      logger.error('[BootcampUtils] Error:', error);
       return 'Internal system error';
     }
   }
@@ -83,7 +83,7 @@ class BootcampHelper extends Tool {
       }
       return user.email;
     } catch (error) {
-      logger.error('[BootcampHelper] Error getting user email:', error);
+      logger.error('[BootcampUtils] Error getting user email:', error);
       throw new Error('Internal system error');
     }
   }
@@ -107,10 +107,10 @@ class BootcampHelper extends Tool {
         throw new Error('Failed to update tracking service');
       }
 
-      logger.info('[BootcampHelper] Tutorial completed for user: ' + userEmail);
+      logger.info('[BootcampUtils] Tutorial completed for user: ' + userEmail);
       return 'Your Training progress was successfully sent to tracking service!';
     } catch (error) {
-      logger.error('[BootcampHelper] Error in tutorial_successful:', error);
+      logger.error('[BootcampUtils] Error in tutorial_successful:', error);
       throw new Error('Internal system error');
     }
   }
@@ -129,13 +129,13 @@ class BootcampHelper extends Tool {
         throw new Error('Failed to submit feedback');
       }
 
-      logger.info('[BootcampHelper] Feedback submitted successfully');
+      logger.info('[BootcampUtils] Feedback submitted successfully');
       return 'Thank you for your valuable feedback!';
     } catch (error) {
-      logger.error('[BootcampHelper] Error in submit_feedback:', error);
+      logger.error('[BootcampUtils] Error in submit_feedback:', error);
       throw new Error('Internal system error');
     }
   }
 }
 
-module.exports = BootcampHelper;
+module.exports = BootcampUtils;

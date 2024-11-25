@@ -23,6 +23,7 @@ class BootcampHelper extends Tool {
     this.schema = z.object({
       action: z.enum(['complete_training', 'submit_feedback']),
       auth_code: z.string(),
+      level: z.number().int().min(1).max(3),
       feedback: z
         .object({
           satisfactionRating: z.enum(['1', '2', '3', '4', '5']),
@@ -98,6 +99,7 @@ class BootcampHelper extends Tool {
         },
         body: JSON.stringify({
           email: userEmail,
+          level: this.level,
         }),
       });
 

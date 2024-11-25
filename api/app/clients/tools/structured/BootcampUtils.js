@@ -42,9 +42,9 @@ class BootcampUtils extends Tool {
     this.userId = fields.userId;
     this.SECRET = 'L30N1N3_B00TC4MP_2024';
     this.COMPLETION_ENDPOINT =
-      'https://prod-50.westeurope.logic.azure.com:443/workflows/15c04e5fe11f483c9add1ff6ed77557b/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=lI_ydk5dJ0TyW-ora_kfucPBvRCVRXPvN-kGTJkXBh4';
+      'https://prod-96.westeurope.logic.azure.com:443/workflows/4fe0a125b5cf4afb863d2b817dc860e7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=foB4PeSFANBjlOUf2lWMTUWbsAocEOsKUAWp4zhKsjY';
     this.FEEDBACK_ENDPOINT =
-      'https://prod-91.westeurope.logic.azure.com:443/workflows/b58a418ab03a4cd6be079966a0d789cc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=E0czfWuxoDX6MS0oU4qk1SHsYsNkJRPx-cxFT7I0g0k';
+      'https://prod-83.westeurope.logic.azure.com:443/workflows/85bf64049c0d46e68a081b0df68e4d41/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=S795keF34N2edBw5Ep29LANE2geV3B9POdoibzT6uxE';
   }
 
   async _call(data) {

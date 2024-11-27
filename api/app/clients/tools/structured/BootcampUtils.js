@@ -26,7 +26,7 @@ class BootcampUtils extends Tool {
       level: z.number().int().min(1).max(3),
       feedback: z
         .object({
-          satisfactionRating: z.enum(['1', '2', '3', '4', '5']),
+          satisfactionRating: z.number().int().min(1).max(5),
           improvedUnderstanding: z.enum(['yes', 'partially', 'no']),
           concreteUseCases: z.enum(['yes', 'no']),
           recommendTraining: z.enum(['yes', 'no']),
@@ -117,6 +117,8 @@ class BootcampUtils extends Tool {
 
   async submit_feedback(feedback) {
     try {
+      logger.info('[BootcampUtils] Attempting to submit feedback:', JSON.stringify(feedback));
+
       const response = await fetch(this.FEEDBACK_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -126,14 +128,21 @@ class BootcampUtils extends Tool {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit feedback');
+        const responseText = await response.text();
+        logger.error(
+          `[BootcampUtils] Failed to submit feedback. Status: ${response.status}, Response: ${responseText}`,
+        );
+        throw new Error(`Failed to submit feedback: ${response.status} ${response.statusText}`);
       }
 
       logger.info('[BootcampUtils] Feedback submitted successfully');
       return 'Thank you for your valuable feedback!';
     } catch (error) {
-      logger.error('[BootcampUtils] Error in submit_feedback:', error);
-      throw new Error('Internal system error');
+      logger.error('[BootcampUtils] Error in submit_feedback:', error.message);
+      if (error.cause) {
+        logger.error('[BootcampUtils] Cause:', error.cause);
+      }
+      return `Error submitting feedback: ${error.message}`;
     }
   }
 }

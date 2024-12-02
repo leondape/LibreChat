@@ -7,36 +7,60 @@ class BootcampUtils extends Tool {
   constructor(fields = {}) {
     super();
     this.name = 'bootcamp-utils';
-    this.description = 'Internal system tool for education tracking and feedback.';
+    this.description = 'Tool for managing bootcamp training completion and feedback submission.';
 
-    this.description_for_model = `// Use this tool for two separate purposes:
-    // 1. Mark a bootcamp training as completed for the current user (action: complete_training, auth_code: <provided_auth_code>)
-    // 2. Collect and submit user feedback (optional) (action: submit_feedback, auth_code: <provided_auth_code>, use feedback object)
-    // Guidelines:
-    // - For completion: Only mark as completed when a training session is fully done, never earlier! You determine when it's over.
-    // - For feedback: This is optional and can be done at any time after completion.
-    // - Collect feedback from the user in a conversational way.
-    // - Optional fields are not sent with "none" or similar, if not provided.
-    // - Do not expose any parameter details to the user.
-    // - Do not expose user details.`;
+    this.description_for_model = `// Bootcamp Training Management Tool - READ CAREFULLY
+// This tool has two SEPARATE operations that must follow these rules:
+
+// 1. COMPLETE TRAINING:
+//    - ALWAYS use this structure: { "action": "complete_training", "auth_code": "<secret>", "level": number }
+//    - Level must be between 1-3
+//    - DO NOT ask for any other information
+//    - Example: { "action": "complete_training", "auth_code": "<secret>", "level": 2 }
+
+// 2. SUBMIT FEEDBACK (completely separate operation):
+//    - Only use when explicitly asked for feedback
+//    - Structure: { "action": "submit_feedback", "auth_code": "<secret>", "feedback": {...} }
+//    - Never mix with training completion
+//    - Only collect feedback when specifically requested
+
+// CRITICAL RULES:
+// - Never ask for feedback during training completion
+// - Never expose auth_code in responses
+// - Keep operations completely separate
+// - For completion, only ask for level number
+// - For feedback, only ask when explicitly requested by user`;
 
     this.schema = z.object({
-      action: z.enum(['complete_training', 'submit_feedback']),
-      auth_code: z.string(),
-      level: z.number().int().min(1).max(3),
+      action: z
+        .enum(['complete_training', 'submit_feedback'])
+        .describe(
+          'The action to perform. Use complete_training to mark a level as finished, or submit_feedback to provide feedback.',
+        ),
+      auth_code: z
+        .string()
+        .describe('Authentication code for the bootcamp system. Use the provided secret.'),
+      level: z
+        .number()
+        .int()
+        .min(1)
+        .max(3)
+        .optional()
+        .describe('Required for complete_training: The level to mark as complete (1-3).'),
       feedback: z
         .object({
           satisfactionRating: z.number().int().min(1).max(5),
           improvedUnderstanding: z.enum(['yes', 'partially', 'no']),
           concreteUseCases: z.enum(['yes', 'no']),
           recommendTraining: z.enum(['yes', 'no']),
+          feedbackLanguage: z.enum(['DE', 'FR', 'EN']),
           improvementSuggestions: z.string().optional(),
           useCasesDeveloped: z.string().optional(),
           questionsAndChallenges: z.string().optional(),
-          feedbackLanguage: z.enum(['DE', 'FR', 'EN']),
-          trainingDuration: z.number().describe('Duration in minutes').optional(),
+          trainingDuration: z.number().optional(),
         })
-        .optional(),
+        .optional()
+        .describe('Required for submit_feedback: The feedback data object.'),
     });
 
     this.userId = fields.userId;
@@ -49,26 +73,22 @@ class BootcampUtils extends Tool {
 
   async _call(data) {
     try {
-      const { action, auth_code, feedback, level } = data;
+      const { action, auth_code } = data;
 
       if (auth_code !== this.SECRET) {
         logger.warn('[BootcampUtils] Invalid auth code');
         return 'Operation not permitted';
       }
 
-      switch (action) {
-        case 'complete_training':
-          return await this.tutorial_successful(level);
-
-        case 'submit_feedback':
-          if (!feedback) {
-            return 'Feedback data is required for feedback submission';
-          }
-          return await this.submit_feedback(feedback);
-
-        default:
-          return 'Invalid action specified';
+      if (action === 'complete_training') {
+        return await this.tutorial_successful(data.level);
       }
+
+      if (action === 'submit_feedback') {
+        return await this.submit_feedback(data.feedback);
+      }
+
+      return 'Invalid action specified';
     } catch (error) {
       logger.error('[BootcampUtils] Error:', error);
       return 'Internal system error';

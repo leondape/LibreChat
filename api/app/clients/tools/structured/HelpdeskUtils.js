@@ -6,22 +6,61 @@ class HelpdeskUtils extends Tool {
   constructor() {
     super();
     this.name = 'helpdesk-utils';
-    this.description = 'Internes Tool für Helpdesk-Feedback und Bewertungen.';
+    this.description = 'Tool zur Erfassung und Übermittlung von Helpdesk-Feedback.';
 
-    this.description_for_model = `// Verwende dieses Tool um Helpdesk-Feedback zu sammeln und zu übermitteln
-    // Guidelines:
-    // - Sammle das Feedback auf konversationelle Art und Weise
-    // - Alle erforderlichen Felder müssen ausgefüllt werden
-    // - Optionale Felder werden nur gesendet, wenn sie auch angegeben wurden
-    // - Keine Parameter-Details an den Benutzer weitergeben`;
+    this.description_for_model = `// Helpdesk Feedback Tool - BITTE SORGFÄLTIG LESEN
+// Nutze dieses Tool um Helpdesk-Feedback zu sammeln und zu übermitteln.
+
+// ERFORDERLICHE STRUKTUR:
+{
+  "zufriedenheitMitHelpdesk": number,    // Bewertung 1-5
+  "anliegenGeloest": "Ja" | "Nein",
+  "kategorieDesAnliegens": string,       // Eine der vordefinierten Kategorien
+  "erneuteNutzung": "ja" | "nein"
+}
+
+// KATEGORIEN (exakt so verwenden):
+// - "Personalabteilung"
+// - "Administratives"
+// - "IT-Support"
+// - "Kinoticket-Buchung"
+// - "Fragen zur Produktion"
+
+// OPTIONALE FELDER:
+{
+  "verbesserungsvorschlaege": string,    // Verbesserungsvorschläge/Kommentare
+  "verbesserungsbereiche": string        // Verbesserungsbereiche (aus Chatverlauf)
+}
+
+// WICHTIG:
+// - Großschreibung bei "Ja"/"Nein" beachten
+// - Kleinschreibung bei "ja"/"nein" beachten
+// - Kategorien exakt wie vorgegeben verwenden`;
 
     this.schema = z.object({
-      zufriedenheitMitHelpdesk: z.number().int().min(1).max(5),
-      anliegenGeloest: z.string(),
-      kategorieDesAnliegens: z.string(),
-      erneuteNutzung: z.string(),
-      verbesserungsvorschlaege: z.string().optional(),
-      verbesserungsbereiche: z.string().optional(),
+      zufriedenheitMitHelpdesk: z
+        .number()
+        .int()
+        .min(1)
+        .max(5)
+        .describe('Zufriedenheit mit dem Helpdesk (1=niedrigste, 5=höchste Bewertung)'),
+      anliegenGeloest: z.string().describe('Wurde das Anliegen gelöst? (Ja/Nein)'),
+      kategorieDesAnliegens: z
+        .string()
+        .describe(
+          'Kategorie des Anliegens (Personalabteilung, Administratives, IT-Support, Kinoticket-Buchung, Fragen zur Produktion)',
+        ),
+      erneuteNutzung: z.string().describe('Wirst du den Helpdesk erneut nutzen? (ja/nein)'),
+      verbesserungsvorschlaege: z
+        .string()
+        .optional()
+        .describe('Verbesserungsvorschläge oder Kommentare'),
+      verbesserungsbereiche: z
+        .string()
+        .optional()
+        .describe(
+          'Bereiche, in denen der Helpdesk verbessert werden muss (automatisch aus Chatverlauf erstellt)',
+        ),
     });
 
     this.FEEDBACK_ENDPOINT =
@@ -32,13 +71,15 @@ class HelpdeskUtils extends Tool {
     try {
       return await this.submit_feedback(data);
     } catch (error) {
-      logger.error('[HelpdeskUtils] Error:', error);
+      logger.error('[HelpdeskUtils] Fehler:', error);
       return 'Interner Systemfehler';
     }
   }
 
   async submit_feedback(feedback) {
     try {
+      logger.info('[HelpdeskUtils] Versuche Feedback zu übermitteln:', JSON.stringify(feedback));
+
       const response = await fetch(this.FEEDBACK_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -48,13 +89,17 @@ class HelpdeskUtils extends Tool {
       });
 
       if (!response.ok) {
+        const responseText = await response.text();
+        logger.error(
+          `[HelpdeskUtils] Feedback konnte nicht übermittelt werden. Status: ${response.status}, Antwort: ${responseText}`,
+        );
         throw new Error('Feedback konnte nicht übermittelt werden');
       }
 
       logger.info('[HelpdeskUtils] Feedback erfolgreich übermittelt');
       return 'Vielen Dank für Ihr wertvolles Feedback!';
     } catch (error) {
-      logger.error('[HelpdeskUtils] Error in submit_feedback:', error);
+      logger.error('[HelpdeskUtils] Fehler bei der Feedback-Übermittlung:', error);
       throw new Error('Interner Systemfehler');
     }
   }

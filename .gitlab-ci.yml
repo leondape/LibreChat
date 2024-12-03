@@ -21,7 +21,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -t $IMAGE_TAG -f Dockerfile .
+    - docker build -t $IMAGE_TAG -f Dockerfile . # wrote debug statement to trigger new build
     # - docker tag $IMAGE_TAG $LATEST_TAG
     - docker tag $IMAGE_TAG $COMMIT_TAG
     - docker push $IMAGE_TAG

@@ -120,6 +120,7 @@ class BootcampUtils extends Tool {
         body: JSON.stringify({
           email: userEmail,
           level: level,
+          userID: this.userId,
         }),
       });
 

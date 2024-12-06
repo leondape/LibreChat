@@ -2,27 +2,76 @@ const { Tool } = require('@langchain/core/tools');
 const { z } = require('zod');
 const { youtube } = require('@googleapis/youtube');
 const { YoutubeTranscript } = require('youtube-transcript');
+const { logger } = require('~/config');
 
 class YouTubeTool extends Tool {
   constructor(fields) {
     super();
     this.name = 'youtube';
     this.apiKey = fields.YOUTUBE_API_KEY || this.getApiKey();
-    this.description = `A tool for interacting with YouTube. Use this to search for videos, get video information, retrieve comments, and fetch video transcripts.
-    Input should be a JSON object with 'action' and 'params' keys.
-    Available actions:
-    1. search_videos: Search for videos. Params: { query: string, maxResults?: number }
-    2. get_video_info: Get information about a specific video. Params: { videoUrl: string }
-    3. get_comments: Get comments for a video. Params: { videoUrl: string, maxResults?: number }
-    4. get_video_transcript: Get the transcript of a video. Params: { videoUrl: string }`;
+    this.description = 'Tool for interacting with YouTube content and data.';
+
+    this.description_for_model = `// YouTube Content Tool - READ CAREFULLY
+// This tool has four SEPARATE operations that must follow these rules:
+
+// 1. SEARCH VIDEOS:
+//    - Action: search_videos
+//    - Required: query (your search term)
+//    - Optional: maxResults (between 1-50, default: 5)
+//    - Usecases: finding relevant videos, exploring new content, or getting recommendations
+//    - Example command: search for "cooking pasta" with max 5 results
+
+// 2. GET VIDEO INFO:
+//    - Action: get_video_info
+//    - Required: videoUrl (full YouTube URL or video ID)
+//    - Example command: get info for video "https://youtube.com/watch?v=123"
+
+// 3. GET COMMENTS:
+//    - Action: get_comments
+//    - Required: videoUrl (full YouTube URL or video ID)
+//    - Optional: maxResults (between 1-50, default: 10)
+//    - Usecases: analyzing user feedback, identifying common issues, or understanding viewer sentiment
+//    - Example command: get 10 comments from video "https://youtube.com/watch?v=123"
+
+// 4. GET TRANSCRIPT:
+//    - Action: get_video_transcript
+//    - Required: videoUrl (full YouTube URL or video ID)
+//    - Optional: Usecases: in-depth analysis, summarization, or translation of a video
+//    - Example command: get transcript for video "https://youtube.com/watch?v=123"
+
+// CRITICAL RULES:
+// - One action per request ONLY
+// - Never mix different operations
+// - maxResults must be between 1-50
+// - Video URLs can be full links or video IDs
+// - All responses are JSON strings
+// - Keep requests focused on one action at a time`;
+
     this.schema = z.object({
-      action: z.enum(['search_videos', 'get_video_info', 'get_comments', 'get_video_transcript']),
-      params: z.object({
-        query: z.string().optional(),
-        videoUrl: z.string().optional(),
-        maxResults: z.number().optional(),
-      }),
+      action: z
+        .enum(['search_videos', 'get_video_info', 'get_comments', 'get_video_transcript'])
+        .describe('The action to perform. Choose one of the available YouTube operations.'),
+      query: z
+        .string()
+        .optional()
+        .describe('Required for search_videos: The search term to find videos.'),
+      videoUrl: z
+        .string()
+        .optional()
+        .describe(
+          'Required for video_info, comments, and transcript: The YouTube video URL or ID.',
+        ),
+      maxResults: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe(
+          'Optional: Number of results to return. Default: 5 for search, 10 for comments. Max: 50.',
+        ),
     });
+
     this.youtubeClient = youtube({
       version: 'v3',
       auth: this.apiKey,
@@ -39,23 +88,23 @@ class YouTubeTool extends Tool {
 
   async _call(input) {
     try {
-      const { action, params } = typeof input === 'string' ? JSON.parse(input) : input;
+      const data = typeof input === 'string' ? JSON.parse(input) : input;
 
-      switch (action) {
+      switch (data.action) {
         case 'search_videos':
-          return JSON.stringify(await this.searchVideos(params.query, params.maxResults));
+          return JSON.stringify(await this.searchVideos(data.query, data.maxResults));
         case 'get_video_info':
-          return JSON.stringify(await this.getVideoInfo(params.videoUrl));
+          return JSON.stringify(await this.getVideoInfo(data.videoUrl));
         case 'get_comments':
-          return JSON.stringify(await this.getComments(params.videoUrl, params.maxResults));
+          return JSON.stringify(await this.getComments(data.videoUrl, data.maxResults));
         case 'get_video_transcript':
-          return JSON.stringify(await this.getVideoTranscript(params.videoUrl));
+          return JSON.stringify(await this.getVideoTranscript(data.videoUrl));
         default:
-          throw new Error(`Unknown action: ${action}`);
+          throw new Error(`Unknown action: ${data.action}`);
       }
     } catch (error) {
-      console.error('YouTube Tool Error:', error);
-      return `Error: ${error.message}`;
+      logger.error('[YouTubeTool] Error:', error);
+      return JSON.stringify({ error: error.message });
     }
   }
 
@@ -153,7 +202,11 @@ class YouTubeTool extends Tool {
     }
 
     // Then try various URL formats
-    const regex = /(?:youtu\.be\/|youtube(?:\.com)?\/(?:(?:watch\?v=)|(?:embed\/)|(?:shorts\/)|(?:live\/)|(?:v\/)|(?:\/))?)([a-zA-Z0-9_-]{11})(?:\S+)?$/;
+
+    const regex = new RegExp(
+      '(?:youtu\\.be/|youtube(?:\\.com)?/(?:(?:watch\\?v=)|(?:embed/)|' +
+        '(?:shorts/)|(?:live/)|(?:v/)|(?:/))?)([a-zA-Z0-9_-]{11})(?:\\S+)?$',
+    );
     const match = url.match(regex);
     return match ? match[1] : null;
   }

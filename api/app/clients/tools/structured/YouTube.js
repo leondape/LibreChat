@@ -8,7 +8,10 @@ class YouTubeTool extends Tool {
   constructor(fields) {
     super();
     this.name = 'youtube';
-    this.apiKey = fields.YOUTUBE_API_KEY || this.getApiKey();
+    /** @type {boolean} Used to initialize the Tool without necessary variables. */
+    this.override = fields.override ?? false;
+    let apiKey = fields.YOUTUBE_API_KEY ?? this.getApiKey();
+    this.apiKey = apiKey;
     this.description = 'Tool for interacting with YouTube content and data.';
 
     this.description_for_model = `// YouTube Content Tool - READ CAREFULLY
@@ -79,8 +82,8 @@ class YouTubeTool extends Tool {
   }
 
   getApiKey() {
-    const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) {
+    const apiKey = process.env.YOUTUBE_API_KEY ?? '';
+    if (!apiKey && !this.override) {
       throw new Error('Missing YOUTUBE_API_KEY environment variable.');
     }
     return apiKey;

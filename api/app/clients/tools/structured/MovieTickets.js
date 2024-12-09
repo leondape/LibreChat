@@ -146,7 +146,16 @@ class MovieTickets extends Tool {
         status: error.response?.status,
       });
 
-      return `Ticket request failed: ${error.response?.data || error.message}`;
+      // Updated error handling to match the API response structure
+      if (error.response?.data?.message) {
+        return error.response.data.message;
+      } else if (error.response?.status === 404) {
+        return 'Movie not found or service unavailable.';
+      } else if (error.response?.status === 400) {
+        return 'Invalid request. Please check your inputs.';
+      } else {
+        return 'An error occurred while processing your ticket request. Please try again later.';
+      }
     }
   }
 }

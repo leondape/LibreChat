@@ -110,12 +110,15 @@ class MovieTickets extends Tool {
       }
 
       const movie = movieResponse.data[0];
-      const email = await this.getUserEmail();
+      const user = await User.findById(this.userId);
+      const email = user.email;
+      const name = (user.name?.includes(' ') ? user.name?.split(' ')[0] : user.name) || '';
 
       const ticketPayload = {
         userEmail: email,
+        name,
         numberOfTickets: ticket_count,
-        movieId: movie._id, // Using the _id from the movie object
+        movieId: movie._id,
         country,
       };
 

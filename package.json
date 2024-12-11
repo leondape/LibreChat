@@ -10,6 +10,7 @@
   "scripts": {
     "update": "node config/update.js",
     "add-balance": "node config/add-balance.js",
+    "set-balance": "node config/set-balance.js",
     "list-balances": "node config/list-balances.js",
     "reset-balances": "node config/reset-balances.js",
     "reset-balances-auto": "node config/reset-balances-auto.js",

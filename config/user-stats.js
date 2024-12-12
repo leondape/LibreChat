@@ -20,8 +20,8 @@ const connect = require('./connect');
   let users = await User.find({});
   let userData = [];
   for (const user of users) {
-    let conversationsCount = (await Conversation.count({ user: user._id })) ?? 0;
-    let messagesCount = (await Message.count({ user: user._id })) ?? 0;
+    let conversationsCount = (await Conversation.countDocuments({ user: user._id })) ?? 0;
+    let messagesCount = (await Message.countDocuments({ user: user._id })) ?? 0;
     let balance = await Balance.findOne({ user: user._id });
 
     userData.push({

@@ -760,7 +760,15 @@ export const visionModels = [
   'llava-13b',
   'gemini-pro-vision',
   'claude-3',
+  'gemini-2.0',
   'gemini-1.5',
+  'gemini-exp',
+  'moondream',
+  'llama3.2-vision',
+  'llama-3.2-90b-vision',
+  'llama-3.2-11b-vision',
+  'llama-3-2-90b-vision',
+  'llama-3-2-11b-vision',
 ];
 export enum VisionModes {
   generative = 'generative',

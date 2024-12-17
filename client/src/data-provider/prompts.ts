@@ -74,12 +74,12 @@ export const useUpdatePromptGroup = (
     },
     onError: (err, variables, context) => {
       if (context?.group) {
-        queryClient.setQueryData([QueryKeys.promptGroups, variables.id], context?.group);
+        queryClient.setQueryData([QueryKeys.promptGroups, variables.id], context.group);
       }
       if (context?.previousListData) {
         queryClient.setQueryData<t.PromptGroupListData>(
           [QueryKeys.promptGroups, name, category, pageSize],
-          context?.previousListData,
+          context.previousListData,
         );
       }
       if (onError) {
@@ -110,7 +110,7 @@ export const useCreatePrompt = (
     onSuccess: (response, variables, context) => {
       const { prompt, group } = response;
       queryClient.setQueryData(
-        [QueryKeys.prompts, variables?.prompt?.groupId],
+        [QueryKeys.prompts, variables.prompt.groupId],
         (oldData: t.TPrompt[] | undefined) => {
           return [prompt, ...(oldData ?? [])];
         },
@@ -301,12 +301,12 @@ export const useMakePromptProduction = (options?: t.MakePromptProductionOptions)
     },
     onError: (err, variables, context) => {
       if (context?.group) {
-        queryClient.setQueryData([QueryKeys.promptGroups, variables.groupId], context?.group);
+        queryClient.setQueryData([QueryKeys.promptGroups, variables.groupId], context.group);
       }
       if (context?.previousListData) {
         queryClient.setQueryData<t.PromptGroupListData>(
           [QueryKeys.promptGroups, name, category, pageSize],
-          context?.previousListData,
+          context.previousListData,
         );
       }
       if (onError) {

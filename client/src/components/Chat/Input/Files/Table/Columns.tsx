@@ -70,13 +70,13 @@ export const columns: ColumnDef<TFile>[] = [
     },
     cell: ({ row }) => {
       const file = row.original;
-      if (file.type?.startsWith('image')) {
+      if (file.type.startsWith('image')) {
         return (
           <div className="flex gap-2">
             <ImagePreview
               url={file.filepath}
               className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md"
-              source={file?.source}
+              source={file.source}
             />
             <span className="self-center truncate ">{file.filename}</span>
           </div>

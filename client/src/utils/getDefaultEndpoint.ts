@@ -25,7 +25,7 @@ const getEndpointFromLocalStorage = (endpointsConfig: TEndpointsConfig) => {
   try {
     const { lastConversationSetup } = getLocalStorageItems();
     const { endpoint } = lastConversationSetup;
-    const isDefaultConfig = Object.values(endpointsConfig ?? {})?.every((value) => !value);
+    const isDefaultConfig = Object.values(endpointsConfig ?? {}).every((value) => !value);
 
     if (isDefaultConfig && endpoint) {
       return endpoint;

@@ -56,12 +56,12 @@ export default function ActionsInput({
   const [functions, setFunctions] = useState<FunctionTool[] | null>(null);
 
   useEffect(() => {
-    if (!action?.metadata?.raw_spec) {
+    if (!action?.metadata.raw_spec) {
       return;
     }
     setInputValue(action.metadata.raw_spec);
     debouncedValidation(action.metadata.raw_spec, handleResult);
-  }, [action?.metadata?.raw_spec]);
+  }, [action?.metadata.raw_spec]);
 
   useEffect(() => {
     if (!validationResult || !validationResult.status || !validationResult.spec) {
@@ -94,7 +94,7 @@ export default function ActionsInput({
     },
     onError(error) {
       showToast({
-        message: (error as Error)?.message ?? localize('com_assistants_update_actions_error'),
+        message: (error as Error).message ?? localize('com_assistants_update_actions_error'),
         status: 'error',
       });
     },

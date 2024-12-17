@@ -78,7 +78,7 @@ export function SortFilterHeader<TData, TValue>({
             Object.entries(filters).map(([key, values]) =>
               values.map((value: string | number) => {
                 const localizedValue = localize(valueMap?.[value] ?? '');
-                const filterValue = localizedValue?.length ? localizedValue : valueMap?.[value];
+                const filterValue = localizedValue.length ? localizedValue : valueMap?.[value];
                 if (!filterValue) {
                   return null;
                 }

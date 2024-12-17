@@ -14,7 +14,7 @@ import { useToastContext } from '~/Providers';
 import { ConvoOptions } from './ConvoOptions';
 import { cn } from '~/utils';
 import store from '~/store';
-import { useLocalize } from '~/hooks'
+import { useLocalize } from '~/hooks';
 
 type KeyEvent = KeyboardEvent<HTMLInputElement>;
 

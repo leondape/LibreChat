@@ -30,7 +30,7 @@ const plugins = selector({
   key: 'plugins',
   get: ({ get }) => {
     const config = get(endpointsConfig) || {};
-    return config?.gptPlugins?.plugins || {};
+    return config.gptPlugins?.plugins || {};
   },
 });
 

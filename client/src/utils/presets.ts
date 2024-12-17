@@ -4,8 +4,8 @@ import { EModelEndpoint } from 'librechat-data-provider';
 export const getPresetIcon = (preset: TPreset, Icon) => {
   return Icon({
     size: 20,
-    endpoint: preset?.endpoint,
-    model: preset?.model,
+    endpoint: preset.endpoint,
+    model: preset.model,
     error: false,
     className: 'icon-md',
     isCreatedByUser: false,

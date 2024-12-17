@@ -136,7 +136,7 @@ describe('generateDynamicSchema', () => {
     let result = schema.safeParse({ testArray: ['value1', 'value2', 'value3'] });
 
     expect(result.success).toBeTruthy();
-    expect(result?.['data']).toEqual({ testArray: ['value1', 'value2', 'value3'] });
+    expect(result['data']).toEqual({ testArray: ['value1', 'value2', 'value3'] });
 
     // Testing with too few tags (should fail)
     result = schema.safeParse({ testArray: [] }); // Assuming minTags is 1, empty array should fail

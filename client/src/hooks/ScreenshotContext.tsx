@@ -35,9 +35,9 @@ export const useScreenshot = () => {
     croppedCanvas.height = cropHeight;
 
     croppedCanvasContext.fillStyle = backgroundColor;
-    croppedCanvasContext?.fillRect(0, 0, cropWidth, cropHeight);
+    croppedCanvasContext.fillRect(0, 0, cropWidth, cropHeight);
 
-    croppedCanvasContext?.drawImage(canvas, cropPositionLeft, cropPositionTop);
+    croppedCanvasContext.drawImage(canvas, cropPositionLeft, cropPositionTop);
 
     const base64Image = croppedCanvas.toDataURL('image/png', 1);
 

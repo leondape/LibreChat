@@ -12,9 +12,9 @@ const {
 } = require('~/models/userMethods');
 const { createToken, findToken, deleteTokens, Session } = require('~/models');
 const { isEnabled, checkEmailConfig, sendEmail } = require('~/server/utils');
+const { isEmailDomainAllowed } = require('~/server/services/domains');
 const { registerSchema } = require('~/strategies/validators');
 const { hashToken } = require('~/server/utils/crypto');
-const isDomainAllowed = require('./isDomainAllowed');
 const { logger } = require('~/config');
 const { exec } = require('child_process');
 const path = require('path');
@@ -168,7 +168,7 @@ const registerUser = async (user, additionalData = {}) => {
       return { status: 200, message: genericVerificationMessage };
     }
 
-    if (!(await isDomainAllowed(email))) {
+    if (!(await isEmailDomainAllowed(email))) {
       const errorMessage =
         'The email address provided cannot be used. Please use a different email address.';
       logger.error(`[registerUser] [Registration not allowed] [Email: ${user.email}]`);
@@ -448,7 +448,6 @@ module.exports = {
   registerUser,
   setAuthTokens,
   resetPassword,
-  isDomainAllowed,
   requestPasswordReset,
   resendVerificationEmail,
 };

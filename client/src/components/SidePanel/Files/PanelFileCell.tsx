@@ -38,12 +38,12 @@ export default function PanelFileCell({ row }: { row: Row<TFile> }) {
       return showToast({ message: localize('com_ui_attach_error'), status: 'error' });
     }
 
-    if (checkOpenAIStorage(fileData?.source ?? '') && !isAssistantsEndpoint(endpoint)) {
+    if (checkOpenAIStorage(fileData.source ?? '') && !isAssistantsEndpoint(endpoint)) {
       return showToast({
         message: localize('com_ui_attach_error_openai'),
         status: 'error',
       });
-    } else if (!checkOpenAIStorage(fileData?.source ?? '') && isAssistantsEndpoint(endpoint)) {
+    } else if (!checkOpenAIStorage(fileData.source ?? '') && isAssistantsEndpoint(endpoint)) {
       showToast({
         message: localize('com_ui_attach_warn_endpoint'),
         status: 'warning',
@@ -87,7 +87,7 @@ export default function PanelFileCell({ row }: { row: Row<TFile> }) {
   }, [addFile, fileMap, row.original, conversation, localize, showToast, fileConfig.endpoints]);
 
   const file = row.original;
-  if (file.type?.startsWith('image')) {
+  if (file.type.startsWith('image')) {
     return (
       <div
         onClick={handleFileClick}

@@ -20,7 +20,7 @@ export default function Settings({
 
   const { settings, multiViewSettings } = getSettings();
   const { endpoint: _endpoint, endpointType } = conversation;
-  const models = modelsQuery?.data?.[_endpoint] ?? [];
+  const models = modelsQuery.data?.[_endpoint] ?? [];
   const endpoint = endpointType ?? _endpoint;
   const OptionComponent = settings[endpoint];
 

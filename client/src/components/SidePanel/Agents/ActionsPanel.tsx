@@ -39,7 +39,7 @@ export default function ActionsPanel({
     },
     onError(error) {
       showToast({
-        message: (error as Error)?.message ?? localize('com_assistants_delete_actions_error'),
+        message: (error as Error).message ?? localize('com_assistants_delete_actions_error'),
         status: 'error',
       });
     },
@@ -68,7 +68,7 @@ export default function ActionsPanel({
   const type = watch('type');
 
   useEffect(() => {
-    if (action?.metadata?.auth) {
+    if (action?.metadata.auth) {
       reset({
         type: action.metadata.auth.type || AuthTypeEnum.None,
         saved_auth_fields: false,

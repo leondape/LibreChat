@@ -25,7 +25,7 @@ const useNavigateToConvo = (index = 0) => {
     }
 
     let convo = { ...conversation };
-    if (!convo?.endpoint) {
+    if (!convo.endpoint) {
       /* undefined endpoint edge case */
       const modelsConfig = queryClient.getQueryData<TModelsConfig>([QueryKeys.models]);
       const endpointsConfig = queryClient.getQueryData<TEndpointsConfig>([QueryKeys.endpoints]);
@@ -55,7 +55,7 @@ const useNavigateToConvo = (index = 0) => {
 
   const navigateWithLastTools = (conversation: TConversation, _resetLatestMessage?: boolean) => {
     // set conversation to the new conversation
-    if (conversation?.endpoint === EModelEndpoint.gptPlugins) {
+    if (conversation.endpoint === EModelEndpoint.gptPlugins) {
       let lastSelectedTools = [];
       try {
         lastSelectedTools =
@@ -66,7 +66,7 @@ const useNavigateToConvo = (index = 0) => {
       navigateToConvo(
         {
           ...conversation,
-          tools: conversation?.tools?.length ? conversation?.tools : lastSelectedTools,
+          tools: conversation.tools?.length ? conversation.tools : lastSelectedTools,
         },
         _resetLatestMessage,
       );

@@ -39,7 +39,7 @@ export default function GroupSidePanel({
         <List
           groups={promptGroups}
           isChatRoute={isChatRoute}
-          isLoading={!!groupsQuery?.isLoading}
+          isLoading={!!groupsQuery.isLoading}
         />
       </div>
       <PanelNavigation

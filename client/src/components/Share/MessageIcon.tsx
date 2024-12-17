@@ -30,8 +30,8 @@ export default function MessageIcon(
     [conversation, message],
   );
 
-  const iconURL = messageSettings?.iconURL;
-  let endpoint = messageSettings?.endpoint;
+  const iconURL = messageSettings.iconURL;
+  let endpoint = messageSettings.endpoint;
   endpoint = getIconEndpoint({ endpointsConfig: undefined, iconURL, endpoint });
 
   if (!message?.isCreatedByUser && iconURL && iconURL.includes('http')) {

@@ -24,7 +24,7 @@ const useUserKey = (endpoint: string) => {
 
   const getExpiry = useCallback(() => {
     if (checkUserKey.data) {
-      return checkUserKey.data?.expiresAt || 'never';
+      return checkUserKey.data.expiresAt || 'never';
     }
   }, [checkUserKey.data]);
 

@@ -12,17 +12,20 @@ class MovieTickets extends Tool {
     - You can request tickets for movies in Germany or Austria
     - The tool will automatically check eligibility based on the user's company email
     - The tool will verify ticket availability and user limits
-    - You can also query available movies`;
+    - You can also query available movies
+    - IMPORTANT: Before booking tickets, ask the user that they will definitely go to see the movie`;
 
     this.description_for_model = `// Use this tool to help users request movie tickets and get movie information.
     // The user's email is automatically retrieved from their account - do not ask for it.
     // For ticket requests, you need:
+    // - CRITICAL: Always ask user if they will definitely use the tickets in cinema before booking
     // - Number of tickets
     // - Country (Germany or Austria)
     // - CRITICAL: Never query movie without having asked for country first!
     // - Movie ID. Use the ID provided by the get_movies tool. You will use this ID for ticket requests, the user will interact with the movie name.
     // Guidelines:
     // - Always verify the movie exists before requesting tickets
+    // - Before booking, ask user that they will go to watch the movie
     // - Inform users about any limitations or availability issues
     // - Handle errors gracefully and provide clear feedback
     // - Never ask for the user's email, it's handled automatically`;

@@ -115,5 +115,8 @@
       "admin/",
       "packages/"
     ]
+  },
+  "dependencies": {
+    "qrcode.react": "^4.2.0"
   }
 }

@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
 import { z } from 'zod';
 import type { ZodError } from 'zod';
+import type { TModelsConfig } from './types';
 import { EModelEndpoint, eModelEndpointSchema } from './schemas';
 import { fileConfigSchema } from './file-config';
 import { specsConfigSchema } from './models';
 import { FileSources } from './types/files';
-import { TModelsConfig } from './types';
+import { MCPServersSchema } from './mcp';
 
 export const defaultSocialLogins = ['google', 'facebook', 'openid', 'github', 'discord'];
 
@@ -209,6 +210,7 @@ export type TAssistantEndpoint = z.infer<typeof assistantEndpointSchema>;
 export const agentsEndpointSChema = baseEndpointSchema.merge(
   z.object({
     /* agents specific */
+    recursionLimit: z.number().optional(),
     disableBuilder: z.boolean().optional(),
     capabilities: z
       .array(z.nativeEnum(AgentCapabilities))
@@ -432,6 +434,7 @@ export const configSchema = z.object({
   imageOutputType: z.nativeEnum(EImageOutputType).default(EImageOutputType.PNG),
   includedTools: z.array(z.string()).optional(),
   filteredTools: z.array(z.string()).optional(),
+  mcpServers: MCPServersSchema.optional(),
   interface: z
     .object({
       privacyPolicy: z
@@ -737,6 +740,7 @@ export const supportsBalanceCheck = {
 };
 
 export const visionModels = [
+  'o1',
   'gpt-4o',
   'gpt-4o-mini',
   'gpt-4-turbo',
@@ -773,7 +777,7 @@ export function validateVisionModel({
     return false;
   }
 
-  if (model === 'gpt-4-turbo-preview') {
+  if (model.includes('gpt-4-turbo-preview') || model.includes('o1-mini')) {
     return false;
   }
 
@@ -1084,9 +1088,9 @@ export enum TTSProviders {
 /** Enum for app-wide constants */
 export enum Constants {
   /** Key for the app's version. */
-  VERSION = 'v0.7.5',
+  VERSION = 'v0.7.6',
   /** Key for the Custom Config's version (librechat.yaml). */
-  CONFIG_VERSION = '1.1.9',
+  CONFIG_VERSION = '1.2.1',
   /** Standard value for the first message's `parentMessageId` value, to indicate no parent exists. */
   NO_PARENT = '00000000-0000-0000-0000-000000000000',
   /** Standard value for the initial conversationId before a request is sent */
@@ -1109,6 +1113,8 @@ export enum Constants {
   MAX_CONVO_STARTERS = 4,
   /** Global/instance Project Name */
   GLOBAL_PROJECT_NAME = 'instance',
+  /** Delimiter for MCP tools */
+  mcp_delimiter = '_mcp_',
 }
 
 export enum LocalStorageKeys {

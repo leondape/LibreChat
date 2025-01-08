@@ -3,14 +3,12 @@ import { ArrowUpDown, Database } from 'lucide-react';
 import { FileSources, FileContext } from 'librechat-data-provider';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { TFile } from 'librechat-data-provider';
+import { Button, Checkbox, OpenAIMinimalIcon, AzureMinimalIcon } from '~/components';
 import ImagePreview from '~/components/Chat/Input/Files/ImagePreview';
 import FilePreview from '~/components/Chat/Input/Files/FilePreview';
 import { SortFilterHeader } from './SortFilterHeader';
-import { OpenAIMinimalIcon } from '~/components/svg';
-import { AzureMinimalIcon } from '~/components/svg';
-import { Button, Checkbox } from '~/components/ui';
+import { useLocalize, useMediaQuery } from '~/hooks';
 import { formatDate, getFileType } from '~/utils';
-import useLocalize from '~/hooks/useLocalize';
 
 const contextMap = {
   [FileContext.avatar]: 'com_ui_avatar',
@@ -60,7 +58,7 @@ export const columns: ColumnDef<TFile>[] = [
       return (
         <Button
           variant="ghost"
-          className="px-2 py-0 text-xs sm:px-2 sm:py-2 sm:text-sm"
+          className="px-2 py-0 text-xs hover:bg-surface-hover sm:px-2 sm:py-2 sm:text-sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           {localize('com_ui_name')}
@@ -100,14 +98,17 @@ export const columns: ColumnDef<TFile>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="px-2 py-0 text-xs sm:px-2 sm:py-2 sm:text-sm"
+          className="px-2 py-0 text-xs hover:bg-surface-hover sm:px-2 sm:py-2 sm:text-sm"
         >
           {localize('com_ui_date')}
           <ArrowUpDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => formatDate(row.original.updatedAt),
+    cell: ({ row }) => {
+      const isSmallScreen = useMediaQuery('(max-width: 768px)');
+      return formatDate(row.original.updatedAt?.toString() ?? '', isSmallScreen);
+    },
   },
   {
     accessorKey: 'filterSource',
@@ -193,7 +194,7 @@ export const columns: ColumnDef<TFile>[] = [
       return (
         <Button
           variant="ghost"
-          className="px-2 py-0 text-xs sm:px-2 sm:py-2 sm:text-sm"
+          className="px-2 py-0 text-xs hover:bg-surface-hover sm:px-2 sm:py-2 sm:text-sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           {localize('com_ui_size')}

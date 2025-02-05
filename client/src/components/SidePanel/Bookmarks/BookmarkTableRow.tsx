@@ -44,9 +44,7 @@ const BookmarkTableRow: React.FC<BookmarkTableRowProps> = ({ row, moveRow, posit
     accept: 'bookmark',
     drop: handleDrop,
     hover(item: DragItem) {
-      if (!ref.current || item.index === position) {
-        return;
-      }
+      if (!ref.current || item.index === position) {return;}
       moveRow(item.index, position);
       item.index = position;
     },

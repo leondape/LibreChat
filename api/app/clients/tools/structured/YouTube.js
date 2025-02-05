@@ -1,218 +1,203 @@
-const { Tool } = require('@langchain/core/tools');
 const { z } = require('zod');
+const { tool } = require('@langchain/core/tools');
 const { youtube } = require('@googleapis/youtube');
 const { YoutubeTranscript } = require('youtube-transcript');
+const { getApiKey } = require('./credentials');
 const { logger } = require('~/config');
 
-class YouTubeTool extends Tool {
-  constructor(fields) {
-    super();
-    this.name = 'youtube';
-    /** @type {boolean} Used to initialize the Tool without necessary variables. */
-    this.override = fields.override ?? false;
-    let apiKey = fields.YOUTUBE_API_KEY ?? this.getApiKey();
-    this.apiKey = apiKey;
-    this.description = 'Tool for interacting with YouTube content and data.';
-
-    this.description_for_model = `// YouTube Content Tool - READ CAREFULLY
-// This tool has four SEPARATE operations that must follow these rules:
-
-// 1. SEARCH VIDEOS:
-//    - Action: search_videos
-//    - Required: query (your search term)
-//    - Optional: maxResults (between 1-50, default: 5)
-//    - Usecases: finding relevant videos, exploring new content, or getting recommendations
-//    - Example command: search for "cooking pasta" with max 5 results
-
-// 2. GET VIDEO INFO:
-//    - Action: get_video_info
-//    - Required: videoUrl (full YouTube URL or video ID)
-//    - Example command: get info for video "https://youtube.com/watch?v=123"
-
-// 3. GET COMMENTS:
-//    - Action: get_comments
-//    - Required: videoUrl (full YouTube URL or video ID)
-//    - Optional: maxResults (between 1-50, default: 10)
-//    - Usecases: analyzing user feedback, identifying common issues, or understanding viewer sentiment
-//    - Example command: get 10 comments from video "https://youtube.com/watch?v=123"
-
-// 4. GET TRANSCRIPT:
-//    - Action: get_video_transcript
-//    - Required: videoUrl (full YouTube URL or video ID)
-//    - Optional: Usecases: in-depth analysis, summarization, or translation of a video
-//    - Example command: get transcript for video "https://youtube.com/watch?v=123"
-
-// CRITICAL RULES:
-// - One action per request ONLY
-// - Never mix different operations
-// - maxResults must be between 1-50
-// - Video URLs can be full links or video IDs
-// - All responses are JSON strings
-// - Keep requests focused on one action at a time`;
-
-    this.schema = z.object({
-      action: z
-        .enum(['search_videos', 'get_video_info', 'get_comments', 'get_video_transcript'])
-        .describe('The action to perform. Choose one of the available YouTube operations.'),
-      query: z
-        .string()
-        .optional()
-        .describe('Required for search_videos: The search term to find videos.'),
-      videoUrl: z
-        .string()
-        .optional()
-        .describe(
-          'Required for video_info, comments, and transcript: The YouTube video URL or ID.',
-        ),
-      maxResults: z
-        .number()
-        .int()
-        .min(1)
-        .max(50)
-        .optional()
-        .describe(
-          'Optional: Number of results to return. Default: 5 for search, 10 for comments. Max: 50.',
-        ),
-    });
-
-    this.youtubeClient = youtube({
-      version: 'v3',
-      auth: this.apiKey,
-    });
+function extractVideoId(url) {
+  const rawIdRegex = /^[a-zA-Z0-9_-]{11}$/;
+  if (rawIdRegex.test(url)) {
+    return url;
   }
 
-  getApiKey() {
-    const apiKey = process.env.YOUTUBE_API_KEY ?? '';
-    if (!apiKey && !this.override) {
-      throw new Error('Missing YOUTUBE_API_KEY environment variable.');
-    }
-    return apiKey;
-  }
-
-  async _call(input) {
-    try {
-      const data = typeof input === 'string' ? JSON.parse(input) : input;
-
-      switch (data.action) {
-        case 'search_videos':
-          return JSON.stringify(await this.searchVideos(data.query, data.maxResults));
-        case 'get_video_info':
-          return JSON.stringify(await this.getVideoInfo(data.videoUrl));
-        case 'get_comments':
-          return JSON.stringify(await this.getComments(data.videoUrl, data.maxResults));
-        case 'get_video_transcript':
-          return JSON.stringify(await this.getVideoTranscript(data.videoUrl));
-        default:
-          throw new Error(`Unknown action: ${data.action}`);
-      }
-    } catch (error) {
-      logger.error('[YouTubeTool] Error:', error);
-      return JSON.stringify({ error: error.message });
-    }
-  }
-
-  async searchVideos(query, maxResults = 5) {
-    const response = await this.youtubeClient.search.list({
-      part: 'snippet',
-      q: query,
-      type: 'video',
-      maxResults,
-    });
-
-    return response.data.items.map((item) => ({
-      title: item.snippet.title,
-      description: item.snippet.description,
-      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-    }));
-  }
-
-  async getVideoInfo(videoUrl) {
-    const videoId = this.extractVideoId(videoUrl);
-    const response = await this.youtubeClient.videos.list({
-      part: 'snippet,statistics',
-      id: videoId,
-    });
-
-    const video = response.data.items[0];
-    return {
-      title: video.snippet.title,
-      description: video.snippet.description,
-      views: video.statistics.viewCount,
-      likes: video.statistics.likeCount,
-      comments: video.statistics.commentCount,
-    };
-  }
-
-  async getComments(videoUrl, maxResults = 10) {
-    const videoId = this.extractVideoId(videoUrl);
-    const response = await this.youtubeClient.commentThreads.list({
-      part: 'snippet',
-      videoId: videoId,
-      maxResults: maxResults,
-    });
-
-    return response.data.items.map((item) => ({
-      author: item.snippet.topLevelComment.snippet.authorDisplayName,
-      text: item.snippet.topLevelComment.snippet.textDisplay,
-      likes: item.snippet.topLevelComment.snippet.likeCount,
-    }));
-  }
-
-  async getVideoTranscript(videoUrl) {
-    const videoId = this.extractVideoId(videoUrl);
-    try {
-      // Try to fetch English transcript
-      try {
-        const englishTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: 'en' });
-        return {
-          language: 'English',
-          transcript: englishTranscript,
-        };
-      } catch (error) {
-        console.log('English transcript not available, trying German...');
-      }
-
-      // If English is not available, try German
-      try {
-        const germanTranscript = await YoutubeTranscript.fetchTranscript(videoId, { lang: 'de' });
-        return {
-          language: 'German',
-          transcript: germanTranscript,
-        };
-      } catch (error) {
-        console.log('German transcript not available, fetching default transcript...');
-      }
-
-      // If neither English nor German is available, fetch the default transcript
-      const defaultTranscript = await YoutubeTranscript.fetchTranscript(videoId);
-      return {
-        language: 'Unknown',
-        transcript: defaultTranscript,
-      };
-    } catch (error) {
-      console.error('Error fetching transcript:', error);
-      return {
-        error: `Error fetching transcript: ${error.message}`,
-      };
-    }
-  }
-
-  extractVideoId(url) {
-    // First, try to match a raw video ID (11 characters)
-    const rawIdRegex = /^[a-zA-Z0-9_-]{11}$/;
-    if (rawIdRegex.test(url)) {
-      return url;
-    }
-
-    // Then try various URL formats
-
-    const regex = new RegExp(
-      '(?:youtu\\.be/|youtube(?:\\.com)?/(?:(?:watch\\?v=)|(?:embed/)|' +
-        '(?:shorts/)|(?:live/)|(?:v/)|(?:/))?)([a-zA-Z0-9_-]{11})(?:\\S+)?$',
-    );
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  }
+  const regex = new RegExp(
+    '(?:youtu\\.be/|youtube(?:\\.com)?/(?:' +
+      '(?:watch\\?v=)|(?:embed/)|(?:shorts/)|(?:live/)|(?:v/)|(?:/))?)' +
+      '([a-zA-Z0-9_-]{11})(?:\\S+)?$',
+  );
+  const match = url.match(regex);
+  return match ? match[1] : null;
 }
 
-module.exports = YouTubeTool;
+function parseTranscript(transcriptResponse) {
+  if (!Array.isArray(transcriptResponse)) {
+    return '';
+  }
+
+  return transcriptResponse
+    .map((entry) => entry.text.trim())
+    .filter((text) => text)
+    .join(' ')
+    .replaceAll('&amp;#39;', '\'');
+}
+
+function createYouTubeTools(fields = {}) {
+  const envVar = 'YOUTUBE_API_KEY';
+  const override = fields.override ?? false;
+  const apiKey = fields.apiKey ?? fields[envVar] ?? getApiKey(envVar, override);
+
+  const youtubeClient = youtube({
+    version: 'v3',
+    auth: apiKey,
+  });
+
+  const searchTool = tool(
+    async ({ query, maxResults = 5 }) => {
+      const response = await youtubeClient.search.list({
+        part: 'snippet',
+        q: query,
+        type: 'video',
+        maxResults: maxResults || 5,
+      });
+      const result = response.data.items.map((item) => ({
+        title: item.snippet.title,
+        description: item.snippet.description,
+        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+      }));
+      return JSON.stringify(result, null, 2);
+    },
+    {
+      name: 'youtube_search',
+      description: `Search for YouTube videos by keyword or phrase.
+- Required: query (search terms to find videos)
+- Optional: maxResults (number of videos to return, 1-50, default: 5)
+- Returns: List of videos with titles, descriptions, and URLs
+- Use for: Finding specific videos, exploring content, research
+Example: query="cooking pasta tutorials" maxResults=3`,
+      schema: z.object({
+        query: z.string().describe('Search query terms'),
+        maxResults: z.number().int().min(1).max(50).optional().describe('Number of results (1-50)'),
+      }),
+    },
+  );
+
+  const infoTool = tool(
+    async ({ url }) => {
+      const videoId = extractVideoId(url);
+      if (!videoId) {
+        throw new Error('Invalid YouTube URL or video ID');
+      }
+
+      const response = await youtubeClient.videos.list({
+        part: 'snippet,statistics',
+        id: videoId,
+      });
+
+      if (!response.data.items?.length) {
+        throw new Error('Video not found');
+      }
+      const video = response.data.items[0];
+
+      const result = {
+        title: video.snippet.title,
+        description: video.snippet.description,
+        views: video.statistics.viewCount,
+        likes: video.statistics.likeCount,
+        comments: video.statistics.commentCount,
+      };
+      return JSON.stringify(result, null, 2);
+    },
+    {
+      name: 'youtube_info',
+      description: `Get detailed metadata and statistics for a specific YouTube video.
+- Required: url (full YouTube URL or video ID)
+- Returns: Video title, description, view count, like count, comment count
+- Use for: Getting video metrics and basic metadata
+- DO NOT USE FOR VIDEO SUMMARIES, USE TRANSCRIPTS FOR COMPREHENSIVE ANALYSIS
+- Accepts both full URLs and video IDs
+Example: url="https://youtube.com/watch?v=abc123" or url="abc123"`,
+      schema: z.object({
+        url: z.string().describe('YouTube video URL or ID'),
+      }),
+    },
+  );
+
+  const commentsTool = tool(
+    async ({ url, maxResults = 10 }) => {
+      const videoId = extractVideoId(url);
+      if (!videoId) {
+        throw new Error('Invalid YouTube URL or video ID');
+      }
+
+      const response = await youtubeClient.commentThreads.list({
+        part: 'snippet',
+        videoId,
+        maxResults: maxResults || 10,
+      });
+
+      const result = response.data.items.map((item) => ({
+        author: item.snippet.topLevelComment.snippet.authorDisplayName,
+        text: item.snippet.topLevelComment.snippet.textDisplay,
+        likes: item.snippet.topLevelComment.snippet.likeCount,
+      }));
+      return JSON.stringify(result, null, 2);
+    },
+    {
+      name: 'youtube_comments',
+      description: `Retrieve top-level comments from a YouTube video.
+- Required: url (full YouTube URL or video ID)
+- Optional: maxResults (number of comments, 1-50, default: 10)
+- Returns: Comment text, author names, like counts
+- Use for: Sentiment analysis, audience feedback, engagement review
+Example: url="abc123" maxResults=20`,
+      schema: z.object({
+        url: z.string().describe('YouTube video URL or ID'),
+        maxResults: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe('Number of comments to retrieve'),
+      }),
+    },
+  );
+
+  const transcriptTool = tool(
+    async ({ url }) => {
+      const videoId = extractVideoId(url);
+      if (!videoId) {
+        throw new Error('Invalid YouTube URL or video ID');
+      }
+
+      try {
+        try {
+          const transcript = await YoutubeTranscript.fetchTranscript(videoId, { lang: 'en' });
+          return parseTranscript(transcript);
+        } catch (e) {
+          logger.error(e);
+        }
+
+        try {
+          const transcript = await YoutubeTranscript.fetchTranscript(videoId, { lang: 'de' });
+          return parseTranscript(transcript);
+        } catch (e) {
+          logger.error(e);
+        }
+
+        const transcript = await YoutubeTranscript.fetchTranscript(videoId);
+        return parseTranscript(transcript);
+      } catch (error) {
+        throw new Error(`Failed to fetch transcript: ${error.message}`);
+      }
+    },
+    {
+      name: 'youtube_transcript',
+      description: `Fetch and parse the transcript/captions of a YouTube video.
+- Required: url (full YouTube URL or video ID)
+- Returns: Full video transcript as plain text
+- Use for: Content analysis, summarization, translation reference
+- This is the "Go-to" tool for analyzing actual video content
+- Attempts to fetch English first, then German, then any available language
+Example: url="https://youtube.com/watch?v=abc123"`,
+      schema: z.object({
+        url: z.string().describe('YouTube video URL or ID'),
+      }),
+    },
+  );
+
+  return [searchTool, infoTool, commentsTool, transcriptTool];
+}
+
+module.exports = createYouTubeTools;

@@ -1,8 +1,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { useCallback, memo, ReactNode } from 'react';
-import { useGetEndpointsQuery } from 'librechat-data-provider/react-query';
-import type { TResPlugin, TInput } from 'librechat-data-provider';
 import { ChevronDownIcon, LucideProps } from 'lucide-react';
+import type { TResPlugin, TInput } from 'librechat-data-provider';
+import { useGetEndpointsQuery } from '~/data-provider';
 import { useShareContext } from '~/Providers';
 import { cn, formatJSON } from '~/utils';
 import { Spinner } from '~/components';

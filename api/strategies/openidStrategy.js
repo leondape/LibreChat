@@ -263,26 +263,26 @@ async function setupOpenId() {
           );
 
           // Only add balance if the user was newly created
-          if (isNewUser && process.env.CHECK_BALANCE === 'true') {
-            const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
+          // if (isNewUser && process.env.CHECK_BALANCE === 'true') {
+          //   const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
 
-            if (!resetBalanceAmount) {
-              throw new Error('RESET_BALANCE_AMOUNT is not set in the .env file!');
-            }
+          //   if (!resetBalanceAmount) {
+          //     throw new Error('RESET_BALANCE_AMOUNT is not set in the .env file!');
+          //   }
 
-            const command = `node ${path.resolve('config/add-balance.js')} ${
-              user.email
-            } ${resetBalanceAmount}`;
-            exec(command, (error, stdout, stderr) => {
-              if (error) {
-                console.error('Error adding balance:', error.message);
-                console.error(stderr);
-              } else {
-                console.log('Balance added successfully for user:', user.email);
-                console.log(stdout);
-              }
-            });
-          }
+          //   const command = `node ${path.resolve('config/add-balance.js')} ${
+          //     user.email
+          //   } ${resetBalanceAmount}`;
+          //   exec(command, (error, stdout, stderr) => {
+          //     if (error) {
+          //       console.error('Error adding balance:', error.message);
+          //       console.error(stderr);
+          //     } else {
+          //       console.log('Balance added successfully for user:', user.email);
+          //       console.log(stdout);
+          //     }
+          //   });
+          // }
 
           done(null, user);
         } catch (err) {

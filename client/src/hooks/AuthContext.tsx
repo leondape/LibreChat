@@ -195,7 +195,7 @@ const AuthContextProvider = ({
       },
       isAuthenticated,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [user, error, isAuthenticated, token, userRole, adminRole],
   );
 

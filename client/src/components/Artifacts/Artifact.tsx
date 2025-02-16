@@ -26,7 +26,7 @@ export const artifactPlugin: Pluggable = () => {
 };
 
 export function Artifact({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   node,
   ...props
 }: Artifact & {

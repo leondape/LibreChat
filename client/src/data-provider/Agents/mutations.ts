@@ -170,7 +170,7 @@ export const useUploadAgentAvatarMutation = (
   unknown // context
 > => {
   return useMutation([MutationKeys.agentAvatarUpload], {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     mutationFn: ({ postCreation, ...variables }: t.AgentAvatarVariables) =>
       dataService.uploadAgentAvatar(variables),
     ...(options || {}),

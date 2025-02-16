@@ -42,7 +42,7 @@ export default function useSearchMessages({ isAuthenticated }: { isAuthenticated
     }
     navigate('/c/new', { replace: true });
     /* Disabled eslint rule because we don't want to run this effect when location changes */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [navigate, searchQuery]);
 
   useEffect(() => {

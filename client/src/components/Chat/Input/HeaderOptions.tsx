@@ -42,7 +42,7 @@ export default function HeaderOptions({
     if (endpoint && noSettings[endpoint]) {
       setShowPopover(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [endpoint, noSettings]);
 
   const saveAsPreset = () => {

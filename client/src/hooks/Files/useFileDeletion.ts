@@ -19,7 +19,7 @@ const useFileDeletion = ({
   assistant_id?: string;
   tool_resource?: EToolResources;
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [_batch, setFileDeleteBatch] = useState<t.BatchFile[]>([]);
   const setFilesToDelete = useSetFilesToDelete();
 
@@ -47,7 +47,6 @@ const useFileDeletion = ({
     [mutateAsync],
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedDelete = useCallback(debounce(executeBatchDelete, 1000), []);
 
   useEffect(() => {

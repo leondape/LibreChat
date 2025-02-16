@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/media-has-caption */
+
 import { useEffect, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import type { TMessageAudio } from '~/common';

@@ -39,7 +39,7 @@ const createAssistant = async (req, res) => {
           return (
             Object.entries(toolDefinitions)
               .filter(([key]) => key.startsWith(`${tool}_`))
-              // eslint-disable-next-line no-unused-vars
+
               .map(([_, val]) => val)
           );
         }
@@ -131,7 +131,7 @@ const updateAssistant = async ({ req, openai, assistant_id, updateData }) => {
     if (!actualTool && manifestToolMap[tool] && manifestToolMap[tool].toolkit === true) {
       actualTool = Object.entries(toolDefinitions)
         .filter(([key]) => key.startsWith(`${tool}_`))
-        // eslint-disable-next-line no-unused-vars
+
         .map(([_, val]) => val);
     } else if (!actualTool) {
       continue;

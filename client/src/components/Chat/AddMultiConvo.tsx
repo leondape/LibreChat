@@ -12,7 +12,7 @@ function AddMultiConvo() {
   const localize = useLocalize();
 
   const clickHandler = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { title: _t, ...convo } = conversation ?? ({} as TConversation);
     setAddedConvo({
       ...convo,

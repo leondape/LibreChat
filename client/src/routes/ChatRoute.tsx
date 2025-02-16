@@ -14,13 +14,22 @@ import { getDefaultModelSpec, getModelSpecIconURL } from '~/utils';
 import { ToolCallsMapProvider } from '~/Providers';
 import ChatView from '~/components/Chat/ChatView';
 import useAuthRedirect from './useAuthRedirect';
+import temporaryStore from '~/store/temporary';
 import { Spinner } from '~/components/svg';
+import { useRecoilCallback } from 'recoil';
 import store from '~/store';
 
 export default function ChatRoute() {
   useHealthCheck();
   const { data: startupConfig } = useGetStartupConfig();
   const { isAuthenticated, user } = useAuthRedirect();
+  const setIsTemporary = useRecoilCallback(
+    ({ set }) =>
+      (value: boolean) => {
+        set(temporaryStore.isTemporary, value);
+      },
+    [],
+  );
   useAppStartup({ startupConfig, user });
 
   const index = 0;
@@ -107,7 +116,7 @@ export default function ChatRoute() {
       hasSetConversation.current = true;
     }
     /* Creates infinite render if all dependencies included due to newConversation invocations exceeding call stack before hasSetConversation.current becomes truthy */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [
     startupConfig,
     initialConvoQuery.data,
@@ -139,6 +148,14 @@ export default function ChatRoute() {
   // if conversationId is null
   if (!conversationId) {
     return null;
+  }
+
+  const isTemporaryChat = conversation && conversation.expiredAt ? true : false;
+
+  if (conversationId !== Constants.NEW_CONVO && !isTemporaryChat) {
+    setIsTemporary(false);
+  } else if (isTemporaryChat) {
+    setIsTemporary(isTemporaryChat);
   }
 
   return (

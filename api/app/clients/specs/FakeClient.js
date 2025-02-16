@@ -86,7 +86,6 @@ const initializeFakeClient = (apiKey, options, fakeMessages) => {
     return 'Mock response text';
   });
 
-  // eslint-disable-next-line no-unused-vars
   TestClient.getCompletion = jest.fn().mockImplementation(async (..._args) => {
     return {
       choices: [

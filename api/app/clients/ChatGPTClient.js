@@ -339,7 +339,7 @@ class ChatGPTClient extends BaseClient {
     opts.body = JSON.stringify(modelOptions);
 
     if (modelOptions.stream) {
-      // eslint-disable-next-line no-async-promise-executor
+
       return new Promise(async (resolve, reject) => {
         try {
           let done = false;

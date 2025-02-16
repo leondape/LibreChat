@@ -208,12 +208,12 @@ export default function StreamAudio({ index = 0 }) {
   useEffect(() => {
     pauseGlobalAudio();
     // We only want the effect to run when the paramId changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [paramId]);
 
   logger.log('StreamAudio.tsx - globalAudioURL:', globalAudioURL);
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
+
     <audio
       ref={audioRef}
       controls

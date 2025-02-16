@@ -42,7 +42,7 @@ const createAssistant = async (req, res) => {
           return (
             Object.entries(toolDefinitions)
               .filter(([key]) => key.startsWith(`${tool}_`))
-              // eslint-disable-next-line no-unused-vars
+
               .map(([_, val]) => val)
           );
         }
@@ -147,7 +147,7 @@ const patchAssistant = async (req, res) => {
           return (
             Object.entries(toolDefinitions)
               .filter(([key]) => key.startsWith(`${tool}_`))
-              // eslint-disable-next-line no-unused-vars
+
               .map(([_, val]) => val)
           );
         }

@@ -1,4 +1,4 @@
-import { useLocalize } from '~/hooks';
+import { TranslationKeys, useLocalize } from '~/hooks';
 import { BlinkAnimation } from './BlinkAnimation';
 import { TStartupConfig } from 'librechat-data-provider';
 import SocialLoginRender from './SocialLoginRender';
@@ -33,7 +33,7 @@ function AuthLayout({
   startupConfig: TStartupConfig | null | undefined;
   startupConfigError: unknown | null | undefined;
   pathname: string;
-  error: string | null;
+  error: TranslationKeys | null;
 }) {
   const localize = useLocalize();
 
@@ -65,7 +65,7 @@ function AuthLayout({
           <img
             src="/assets/logo.png"
             className="h-full w-full object-contain"
-            alt={localize('com_ui_logo', startupConfig?.appTitle ?? 'LeoChat')}
+            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'LeoChat' })}
           />
         </div>
       </BlinkAnimation>

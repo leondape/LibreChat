@@ -23,7 +23,6 @@ class MeiliSearchClient {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 async function indexSync(req, res, next) {
   if (!searchEnabled) {
     return;

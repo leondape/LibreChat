@@ -63,7 +63,7 @@ export const ThemeProvider = ({ initialTheme, children }) => {
     }
     applyFontSize(JSON.parse(fontSize));
     // Reason: This effect should only run once, and `setFontSize` is a stable function
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   if (initialTheme) {

@@ -8,6 +8,7 @@ const { Issuer, Strategy: OpenIDStrategy, custom } = require('openid-client');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { findUser, createUser, updateUser } = require('~/models/userMethods');
 const { hashToken } = require('~/server/utils/crypto');
+const { isEnabled } = require('~/server/utils');
 const { logger } = require('~/config');
 require('dotenv').config();
 
@@ -117,11 +118,24 @@ async function setupOpenId() {
       logger.info(`[openidStrategy] proxy agent added: ${process.env.PROXY}`);
     }
     const issuer = await Issuer.discover(process.env.OPENID_ISSUER);
-    const client = new issuer.Client({
+    /* Supported Algorithms, openid-client v5 doesn't set it automatically as discovered from server.
+      - id_token_signed_response_alg      // defaults to 'RS256'
+      - request_object_signing_alg        // defaults to 'RS256'
+      - userinfo_signed_response_alg      // not in v5
+      - introspection_signed_response_alg // not in v5
+      - authorization_signed_response_alg // not in v5
+    */
+    /** @type {import('openid-client').ClientMetadata} */
+    const clientMetadata = {
       client_id: process.env.OPENID_CLIENT_ID,
       client_secret: process.env.OPENID_CLIENT_SECRET,
       redirect_uris: [process.env.DOMAIN_SERVER + process.env.OPENID_CALLBACK_URL],
-    });
+    };
+    if (isEnabled(process.env.OPENID_SET_FIRST_SUPPORTED_ALGORITHM)) {
+      clientMetadata.id_token_signed_response_alg =
+        issuer.id_token_signing_alg_values_supported?.[0] || 'RS256';
+    }
+    const client = new issuer.Client(clientMetadata);
     const requiredRole = process.env.OPENID_REQUIRED_ROLE;
     const requiredRoleParameterPath = process.env.OPENID_REQUIRED_ROLE_PARAMETER_PATH;
     const requiredRoleTokenKind = process.env.OPENID_REQUIRED_ROLE_TOKEN_KIND;
@@ -249,26 +263,26 @@ async function setupOpenId() {
           );
 
           // Only add balance if the user was newly created
-          if (isNewUser && process.env.CHECK_BALANCE === 'true') {
-            const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
+          // if (isNewUser && process.env.CHECK_BALANCE === 'true') {
+          //   const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
 
-            if (!resetBalanceAmount) {
-              throw new Error('RESET_BALANCE_AMOUNT is not set in the .env file!');
-            }
+          //   if (!resetBalanceAmount) {
+          //     throw new Error('RESET_BALANCE_AMOUNT is not set in the .env file!');
+          //   }
 
-            const command = `node ${path.resolve('config/add-balance.js')} ${
-              user.email
-            } ${resetBalanceAmount}`;
-            exec(command, (error, stdout, stderr) => {
-              if (error) {
-                console.error('Error adding balance:', error.message);
-                console.error(stderr);
-              } else {
-                console.log('Balance added successfully for user:', user.email);
-                console.log(stdout);
-              }
-            });
-          }
+          //   const command = `node ${path.resolve('config/add-balance.js')} ${
+          //     user.email
+          //   } ${resetBalanceAmount}`;
+          //   exec(command, (error, stdout, stderr) => {
+          //     if (error) {
+          //       console.error('Error adding balance:', error.message);
+          //       console.error(stderr);
+          //     } else {
+          //       console.log('Balance added successfully for user:', user.email);
+          //       console.log(stdout);
+          //     }
+          //   });
+          // }
 
           done(null, user);
         } catch (err) {

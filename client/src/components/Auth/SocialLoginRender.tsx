@@ -1,8 +1,10 @@
-import { TStartupConfig } from 'librechat-data-provider';
-import { GoogleIcon, FacebookIcon, OpenIDIcon, GithubIcon, DiscordIcon } from '~/components';
+import { GoogleIcon, FacebookIcon, OpenIDIcon, GithubIcon, DiscordIcon, AppleIcon } from '~/components';
+
+import SocialButton from './SocialButton';
 
 import { useLocalize } from '~/hooks';
-import SocialButton from './SocialButton';
+
+import { TStartupConfig } from 'librechat-data-provider';
 
 function SocialLoginRender({
   startupConfig,
@@ -58,6 +60,17 @@ function SocialLoginRender({
         Icon={GoogleIcon}
         label={localize('com_auth_google_login')}
         id="google"
+      />
+    ),
+    apple: startupConfig.appleLoginEnabled && (
+      <SocialButton
+        key="apple"
+        enabled={startupConfig.appleLoginEnabled}
+        serverDomain={startupConfig.serverDomain}
+        oauthPath="apple"
+        Icon={AppleIcon}
+        label={localize('com_auth_apple_login')}
+        id="apple"
       />
     ),
     openid: startupConfig.openidLoginEnabled && (

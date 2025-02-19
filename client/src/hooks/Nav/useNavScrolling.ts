@@ -20,7 +20,6 @@ export default function useNavScrolling<TData>({
   const scrollPositionRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchNext = useCallback(
     throttle(() => (fetchNextPage != null ? fetchNextPage() : () => ({})), 750, { leading: true }),
     [fetchNextPage],

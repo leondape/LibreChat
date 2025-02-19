@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import TagManager from 'react-gtm-module';
 import { Constants } from 'librechat-data-provider';
-import { useGetStartupConfig } from 'librechat-data-provider/react-query';
+import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
 export default function Footer({ className }: { className?: string }) {
@@ -56,7 +56,7 @@ export default function Footer({ className }: { className?: string }) {
     <React.Fragment key={`main-content-part-${index}`}>
       <ReactMarkdown
         components={{
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
           a: ({ node: _n, href, children, ...otherProps }) => {
             return (
               <a
@@ -70,7 +70,7 @@ export default function Footer({ className }: { className?: string }) {
               </a>
             );
           },
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
           p: ({ node: _n, ...props }) => <span {...props} />,
         }}
       >

@@ -43,7 +43,7 @@ const SaveAsPresetDialog = ({ open, onOpenChange, preset }: TEditPresetProps) =>
 
   useEffect(() => {
     setTitle(preset.title ?? localize('com_endpoint_my_preset'));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [open]);
 
   // Handle Enter key press

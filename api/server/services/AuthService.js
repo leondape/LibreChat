@@ -23,9 +23,6 @@ const { isEnabled, checkEmailConfig, sendEmail } = require('~/server/utils');
 const { isEmailDomainAllowed } = require('~/server/services/domains');
 const { registerSchema } = require('~/strategies/validators');
 const { logger } = require('~/config');
-const { exec } = require('child_process');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const domains = {
   client: process.env.DOMAIN_CLIENT,
@@ -38,13 +35,14 @@ const genericVerificationMessage = 'Please check your email to verify your email
 /**
  * Logout user
  *
- * @param {String} userId
- * @param {*} refreshToken
+ * @param {ServerRequest} req
+ * @param {string} refreshToken
  * @returns
  */
-const logoutUser = async (userId, refreshToken) => {
+const logoutUser = async (req, refreshToken) => {
   try {
-    const session = await findSession({ userId: userId, refreshToken: refreshToken });
+    const userId = req.user._id;
+    const session = await findSession({ userId: userId, refreshToken });
 
     if (session) {
       try {
@@ -53,6 +51,12 @@ const logoutUser = async (userId, refreshToken) => {
         logger.error('[logoutUser] Failed to delete session.', deleteErr);
         return { status: 500, message: 'Failed to delete session.' };
       }
+    }
+
+    try {
+      req.session.destroy();
+    } catch (destroyErr) {
+      logger.error('[logoutUser] Failed to destroy session.', destroyErr);
     }
 
     return { status: 200, message: 'Logout successful' };
@@ -111,31 +115,46 @@ const sendVerificationEmail = async (user) => {
  */
 const verifyEmail = async (req) => {
   const { email, token } = req.body;
-  let emailVerificationData = await findToken({ email: decodeURIComponent(email) });
+  const decodedEmail = decodeURIComponent(email);
+
+  const user = await findUser({ email: decodedEmail }, 'email _id emailVerified');
+
+  if (!user) {
+    logger.warn(`[verifyEmail] [User not found] [Email: ${decodedEmail}]`);
+    return new Error('User not found');
+  }
+
+  if (user.emailVerified) {
+    logger.info(`[verifyEmail] Email already verified [Email: ${decodedEmail}]`);
+    return { message: 'Email already verified', status: 'success' };
+  }
+
+  let emailVerificationData = await findToken({ email: decodedEmail });
 
   if (!emailVerificationData) {
-    logger.warn(`[verifyEmail] [No email verification data found] [Email: ${email}]`);
+    logger.warn(`[verifyEmail] [No email verification data found] [Email: ${decodedEmail}]`);
     return new Error('Invalid or expired password reset token');
   }
 
   const isValid = bcrypt.compareSync(token, emailVerificationData.token);
 
   if (!isValid) {
-    logger.warn(`[verifyEmail] [Invalid or expired email verification token] [Email: ${email}]`);
+    logger.warn(
+      `[verifyEmail] [Invalid or expired email verification token] [Email: ${decodedEmail}]`,
+    );
     return new Error('Invalid or expired email verification token');
   }
 
   const updatedUser = await updateUser(emailVerificationData.userId, { emailVerified: true });
   if (!updatedUser) {
-    logger.warn(`[verifyEmail] [User not found] [Email: ${email}]`);
-    return new Error('User not found');
+    logger.warn(`[verifyEmail] [User update failed] [Email: ${decodedEmail}]`);
+    return new Error('Failed to update user verification status');
   }
 
   await deleteTokens({ token: emailVerificationData.token });
-  logger.info(`[verifyEmail] Email verification successful. [Email: ${email}]`);
-  return { message: 'Email verification was successful' };
+  logger.info(`[verifyEmail] Email verification successful [Email: ${decodedEmail}]`);
+  return { message: 'Email verification was successful', status: 'success' };
 };
-
 /**
  * Register a new user.
  * @param {MongoUser} user <email, password, name, username>
@@ -207,29 +226,6 @@ const registerUser = async (user, additionalData = {}) => {
       });
     } else {
       await updateUser(newUserId, { emailVerified: true });
-    }
-
-    // Check if CHECK_BALANCE is true before adding balance !WORKS ONLY FOR EMAIL or manual, NOT OPENID!
-    if (process.env.CHECK_BALANCE === 'true') {
-      const resetBalanceAmount = process.env.RESET_BALANCE_AMOUNT;
-
-      if (!resetBalanceAmount) {
-        logger.error('RESET_BALANCE_AMOUNT is not set in the .env file!');
-        return { status: 500, message: 'Balance amount not configured' };
-      }
-
-      const command = `node ${path.resolve(
-        'config/add-balance.js',
-      )} ${email} ${resetBalanceAmount}`;
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          logger.error('Error adding balance:', error.message);
-          logger.error(stderr);
-        } else {
-          logger.info('Balance added successfully for user:', email);
-          logger.info(stdout);
-        }
-      });
     }
 
     return { status: 200, message: genericVerificationMessage };

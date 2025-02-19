@@ -2,8 +2,8 @@ import { useRecoilState } from 'recoil';
 import * as Select from '@ariakit/react/select';
 import { Fragment, useState, memo } from 'react';
 import { FileText, LogOut } from 'lucide-react';
-import { useGetUserBalance, useGetStartupConfig } from 'librechat-data-provider/react-query';
 import { LinkIcon, GearIcon, DropdownMenuSeparator } from '~/components';
+import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import FilesView from '~/components/Chat/Input/Files/FilesView';
 import { useAuthContext } from '~/hooks/AuthContext';
 import useAvatar from '~/hooks/Messages/useAvatar';
@@ -80,9 +80,9 @@ function AccountSettings() {
           !isNaN(parseFloat(balanceQuery.data)) && (
           <>
             <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {`Balance: ${(parseFloat(balanceQuery.data) / 1_000_000)
+              {localize('com_nav_balance')}: ${(parseFloat(balanceQuery.data) / 1_000_000)
                 .toFixed(2)
-                .replace('.', ',')} $`}
+                .replace('.', ',')} $
             </div>
             <DropdownMenuSeparator />
           </>

@@ -131,7 +131,7 @@ function Speech() {
         updateSetting(key, value);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [data]);
 
   logger.log({ sttExternal, ttsExternal });

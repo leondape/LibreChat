@@ -33,7 +33,7 @@ export default function useLocalStorage<T>(key: string, defaultValue: T): [T, (v
     return () => {
       window.removeEventListener('storage', handler);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const setValueWrap = (value: T) => {

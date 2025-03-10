@@ -56,7 +56,6 @@ const initializeFakeClient = (apiKey, options, fakeMessages) => {
   let TestClient = new FakeClient(apiKey);
   TestClient.options = options;
   TestClient.abortController = { abort: jest.fn() };
-  TestClient.saveMessageToDatabase = jest.fn();
   TestClient.loadHistory = jest
     .fn()
     .mockImplementation((conversationId, parentMessageId = null) => {

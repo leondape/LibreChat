@@ -10,6 +10,7 @@ const {
   GoogleSearchAPI,
   // Structured Tools
   DALLE3,
+  FluxAPI,
   OpenWeather,
   StructuredSD,
   StructuredACS,
@@ -17,11 +18,6 @@ const {
   StructuredWolfram,
   createYouTubeTools,
   TavilySearchResults,
-  YouTubeTool,
-  MovieTickets,
-  BootcampUtils,
-  HelpdeskUtils,
-  FluxAPI,
 } = require('../');
 const { primeFiles: primeCodeFiles } = require('~/server/services/Files/Code/process');
 const { createFileSearchTool, primeFiles: primeSearchFiles } = require('./fileSearch');
@@ -187,6 +183,7 @@ const loadTools = async ({
   returnMap = false,
 }) => {
   const toolConstructors = {
+    flux: FluxAPI,
     calculator: Calculator,
     google: GoogleSearchAPI,
     open_weather: OpenWeather,
@@ -194,12 +191,7 @@ const loadTools = async ({
     'stable-diffusion': StructuredSD,
     'azure-ai-search': StructuredACS,
     traversaal_search: TraversaalSearch,
-    youtube: YouTubeTool,
-    ticketing: MovieTickets,
-    'bootcamp-utils': BootcampUtils,
-    'helpdesk-utils': HelpdeskUtils,
     tavily_search_results_json: TavilySearchResults,
-    flux: FluxAPI,
   };
 
   const customConstructors = {
@@ -240,22 +232,11 @@ const loadTools = async ({
   };
 
   const toolOptions = {
-    serpapi: { location: 'Austin,Texas,United States', hl: 'en', gl: 'us' },
+    flux: imageGenOptions,
     dalle: imageGenOptions,
     'stable-diffusion': imageGenOptions,
-    'flux': imageGenOptions,
+    serpapi: { location: 'Austin,Texas,United States', hl: 'en', gl: 'us' },
   };
-
-  const toolAuthFields = {};
-  toolAuthFields['flux'] = ['FLUX_API_KEY'];
-
-  availableTools.forEach((tool) => {
-    if (customConstructors[tool.pluginKey]) {
-      return;
-    }
-
-    toolAuthFields[tool.pluginKey] = tool.authConfig.map((auth) => auth.authField);
-  });
 
   const toolContextMap = {};
   const remainingTools = [];

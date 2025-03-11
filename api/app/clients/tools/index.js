@@ -15,7 +15,6 @@ const YouTubeTool = require('./structured/YouTube');
 const MovieTickets = require('./structured/MovieTickets');
 const BootcampUtils = require('./structured/BootcampUtils');
 const HelpdeskUtils = require('./structured/HelpdeskUtils');
-const FluxAPI = require('./structured/FluxAPI');
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};

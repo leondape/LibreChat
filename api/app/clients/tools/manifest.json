@@ -166,6 +166,27 @@
     ]
   },
   {
+    "name": "L9-Ticketing-Plugin",
+    "pluginKey": "ticketing",
+    "description": "Request movie tickets for employees in Germany and Austria.",
+    "icon": "https://cdn.vectorstock.com/i/1000v/47/67/movie-icon-vector-23534767.jpg",
+    "authConfig": []
+  },
+  {
+    "name": "Bootcamp-Utils",
+    "pluginKey": "bootcamp-utils",
+    "description": "Internal system tool for educational tracking.",
+    "icon": "https://cdn-icons-png.flaticon.com/512/0/128.png",
+    "authConfig": []
+  },
+  {
+    "name": "Helpdesk-Utils",
+    "pluginKey": "helpdesk-utils",
+    "description": "Internes System-Tool für Helpdesk-Feedback und Bewertungen.",
+    "icon": "https://cdn-icons-png.flaticon.com/512/0/128.png",
+    "authConfig": []
+  },
+  {
     "name": "Flux",
     "pluginKey": "flux",
     "description": "Generate images using text with the Flux API.",

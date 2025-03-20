@@ -166,20 +166,6 @@
     ]
   },
   {
-    "name": "Flux",
-    "pluginKey": "flux",
-    "description": "Generate images using text with the Flux API.",
-    "icon": "https://blackforestlabs.ai/wp-content/uploads/2024/07/bfl_logo_retraced_blk.png",
-    "isAuthRequired": "true",
-    "authConfig": [
-      {
-        "authField": "FLUX_API_KEY",
-        "label": "Your Flux API Key",
-        "description": "Provide your Flux API key from your user profile."
-      }
-    ]
-  },
-  {
     "name": "L9-Ticketing-Plugin",
     "pluginKey": "ticketing",
     "description": "Request movie tickets for employees in Germany and Austria.",
@@ -199,5 +185,19 @@
     "description": "Internes System-Tool für Helpdesk-Feedback und Bewertungen.",
     "icon": "https://cdn-icons-png.flaticon.com/512/0/128.png",
     "authConfig": []
+  },
+  {
+    "name": "Flux",
+    "pluginKey": "flux",
+    "description": "Generate images using text with the Flux API.",
+    "icon": "https://blackforestlabs.ai/wp-content/uploads/2024/07/bfl_logo_retraced_blk.png",
+    "isAuthRequired": "true",
+    "authConfig": [
+      {
+        "authField": "FLUX_API_KEY",
+        "label": "Your Flux API Key",
+        "description": "Provide your Flux API key from your user profile."
+      }
+    ]
   }
 ]

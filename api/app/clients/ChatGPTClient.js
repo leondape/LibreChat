@@ -1,4 +1,4 @@
-const Keyv = require('keyv');
+const { Keyv } = require('keyv');
 const crypto = require('crypto');
 const { CohereClient } = require('cohere-ai');
 const { fetchEventSource } = require('@waylaidwanderer/fetch-event-source');

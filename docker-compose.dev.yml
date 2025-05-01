@@ -30,6 +30,19 @@ services:
   rag_api:
     container_name: rag_api_dev
     image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+  metrics:
+    image: ghcr.io/virtuos/librechat_exporter:main
+    depends_on:
+      - mongodb
+    # ports:
+    #   - "8000:8000"
+    restart: unless-stopped
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
       
 
 networks:

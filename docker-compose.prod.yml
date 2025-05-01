@@ -20,7 +20,19 @@ services:
     networks:
       - proxy
       - default
-      
+  metrics:
+    image: ghcr.io/virtuos/librechat_exporter:main
+    depends_on:
+      - mongodb
+    # ports:
+    #   - "8000:8000"
+    restart: unless-stopped
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
 
 networks:
   proxy:

@@ -80,9 +80,8 @@ function AccountSettings() {
           !isNaN(parseFloat(balanceQuery.data)) && (
           <>
             <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {localize('com_nav_balance')}: ${(parseFloat(balanceQuery.data) / 1_000_000)
-                .toFixed(2)
-                .replace('.', ',')} $
+              {localize('com_nav_balance')}:{' '}
+              {(parseFloat(balanceQuery.data) / 1_000_000).toFixed(2).replace('.', ',')} $
             </div>
             <DropdownMenuSeparator />
           </>

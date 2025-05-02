@@ -30,7 +30,7 @@ describe('AccountSettings', () => {
 
     // Ensure the startup config enables balance checking.
     (useGetStartupConfig as jest.Mock).mockReturnValue({
-      data: { checkBalance: true },
+      data: { balance: { enabled: true } },
       isLoading: false,
     });
 
@@ -48,7 +48,7 @@ describe('AccountSettings', () => {
     });
   });
 
-  it('should display balance in correct format (e.g. "$42,42 $") in the dropdown', async () => {
+  it('should display balance in correct format (e.g. "42,42 $") in the dropdown', async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
@@ -71,7 +71,7 @@ describe('AccountSettings', () => {
     //
     // Since the localized label might change in future, we simply wait for the
     // formatted number string to appear.
-    const balanceText = await screen.findByText(/\$42,42\s?\$/);
+    const balanceText = await screen.findByText(/42,42 \$/);
     expect(balanceText).toBeInTheDocument();
   });
 });

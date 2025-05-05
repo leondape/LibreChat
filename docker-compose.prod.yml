@@ -21,7 +21,7 @@ services:
       - proxy
       - default
   metrics:
-    image: ghcr.io/virtuos/librechat_exporter:main
+    image: registry.leoninestudios.com/l9ai/chat-services/librechat_exporter:latest
     depends_on:
       - mongodb
     # ports:

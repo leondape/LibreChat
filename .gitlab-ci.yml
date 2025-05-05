@@ -32,7 +32,7 @@ build:
   only:
     - tags
     - main
-    - develop # added comment for commit 
+    # - develop # added comment for commit 
     
 deploy-prod:
   stage: deploy

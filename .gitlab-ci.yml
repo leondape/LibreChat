@@ -20,7 +20,6 @@ variables:
 
 before_script:
   - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  - echo $DEPLOY_TOKEN_PASSWORD_METRICS | docker login -u $DEPLOY_TOKEN_USER_METRICS --password-stdin $LEONINE_REGISTRY
 
 build:
   stage: build
@@ -92,6 +91,7 @@ deploy-dev:
           $DEPLOY_USER@$DEPLOY_SERVER_DEV \
           "export COMMIT_TAG=$COMMIT_TAG && \
           echo \"$CI_REGISTRY_PASSWORD\" | docker login -u \"$CI_REGISTRY_USER\" --password-stdin \"$CI_REGISTRY\" && \
+          echo \"$DEPLOY_TOKEN_PASSWORD_METRICS\" | docker login -u \"$DEPLOY_TOKEN_USER_METRICS\" --password-stdin \"$LEONINE_REGISTRY\" && \
           cd \"$DEPLOY_DIR_DEV\" && \
           docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
 

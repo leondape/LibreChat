@@ -14,11 +14,13 @@ variables:
   DEPLOY_DIR_PROD: /deployments/leochat
   DEPLOY_DIR_DEV: /development/leochat_dev
   LEONINE_REGISTRY: registry.leoninestudios.com
+  DEPLOY_TOKEN_USER_METRICS: $DEPLOY_TOKEN_USER_METRICS
+  DEPLOY_TOKEN_PASSWORD_METRICSD: $DEPLOY_TOKEN_PASSWORD_METRICS
   # CI_VERBOSE: "true"
 
 before_script:
   - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-  - echo $LEONINE_REGISTRY_PASSWORD | docker login -u $DEPLOY_TOKEN --password-stdin registry.leoninestudios.com
+  - echo $DEPLOY_TOKEN_PASSWORD_METRICS | docker login -u $DEPLOY_TOKEN_USER_METRICS --password-stdin $LEONINE_REGISTRY
 
 build:
   stage: build

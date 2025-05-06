@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
   prometheus:
     image: prom/prometheus
+    user: "${UID}:${GID}"
     volumes:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
       - "./prometheus_data:/prometheus"

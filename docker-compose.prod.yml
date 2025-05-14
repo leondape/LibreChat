@@ -24,20 +24,12 @@ services:
     ports:
       - "27017:27017"
   metrics:
-    image: registry.leoninestudios.com/l9ai/chat-services/librechat_exporter:latest
+    image: ghcr.io/virtuos/librechat_exporter:main
     depends_on:
       - mongodb
-    # ports:
-    #   - "8000:8000"
-    restart: unless-stopped
-  prometheus:
-    image: prom/prometheus
-    user: "${UID}:${GID}"
-    volumes:
-      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "./prometheus_data:/prometheus"
     ports:
-      - 9090:9090
+      - "8000:8000"
+    restart: unless-stopped
 
 networks:
   proxy:

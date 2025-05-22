@@ -55,7 +55,6 @@ deploy-prod:
     # Deploy steps
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/docker-compose.yml
     - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.prod.yml $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/docker-compose.prod.yml
-    - scp -P 35039 -o StrictHostKeyChecking=no launch.sh $DEPLOY_USER@$DEPLOY_SERVER_PROD:$DEPLOY_DIR_PROD/launch.sh
     - |
       ssh -p 35039 $DEPLOY_USER@$DEPLOY_SERVER_PROD \
       "export COMMIT_TAG=$COMMIT_TAG && \

@@ -6,7 +6,7 @@ services:
     image: ${COMMIT_TAG}
     ports: !reset []
     container_name: LeoChat
-    command: sh -c "npm run backend & node config/cron.js" # schedule cron for balance reset
+    command: sh -c "npm run backend" # schedule cron for balance reset
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
 # TRAEFIK Config

@@ -65,7 +65,6 @@ export default function FileRow({
     if (files.every((file) => file.progress === 1)) {
       setFilesLoading(false);
     }
-
   }, [files]);
 
   if (files.length === 0) {
@@ -75,20 +74,20 @@ export default function FileRow({
   const renderFiles = () => {
     const rowStyle = isRTL
       ? {
-        display: 'flex',
-        flexDirection: 'row-reverse',
-        flexWrap: 'wrap',
-        gap: '4px',
-        width: '100%',
-        maxWidth: '100%',
-      }
+          display: 'flex',
+          flexDirection: 'row-reverse',
+          flexWrap: 'wrap',
+          gap: '4px',
+          width: '100%',
+          maxWidth: '100%',
+        }
       : {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '4px',
-        width: '100%',
-        maxWidth: '100%',
-      };
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4px',
+          width: '100%',
+          maxWidth: '100%',
+        };
 
     return (
       <div style={rowStyle as React.CSSProperties}>

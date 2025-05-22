@@ -15,6 +15,9 @@ jest.mock('./Config/loadCustomConfig', () => {
     Promise.resolve({
       registration: { socialLogins: ['testLogin'] },
       fileStrategy: 'testStrategy',
+      balance: {
+        enabled: true,
+      },
     }),
   );
 });
@@ -42,6 +45,12 @@ jest.mock('./ToolService', () => ({
       },
     },
   }),
+}));
+jest.mock('./start/turnstile', () => ({
+  loadTurnstileConfig: jest.fn(() => ({
+    siteKey: 'default-site-key',
+    options: {},
+  })),
 }));
 
 const azureGroups = [
@@ -83,6 +92,10 @@ const azureGroups = [
 
 describe('AppService', () => {
   let app;
+  const mockedTurnstileConfig = {
+    siteKey: 'default-site-key',
+    options: {},
+  };
 
   beforeEach(() => {
     app = { locals: {} };
@@ -104,6 +117,7 @@ describe('AppService', () => {
         sidePanel: true,
         presets: true,
       }),
+      turnstileConfig: mockedTurnstileConfig,
       modelSpecs: undefined,
       availableTools: {
         ExampleTool: {
@@ -124,6 +138,9 @@ describe('AppService', () => {
       imageOutputType: expect.any(String),
       fileConfig: undefined,
       secureImageLinks: undefined,
+      balance: { enabled: true },
+      filteredTools: undefined,
+      includedTools: undefined,
     });
   });
 
@@ -341,9 +358,6 @@ describe('AppService', () => {
     process.env.FILE_UPLOAD_USER_MAX = 'initialUserMax';
     process.env.FILE_UPLOAD_USER_WINDOW = 'initialUserWindow';
 
-    // Mock a custom configuration without specific rate limits
-    require('./Config/loadCustomConfig').mockImplementationOnce(() => Promise.resolve({}));
-
     await AppService(app);
 
     // Verify that process.env falls back to the initial values
@@ -404,9 +418,6 @@ describe('AppService', () => {
     process.env.IMPORT_USER_MAX = 'initialUserMax';
     process.env.IMPORT_USER_WINDOW = 'initialUserWindow';
 
-    // Mock a custom configuration without specific rate limits
-    require('./Config/loadCustomConfig').mockImplementationOnce(() => Promise.resolve({}));
-
     await AppService(app);
 
     // Verify that process.env falls back to the initial values
@@ -445,13 +456,27 @@ describe('AppService updating app.locals and issuing warnings', () => {
     expect(app.locals.availableTools).toBeDefined();
     expect(app.locals.fileStrategy).toEqual(FileSources.local);
     expect(app.locals.socialLogins).toEqual(defaultSocialLogins);
+    expect(app.locals.balance).toEqual(
+      expect.objectContaining({
+        enabled: false,
+        startBalance: undefined,
+      }),
+    );
   });
 
   it('should update app.locals with values from loadCustomConfig', async () => {
-    // Mock loadCustomConfig to return a specific config object
+    // Mock loadCustomConfig to return a specific config object with a complete balance config
     const customConfig = {
       fileStrategy: 'firebase',
       registration: { socialLogins: ['testLogin'] },
+      balance: {
+        enabled: false,
+        startBalance: 5000,
+        autoRefillEnabled: true,
+        refillIntervalValue: 15,
+        refillIntervalUnit: 'hours',
+        refillAmount: 5000,
+      },
     };
     require('./Config/loadCustomConfig').mockImplementationOnce(() =>
       Promise.resolve(customConfig),
@@ -464,6 +489,7 @@ describe('AppService updating app.locals and issuing warnings', () => {
     expect(app.locals.availableTools).toBeDefined();
     expect(app.locals.fileStrategy).toEqual(customConfig.fileStrategy);
     expect(app.locals.socialLogins).toEqual(customConfig.registration.socialLogins);
+    expect(app.locals.balance).toEqual(customConfig.balance);
   });
 
   it('should apply the assistants endpoint configuration correctly to app.locals', async () => {
@@ -511,7 +537,7 @@ describe('AppService updating app.locals and issuing warnings', () => {
     const { logger } = require('~/config');
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
-        'The \'assistants\' endpoint has both \'supportedIds\' and \'excludedIds\' defined.',
+        "The 'assistants' endpoint has both 'supportedIds' and 'excludedIds' defined.",
       ),
     );
   });
@@ -533,7 +559,7 @@ describe('AppService updating app.locals and issuing warnings', () => {
     const { logger } = require('~/config');
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
-        'The \'assistants\' endpoint has both \'privateAssistants\' and \'supportedIds\' or \'excludedIds\' defined.',
+        "The 'assistants' endpoint has both 'privateAssistants' and 'supportedIds' or 'excludedIds' defined.",
       ),
     );
   });

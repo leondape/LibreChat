@@ -19,7 +19,6 @@ const useFileDeletion = ({
   assistant_id?: string;
   tool_resource?: EToolResources;
 }) => {
-
   const [_batch, setFileDeleteBatch] = useState<t.BatchFile[]>([]);
   const setFilesToDelete = useSetFilesToDelete();
 
@@ -47,6 +46,7 @@ const useFileDeletion = ({
     [mutateAsync],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedDelete = useCallback(debounce(executeBatchDelete, 1000), []);
 
   useEffect(() => {
@@ -108,22 +108,33 @@ const useFileDeletion = ({
 
   const deleteFiles = useCallback(
     ({ files, setFiles }: { files: ExtendedFile[] | t.TFile[]; setFiles?: FileMapSetter }) => {
-      const batchFiles = files.map((_file) => {
-        const { file_id, embedded, filepath = '', source = FileSources.local } = _file;
+      const batchFiles: t.BatchFile[] = [];
+      for (const _file of files) {
+        const {
+          file_id,
+          embedded,
+          temp_file_id,
+          filepath = '',
+          source = FileSources.local,
+        } = _file;
 
-        return {
+        batchFiles.push({
           source,
           file_id,
           filepath,
-          embedded,
-        };
-      });
+          temp_file_id,
+          embedded: embedded ?? false,
+        });
+      }
 
       if (setFiles) {
         setFiles((currentFiles) => {
           const updatedFiles = new Map(currentFiles);
           batchFiles.forEach((file) => {
             updatedFiles.delete(file.file_id);
+            if (file.temp_file_id) {
+              updatedFiles.delete(file.temp_file_id);
+            }
           });
           const filesToUpdate = Object.fromEntries(updatedFiles);
           setFilesToDelete(filesToUpdate);

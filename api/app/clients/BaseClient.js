@@ -11,9 +11,9 @@ const {
   Constants,
 } = require('librechat-data-provider');
 const { getMessages, saveMessage, updateMessage, saveConvo, getConvo } = require('~/models');
-const { addSpaceIfNeeded, isEnabled } = require('~/server/utils');
+const { checkBalance } = require('~/models/balanceMethods');
 const { truncateToolCallOutputs } = require('./prompts');
-const checkBalance = require('~/models/checkBalance');
+const { addSpaceIfNeeded } = require('~/server/utils');
 const { getFiles } = require('~/models/File');
 const TextStream = require('./TextStream');
 const { logger } = require('~/config');
@@ -28,15 +28,10 @@ class BaseClient {
       month: 'long',
       day: 'numeric',
     });
-    this.fetch = this.fetch.bind(this);
     /** @type {boolean} */
     this.skipSaveConvo = false;
     /** @type {boolean} */
     this.skipSaveUserMessage = false;
-    /** @type {ClientDatabaseSavePromise} */
-    this.userMessagePromise;
-    /** @type {ClientDatabaseSavePromise} */
-    this.responsePromise;
     /** @type {string} */
     this.user;
     /** @type {string} */
@@ -68,15 +63,15 @@ class BaseClient {
   }
 
   setOptions() {
-    throw new Error('Method \'setOptions\' must be implemented.');
+    throw new Error("Method 'setOptions' must be implemented.");
   }
 
   async getCompletion() {
-    throw new Error('Method \'getCompletion\' must be implemented.');
+    throw new Error("Method 'getCompletion' must be implemented.");
   }
 
   async sendCompletion() {
-    throw new Error('Method \'sendCompletion\' must be implemented.');
+    throw new Error("Method 'sendCompletion' must be implemented.");
   }
 
   getSaveOptions() {
@@ -242,11 +237,11 @@ class BaseClient {
     const userMessage = opts.isEdited
       ? this.currentMessages[this.currentMessages.length - 2]
       : this.createUserMessage({
-        messageId: userMessageId,
-        parentMessageId,
-        conversationId,
-        text: message,
-      });
+          messageId: userMessageId,
+          parentMessageId,
+          conversationId,
+          text: message,
+        });
 
     if (typeof opts?.getReqData === 'function') {
       opts.getReqData({
@@ -366,17 +361,14 @@ class BaseClient {
    *  context: TMessage[],
    *  remainingContextTokens: number,
    *  messagesToRefine: TMessage[],
-   *  summaryIndex: number,
-   * }>} An object with four properties: `context`, `summaryIndex`, `remainingContextTokens`, and `messagesToRefine`.
+   * }>} An object with three properties: `context`, `remainingContextTokens`, and `messagesToRefine`.
    *    `context` is an array of messages that fit within the token limit.
-   *    `summaryIndex` is the index of the first message in the `messagesToRefine` array.
    *    `remainingContextTokens` is the number of tokens remaining within the limit after adding the messages to the context.
    *    `messagesToRefine` is an array of messages that were not added to the context because they would have exceeded the token limit.
    */
   async getMessagesWithinTokenLimit({ messages: _messages, maxContextTokens, instructions }) {
     // Every reply is primed with <|start|>assistant<|message|>, so we
     // start with 3 tokens for the label after all messages have been counted.
-    let summaryIndex = -1;
     let currentTokenCount = 3;
     const instructionsTokenCount = instructions?.tokenCount ?? 0;
     let remainingContextTokens =
@@ -409,14 +401,12 @@ class BaseClient {
     }
 
     const prunedMemory = messages;
-    summaryIndex = prunedMemory.length - 1;
     remainingContextTokens -= currentTokenCount;
 
     return {
       context: context.reverse(),
       remainingContextTokens,
       messagesToRefine: prunedMemory,
-      summaryIndex,
     };
   }
 
@@ -459,7 +449,7 @@ class BaseClient {
 
     let orderedWithInstructions = this.addInstructions(orderedMessages, instructions);
 
-    let { context, remainingContextTokens, messagesToRefine, summaryIndex } =
+    let { context, remainingContextTokens, messagesToRefine } =
       await this.getMessagesWithinTokenLimit({
         messages: orderedWithInstructions,
         instructions,
@@ -529,7 +519,7 @@ class BaseClient {
     }
 
     // Make sure to only continue summarization logic if the summary message was generated
-    shouldSummarize = summaryMessage && shouldSummarize;
+    shouldSummarize = summaryMessage != null && shouldSummarize === true;
 
     logger.debug('[BaseClient] Context Count (2/2)', {
       remainingContextTokens,
@@ -539,17 +529,18 @@ class BaseClient {
     /** @type {Record<string, number> | undefined} */
     let tokenCountMap;
     if (buildTokenMap) {
-      tokenCountMap = orderedWithInstructions.reduce((map, message, index) => {
+      const currentPayload = shouldSummarize ? orderedWithInstructions : context;
+      tokenCountMap = currentPayload.reduce((map, message, index) => {
         const { messageId } = message;
         if (!messageId) {
           return map;
         }
 
-        if (shouldSummarize && index === summaryIndex && !usePrevSummary) {
+        if (shouldSummarize && index === messagesToRefine.length - 1 && !usePrevSummary) {
           map.summaryMessage = { ...summaryMessage, messageId, tokenCount: summaryTokenCount };
         }
 
-        map[messageId] = orderedWithInstructions[index].tokenCount;
+        map[messageId] = currentPayload[index].tokenCount;
         return map;
       }, {});
     }
@@ -568,6 +559,8 @@ class BaseClient {
   }
 
   async sendMessage(message, opts = {}) {
+    /** @type {Promise<TMessage>} */
+    let userMessagePromise;
     const { user, head, isEdited, conversationId, responseMessageId, saveOptions, userMessage } =
       await this.handleStartMethods(message, opts);
 
@@ -629,17 +622,18 @@ class BaseClient {
     }
 
     if (!isEdited && !this.skipSaveUserMessage) {
-      this.userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
+      userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
       this.savedMessageIds.add(userMessage.messageId);
       if (typeof opts?.getReqData === 'function') {
         opts.getReqData({
-          userMessagePromise: this.userMessagePromise,
+          userMessagePromise,
         });
       }
     }
 
+    const balance = this.options.req?.app?.locals?.balance;
     if (
-      isEnabled(process.env.CHECK_BALANCE) &&
+      balance?.enabled &&
       supportsBalanceCheck[this.options.endpointType ?? this.options.endpoint]
     ) {
       await checkBalance({
@@ -658,7 +652,9 @@ class BaseClient {
 
     /** @type {string|string[]|undefined} */
     const completion = await this.sendCompletion(payload, opts);
-    this.abortController.requestCompleted = true;
+    if (this.abortController) {
+      this.abortController.requestCompleted = true;
+    }
 
     /** @type {TMessage} */
     const responseMessage = {
@@ -679,7 +675,8 @@ class BaseClient {
       responseMessage.text = addSpaceIfNeeded(generation) + completion;
     } else if (
       Array.isArray(completion) &&
-      isParamEndpoint(this.options.endpoint, this.options.endpointType)
+      (this.clientName === EModelEndpoint.agents ||
+        isParamEndpoint(this.options.endpoint, this.options.endpointType))
     ) {
       responseMessage.text = '';
       responseMessage.content = completion;
@@ -705,7 +702,13 @@ class BaseClient {
       if (usage != null && Number(usage[this.outputTokensKey]) > 0) {
         responseMessage.tokenCount = usage[this.outputTokensKey];
         completionTokens = responseMessage.tokenCount;
-        await this.updateUserMessageTokenCount({ usage, tokenCountMap, userMessage, opts });
+        await this.updateUserMessageTokenCount({
+          usage,
+          tokenCountMap,
+          userMessage,
+          userMessagePromise,
+          opts,
+        });
       } else {
         responseMessage.tokenCount = this.getTokenCountForResponse(responseMessage);
         completionTokens = responseMessage.tokenCount;
@@ -714,8 +717,8 @@ class BaseClient {
       await this.recordTokenUsage({ promptTokens, completionTokens, usage });
     }
 
-    if (this.userMessagePromise) {
-      await this.userMessagePromise;
+    if (userMessagePromise) {
+      await userMessagePromise;
     }
 
     if (this.artifactPromises) {
@@ -730,7 +733,11 @@ class BaseClient {
       }
     }
 
-    this.responsePromise = this.saveMessageToDatabase(responseMessage, saveOptions, user);
+    responseMessage.databasePromise = this.saveMessageToDatabase(
+      responseMessage,
+      saveOptions,
+      user,
+    );
     this.savedMessageIds.add(responseMessage.messageId);
     delete responseMessage.tokenCount;
     return responseMessage;
@@ -751,9 +758,16 @@ class BaseClient {
    * @param {StreamUsage} params.usage
    * @param {Record<string, number>} params.tokenCountMap
    * @param {TMessage} params.userMessage
+   * @param {Promise<TMessage>} params.userMessagePromise
    * @param {object} params.opts
    */
-  async updateUserMessageTokenCount({ usage, tokenCountMap, userMessage, opts }) {
+  async updateUserMessageTokenCount({
+    usage,
+    tokenCountMap,
+    userMessage,
+    userMessagePromise,
+    opts,
+  }) {
     /** @type {boolean} */
     const shouldUpdateCount =
       this.calculateCurrentTokenCount != null &&
@@ -789,7 +803,7 @@ class BaseClient {
       Note: we update the user message to be sure it gets the calculated token count;
       though `AskController` saves the user message, EditController does not
     */
-    await this.userMessagePromise;
+    await userMessagePromise;
     await this.updateMessageInDatabase({
       messageId: userMessage.messageId,
       tokenCount: userMessageTokenCount,
@@ -855,7 +869,7 @@ class BaseClient {
     }
 
     const savedMessage = await saveMessage(
-      this.options.req,
+      this.options?.req,
       {
         ...message,
         endpoint: this.options.endpoint,
@@ -879,16 +893,17 @@ class BaseClient {
     const existingConvo =
       this.fetchedConvo === true
         ? null
-        : await getConvo(this.options.req?.user?.id, message.conversationId);
+        : await getConvo(this.options?.req?.user?.id, message.conversationId);
 
     const unsetFields = {};
+    const exceptions = new Set(['spec', 'iconURL']);
     if (existingConvo != null) {
       this.fetchedConvo = true;
       for (const key in existingConvo) {
         if (!key) {
           continue;
         }
-        if (excludedKeys.has(key)) {
+        if (excludedKeys.has(key) && !exceptions.has(key)) {
           continue;
         }
 
@@ -898,7 +913,7 @@ class BaseClient {
       }
     }
 
-    const conversation = await saveConvo(this.options.req, fieldsToKeep, {
+    const conversation = await saveConvo(this.options?.req, fieldsToKeep, {
       context: 'api/app/clients/BaseClient.js - saveMessageToDatabase #saveConvo',
       unsetFields,
     });

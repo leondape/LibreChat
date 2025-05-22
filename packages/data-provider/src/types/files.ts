@@ -4,6 +4,7 @@ export enum FileSources {
   local = 'local',
   firebase = 'firebase',
   azure = 'azure',
+  azure_blob = 'azure_blob',
   openai = 'openai',
   s3 = 's3',
   vectordb = 'vectordb',
@@ -130,6 +131,7 @@ export type BatchFile = {
   filepath: string;
   embedded: boolean;
   source: FileSources;
+  temp_file_id?: string;
 };
 
 export type DeleteFilesBody = {

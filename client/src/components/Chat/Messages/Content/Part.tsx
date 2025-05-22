@@ -7,17 +7,13 @@ import {
 } from 'librechat-data-provider';
 import { memo } from 'react';
 import type { TMessageContentParts, TAttachment } from 'librechat-data-provider';
+import { OpenAIImageGen, EmptyText, Reasoning, ExecuteCode, AgentUpdate, Text } from './Parts';
 import { ErrorMessage } from './MessageContent';
-import AgentUpdate from './Parts/AgentUpdate';
-import ExecuteCode from './Parts/ExecuteCode';
 import RetrievalCall from './RetrievalCall';
-import Reasoning from './Parts/Reasoning';
-import EmptyText from './Parts/EmptyText';
 import CodeAnalyze from './CodeAnalyze';
 import Container from './Container';
 import ToolCall from './ToolCall';
 import ImageGen from './ImageGen';
-import Text from './Parts/Text';
 import Image from './Image';
 
 type PartProps = {
@@ -38,7 +34,13 @@ const Part = memo(
     if (part.type === ContentTypes.ERROR) {
       return (
         <ErrorMessage
-          text={part[ContentTypes.ERROR] ?? part[ContentTypes.TEXT]?.value}
+          text={
+            part[ContentTypes.ERROR] ??
+            (typeof part[ContentTypes.TEXT] === 'string'
+              ? part[ContentTypes.TEXT]
+              : part.text?.value) ??
+            ''
+          }
           className="my-2"
         />
       );
@@ -88,7 +90,20 @@ const Part = memo(
             args={typeof toolCall.args === 'string' ? toolCall.args : ''}
             output={toolCall.output ?? ''}
             initialProgress={toolCall.progress ?? 0.1}
+            attachments={attachments}
+          />
+        );
+      } else if (
+        isToolCall &&
+        (toolCall.name === 'image_gen_oai' || toolCall.name === 'image_edit_oai')
+      ) {
+        return (
+          <OpenAIImageGen
+            initialProgress={toolCall.progress ?? 0.1}
             isSubmitting={isSubmitting}
+            toolName={toolCall.name}
+            args={typeof toolCall.args === 'string' ? toolCall.args : ''}
+            output={toolCall.output ?? ''}
             attachments={attachments}
           />
         );
@@ -112,7 +127,6 @@ const Part = memo(
             initialProgress={toolCall.progress ?? 0.1}
             code={code_interpreter.input}
             outputs={code_interpreter.outputs ?? []}
-            isSubmitting={isSubmitting}
           />
         );
       } else if (

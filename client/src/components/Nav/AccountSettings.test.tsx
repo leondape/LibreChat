@@ -34,9 +34,12 @@ describe('AccountSettings', () => {
       isLoading: false,
     });
 
-    // Provide a valid balance.
+    // Provide a valid balance with correct data structure.
     (useGetUserBalance as jest.Mock).mockReturnValue({
-      data: '42420000',
+      data: {
+        tokenCredits: 42420000,
+        autoRefillEnabled: false,
+      },
       isLoading: false,
     });
 
@@ -61,13 +64,9 @@ describe('AccountSettings', () => {
     const navUser = screen.getByTestId('nav-user');
     fireEvent.click(navUser);
 
-    // The balance is rendered as:
-    //   {localize('com_nav_balance')}: ${ (parseFloat(balanceQuery.data) / 1_000_000)
-    //             .toFixed(2)
-    //             .replace('.', ',') } $
-    //
-    // With our mocks the returned text (after localization) becomes:
-    //   "com_nav_balance: $42,42 $"
+    // The balance is rendered using Intl.NumberFormat('de-DE') which formats
+    // the number (42420000 / 1_000_000 = 42.42) as "42,42" in German locale
+    // The final format becomes: "com_nav_balance: 42,42 $"
     //
     // Since the localized label might change in future, we simply wait for the
     // formatted number string to appear.

@@ -12,8 +12,8 @@ const cleanupPreset = ({ preset: _preset }: TCleanupPreset): TPreset => {
     console.error(`Unknown endpoint ${endpoint}`, _preset);
     return {
       endpoint: null,
-      presetId: _preset.presetId ?? null,
-      title: _preset.title ?? 'New Preset',
+      presetId: _preset?.presetId ?? null,
+      title: _preset?.title ?? 'New Preset',
     };
   }
 
@@ -39,11 +39,11 @@ const cleanupPreset = ({ preset: _preset }: TCleanupPreset): TPreset => {
   const parsedPreset = parseConvo({ endpoint, endpointType, conversation: preset });
 
   return {
-    presetId: _preset.presetId ?? null,
+    presetId: _preset?.presetId ?? null,
     ...parsedPreset,
     endpoint,
     endpointType,
-    title: _preset.title ?? 'New Preset',
+    title: _preset?.title ?? 'New Preset',
   } as TPreset;
 };
 

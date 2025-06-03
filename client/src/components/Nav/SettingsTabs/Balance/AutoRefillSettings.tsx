@@ -101,7 +101,14 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
       </div>
       <div className="mb-1 flex justify-between text-sm">
         <span>{localize('com_nav_balance_refill_amount')}</span>
-        <span>{refillAmount !== undefined ? refillAmount : '-'}</span>
+        <span>
+          {refillAmount !== undefined
+            ? `${new Intl.NumberFormat('de-DE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(Number(refillAmount) / 1_000_000)} $`
+            : '-'}
+        </span>
       </div>
       <div className="mb-1 flex justify-between text-sm">
         <span>{localize('com_nav_balance_interval')}</span>

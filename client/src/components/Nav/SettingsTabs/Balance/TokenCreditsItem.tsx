@@ -20,7 +20,12 @@ const TokenCreditsItem: React.FC<TokenCreditsItemProps> = ({ tokenCredits }) => 
 
       {/* Right Section: tokenCredits Value */}
       <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
-        {tokenCredits !== undefined ? tokenCredits.toFixed(2) : '0.00'}
+        {tokenCredits !== undefined
+          ? `${new Intl.NumberFormat('de-DE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(Number(tokenCredits) / 1_000_000)} $`
+          : '0,00 $'}
       </span>
     </div>
   );

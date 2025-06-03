@@ -24,8 +24,10 @@ jest.mock('./Config/loadCustomConfig', () => {
 jest.mock('./Files/Firebase/initialize', () => ({
   initializeFirebase: jest.fn(),
 }));
-jest.mock('~/models/Role', () => ({
+jest.mock('~/models', () => ({
   initializeRoles: jest.fn(),
+}));
+jest.mock('~/models/Role', () => ({
   updateAccessPermissions: jest.fn(),
 }));
 jest.mock('./ToolService', () => ({
@@ -141,6 +143,14 @@ describe('AppService', () => {
       balance: { enabled: true },
       filteredTools: undefined,
       includedTools: undefined,
+      webSearch: {
+        cohereApiKey: '${COHERE_API_KEY}',
+        firecrawlApiKey: '${FIRECRAWL_API_KEY}',
+        firecrawlApiUrl: '${FIRECRAWL_API_URL}',
+        jinaApiKey: '${JINA_API_KEY}',
+        safeSearch: 1,
+        serperApiKey: '${SERPER_API_KEY}',
+      },
     });
   });
 

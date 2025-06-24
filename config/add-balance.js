@@ -5,6 +5,7 @@ require('module-alias')({ base: path.resolve(__dirname, '..', 'api') });
 const { askQuestion, silentExit } = require('./helpers');
 const { isEnabled } = require('~/server/utils/handleText');
 const { createTransaction } = require('~/models/Transaction');
+const loadCustomConfig = require('~/server/services/Config/loadCustomConfig');
 const connect = require('./connect');
 
 (async () => {
@@ -32,15 +33,18 @@ const connect = require('./connect');
     // console.purple(`[DEBUG] Args Length: ${process.argv.length}`);
   }
 
-  if (!process.env.CHECK_BALANCE) {
+  // Load balance configuration from librechat.yaml first, then fall back to environment variables
+  const config = (await loadCustomConfig()) ?? {};
+  const balance = config.balance ?? {
+    enabled: isEnabled(process.env.CHECK_BALANCE),
+  };
+
+  if (!balance.enabled) {
     console.red(
-      'Error: CHECK_BALANCE environment variable is not set! Configure it to use it: `CHECK_BALANCE=true`',
-    );
-    silentExit(1);
-  }
-  if (isEnabled(process.env.CHECK_BALANCE) === false) {
-    console.red(
-      'Error: CHECK_BALANCE environment variable is set to `false`! Please configure: `CHECK_BALANCE=true`',
+      'Error: Balance system is not enabled! Please configure it in librechat.yaml:\n' +
+        'balance:\n' +
+        '  enabled: true\n' +
+        'Or set CHECK_BALANCE=true in .env file',
     );
     silentExit(1);
   }

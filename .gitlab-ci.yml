@@ -1,7 +1,7 @@
 image: docker:latest
 
 stages:
-  # - build
+  - build
   - deploy
 
 variables:
@@ -30,8 +30,7 @@ build:
   tags:
     - runner-01
   only:
-    - tags
-    - main
+    # - main
     - develop # added comment for commit 
     
 deploy-prod:

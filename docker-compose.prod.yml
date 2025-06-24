@@ -4,7 +4,7 @@ services:
 # LOCAL BUILD
   api:
     # image: ${COMMIT_TAG}
-    image: registry.leoninestudios.com/l9ai/chat-services/leochat:main
+    image: registry.leoninestudios.com/l9ai/chat-services/leochat:main-566fcc22
     ports: !reset []
     container_name: LeoChat
     command: sh -c "npm run backend" # schedule cron for balance reset

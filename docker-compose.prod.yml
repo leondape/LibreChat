@@ -3,7 +3,8 @@ version: '3.4'
 services:
 # LOCAL BUILD
   api:
-    image: ${COMMIT_TAG}
+    # image: ${COMMIT_TAG}
+    image: registry.leoninestudios.com/l9ai/chat-services/leochat:main
     ports: !reset []
     container_name: LeoChat
     command: sh -c "npm run backend" # schedule cron for balance reset
@@ -20,9 +21,9 @@ services:
     networks:
       - proxy
       - default
-  # mongodb:
-  #   ports:
-  #     - "27017:27017"
+  mongodb:
+    ports:
+      - "27017:27017"
   metrics:
     image: ghcr.io/virtuos/librechat_exporter:main
     depends_on:

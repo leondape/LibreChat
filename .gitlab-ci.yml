@@ -30,7 +30,7 @@ build:
   tags:
     - runner-01
   only:
-    # - main
+    - main
     - develop # added comment for commit 
     
 deploy-prod:

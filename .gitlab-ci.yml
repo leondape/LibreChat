@@ -26,14 +26,14 @@ build:
   tags:
     - runner-01
   only:
-    - wangpt
+    - main
 
 deploy-prod:
   stage: deploy
   tags: 
     - runner-01
   only:
-    - wangpt
+    - main
     
   script:
     # Pre-deploy steps

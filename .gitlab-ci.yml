@@ -1,0 +1,61 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  COMMIT_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  LATEST_TAG: $CI_REGISTRY_IMAGE:latest
+  DEPLOY_USER_MDWN: $CI_DEPLOY_USER_MDWN
+  DEPLOY_SERVER_MDWN: $CI_DEPLOY_SERVER_MDWN
+  DEPLOY_DIR_PROD_MDWN: /home/rootlessdocker/deployments/wangpt
+  CI_VERBOSE: "true"
+
+before_script:
+  - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_TAG -f Dockerfile .
+    - docker tag $IMAGE_TAG $COMMIT_TAG
+    - docker push $IMAGE_TAG
+    - docker push $COMMIT_TAG
+  tags:
+    - runner-01
+  only:
+    - wangpt
+
+deploy-prod:
+  stage: deploy
+  tags: 
+    - runner-01
+  only:
+    - wangpt
+    
+  script:
+    # Pre-deploy steps
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p 22 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+
+    # Export commit tag
+    - export COMMIT_TAG="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    
+    # # Deploy steps
+    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_MDWN@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_MDWN/docker-compose.yml
+    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.prod-mdwn.yml $DEPLOY_USER_MDWN@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_MDWN/docker-compose.prod-mdwn.yml
+    - |
+      ssh -p 22 $DEPLOY_USER_MDWN@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      export COMMIT_TAG=$COMMIT_TAG
+      eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
+      export DOCKER_HOST
+      echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+      cd $DEPLOY_DIR_PROD_MDWN
+      docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml down || true
+      docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml up -d
+      EOF
+

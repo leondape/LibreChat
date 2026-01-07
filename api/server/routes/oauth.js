@@ -46,11 +46,11 @@ const oauthHandler = async (req, res, next) => {
     ) {
       // Sync Entra ID groups from Microsoft Graph API (if enabled)
       await syncUserEntraGroupMemberships(req.user, req.user.tokenset.access_token);
-      
+
       // Sync OIDC groups from JWT token claims (if enabled)
       await syncUserOidcGroupsFromToken(req.user, req.user.tokenset);
-      
-      setOpenIDAuthTokens(req.user.tokenset, res, req.user._id.toString());
+
+      setOpenIDAuthTokens(req.user.tokenset, req, res, req.user._id.toString());
     } else {
       await setAuthTokens(req.user._id, res);
     }

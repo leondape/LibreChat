@@ -39,17 +39,23 @@ const oauthHandler = async (req, res, next) => {
     if (req.banned) {
       return;
     }
+
+    // Sync groups from OpenID provider (independent of token reuse setting)
+    // Both sync functions have their own feature flag checks internally
+    if (req.user && req.user.provider === 'openid' && req.user.tokenset) {
+      // Sync Entra ID groups from Microsoft Graph API (if enabled via USE_ENTRA_ID_FOR_PEOPLE_SEARCH)
+      await syncUserEntraGroupMemberships(req.user, req.user.tokenset.access_token);
+
+      // Sync OIDC groups from JWT token claims (if enabled via OPENID_SYNC_GROUPS_FROM_TOKEN)
+      await syncUserOidcGroupsFromToken(req.user, req.user.tokenset);
+    }
+
+    // Handle session token management (based on token reuse setting)
     if (
       req.user &&
       req.user.provider === 'openid' &&
       isEnabled(process.env.OPENID_REUSE_TOKENS) === true
     ) {
-      // Sync Entra ID groups from Microsoft Graph API (if enabled)
-      await syncUserEntraGroupMemberships(req.user, req.user.tokenset.access_token);
-
-      // Sync OIDC groups from JWT token claims (if enabled)
-      await syncUserOidcGroupsFromToken(req.user, req.user.tokenset);
-
       setOpenIDAuthTokens(req.user.tokenset, req, res, req.user._id.toString());
     } else {
       await setAuthTokens(req.user._id, res);

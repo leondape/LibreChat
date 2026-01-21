@@ -957,7 +957,7 @@
   "com_ui_mcp_initialized_success": "Serveur MCP '{{0}}' initialisé avec succès",
   "com_ui_mcp_oauth_cancelled": "Authentification OAuth annulée pour {{0}}",
   "com_ui_mcp_oauth_timeout": "Délai d'authentification OAuth dépassé pour {{0}}",
-  "com_ui_mcp_servers": "Serveurs MCP",
+  "com_ui_mcp_servers": "Intégrations",
   "com_ui_mcp_update_var": "Modifier {{0}}",
   "com_ui_mcp_url": "Adresse URL du serveur MCP",
   "com_ui_medium": "Modéré",

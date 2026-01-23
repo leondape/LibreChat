@@ -53,7 +53,7 @@ deploy-prod:
       export COMMIT_TAG=$COMMIT_TAG
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
-      echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+      echo $DEPLOY_TOKEN_PASSWORD | docker login -u $DEPLOY_TOKEN_USER --password-stdin $CI_REGISTRY
       cd $DEPLOY_DIR_PROD_MDWN
       docker pull $COMMIT_TAG
       docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml down || true

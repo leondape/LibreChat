@@ -3,6 +3,7 @@ image: docker:latest
 stages:
   - build
   - deploy
+  - de-provisioning
 
 variables:
   COMMIT_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
@@ -60,3 +61,13 @@ deploy-prod:
       docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml up -d
       EOF
 
+delete-user-and-data:
+  stage: de-provisioning 
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL
+  variables:
+    GIT_STRATEGY: none
+  before_script: []  # Skip the global docker login
+  script:
+    - 'echo "User Email: $USER_EMAIL"'
+    - 'echo "Timestamp: $(date -Iseconds)"'

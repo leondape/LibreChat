@@ -6,6 +6,7 @@ const {
   normalizeHttpError,
   extractWebSearchEnvVars,
 } = require('@librechat/api');
+const { sendTOSAcceptanceWebhook } = require('~/server/services/WebhookService');
 const {
   deleteAllUserSessions,
   deleteAllSharedLinks,
@@ -90,6 +91,20 @@ const acceptTermsController = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Send webhook notification for TOS acceptance
+    try {
+      
+      await sendTOSAcceptanceWebhook({
+        userId: user.id,
+        email: user.email,
+        timestamp: new Date(),
+      });
+    } catch (webhookError) {
+      logger.error('[acceptTermsController] Webhook failed but continuing:', webhookError);
+      // Don't fail the request if webhook fails
+    }
+
     res.status(200).json({ message: 'Terms accepted successfully' });
   } catch (error) {
     logger.error('Error accepting terms:', error);

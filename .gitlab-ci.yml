@@ -26,15 +26,19 @@ build:
     - docker push $COMMIT_TAG
   tags:
     - runner-01
-  only:
-    - main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy-prod:
   stage: deploy
   tags: 
     - runner-01
-  only:
-    - main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
     
   script:
     # Pre-deploy steps
@@ -63,6 +67,8 @@ deploy-prod:
 
 delete-user-and-data:
   stage: de-provisioning 
+  tags: 
+    - runner-01
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL
   variables:

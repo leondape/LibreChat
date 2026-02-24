@@ -12,6 +12,8 @@ variables:
   DEPLOY_USER_MDWN: $CI_DEPLOY_USER_MDWN
   DEPLOY_SERVER_MDWN: $CI_DEPLOY_SERVER_MDWN
   DEPLOY_DIR_PROD_MDWN: /home/rootlessdocker/deployments/wangpt
+  DEPLOY_USER_DOCKERUSER01: $CI_DEPLOY_USER_DOCKERUSER01
+  DEPLOY_DIR_PROD_DOCKERUSER01: /data/docker/dockeruser01/deployments/wangpt
   CI_VERBOSE: "true"
 
 before_script:
@@ -63,6 +65,40 @@ deploy-prod:
       docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml pull
       docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml down || true
       docker compose -f docker-compose.yml -f docker-compose.prod-mdwn.yml up -d
+      EOF
+
+deploy-prod-dockeruser01:
+  stage: deploy
+  tags: 
+    - runner-01
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+    
+  script:
+    # Pre-deploy steps
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p 22 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+
+    # Export commit tag
+    - export COMMIT_TAG="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    
+    # Deploy steps
+    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.yml
+    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.prod-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.prod-dockeruser01.yml
+    - |
+      ssh -p 22 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      export COMMIT_TAG=$COMMIT_TAG
+      eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
+      export DOCKER_HOST
+      echo $DEPLOY_TOKEN_PASSWORD | docker login -u $DEPLOY_TOKEN_USER --password-stdin $CI_REGISTRY
+      cd $DEPLOY_DIR_PROD_DOCKERUSER01
+      docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml pull
+      docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml down || true
+      docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml up -d
       EOF
 
 delete-user-and-data:

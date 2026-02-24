@@ -5,7 +5,7 @@ services:
   api:
     image: ${COMMIT_TAG} # change version to the latest
     ports:
-      - "3081:3080"
+      - "3080:3080"
     container_name: wangpt
     command: sh -c "npm run backend"
     volumes:

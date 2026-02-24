@@ -13,9 +13,6 @@ services:
       - type: bind
         source: ./api/data/auth.json
         target: /app/api/data/auth.json
-    networks:
-      - default
-      - mcp-shared-network
       
   metrics:
     image: registry.leoninestudios.com/l9ai/chat-services/librechat_exporter:latest
@@ -24,10 +21,3 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-
-    networks:
-      - default
-      
-networks:
-  mcp-shared-network:
-    external: true  # Connect to MCP services

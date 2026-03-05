@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { TokenExchangeMethodEnum } from 'librechat-data-provider';
 import type { MCPOptions } from 'librechat-data-provider';
 import type { IUser } from '@librechat/data-schemas';
-import { resolveHeaders, resolveNestedObject, processMCPEnv, encodeHeaderValue } from './env';
+import { resolveHeaders, resolveNestedObject, processMCPEnv, sanitizeHeaderValue } from './env';
 
 function isStdioOptions(options: MCPOptions): options is Extract<MCPOptions, { type?: 'stdio' }> {
   return !options.type || options.type === 'stdio';
@@ -32,79 +32,77 @@ function createTestUser(overrides: Partial<IUser> = {}): IUser {
   } as IUser;
 }
 
-describe('encodeHeaderValue', () => {
+describe('sanitizeHeaderValue', () => {
   it('should return empty string for empty input', () => {
-    expect(encodeHeaderValue('')).toBe('');
+    expect(sanitizeHeaderValue('')).toBe('');
   });
 
-  it('should return empty string for null/undefined coerced to empty string', () => {
-    expect(encodeHeaderValue(null as unknown as string)).toBe('');
-    expect(encodeHeaderValue(undefined as unknown as string)).toBe('');
+  it('should return empty string for null/undefined', () => {
+    expect(sanitizeHeaderValue(null as unknown as string)).toBe('');
+    expect(sanitizeHeaderValue(undefined as unknown as string)).toBe('');
   });
 
   it('should return empty string for non-string values', () => {
-    expect(encodeHeaderValue(123 as unknown as string)).toBe('');
-    expect(encodeHeaderValue(false as unknown as string)).toBe('');
-    expect(encodeHeaderValue({} as unknown as string)).toBe('');
+    expect(sanitizeHeaderValue(123 as unknown as string)).toBe('');
+    expect(sanitizeHeaderValue(false as unknown as string)).toBe('');
+    expect(sanitizeHeaderValue({} as unknown as string)).toBe('');
   });
 
-  it('should pass through ASCII characters (0-127) unchanged', () => {
-    expect(encodeHeaderValue('Hello')).toBe('Hello');
-    expect(encodeHeaderValue('test@example.com')).toBe('test@example.com');
-    expect(encodeHeaderValue('ABC123')).toBe('ABC123');
+  it('should pass through ASCII characters unchanged', () => {
+    expect(sanitizeHeaderValue('Hello')).toBe('Hello');
+    expect(sanitizeHeaderValue('test@example.com')).toBe('test@example.com');
+    expect(sanitizeHeaderValue('ABC123')).toBe('ABC123');
   });
 
-  it('should pass through Latin-1 characters (128-255) unchanged', () => {
-    // Characters with Unicode values 128-255 are safe
-    expect(encodeHeaderValue('José')).toBe('José'); // é = U+00E9 (233)
-    expect(encodeHeaderValue('Müller')).toBe('Müller'); // ü = U+00FC (252)
-    expect(encodeHeaderValue('Zoë')).toBe('Zoë'); // ë = U+00EB (235)
-    expect(encodeHeaderValue('Björk')).toBe('Björk'); // ö = U+00F6 (246)
+  it('should transliterate Latin accented characters', () => {
+    expect(sanitizeHeaderValue('José')).toBe('Jose');
+    expect(sanitizeHeaderValue('Müller')).toBe('Muller');
+    expect(sanitizeHeaderValue('Zoë')).toBe('Zoe');
+    expect(sanitizeHeaderValue('Björk')).toBe('Bjork');
   });
 
-  it('should Base64 encode Slavic characters (>255)', () => {
-    // Slavic characters that cause ByteString errors
-    expect(encodeHeaderValue('Marić')).toBe('b64:TWFyacSH'); // ć = U+0107 (263)
-    expect(encodeHeaderValue('Đorđe')).toBe('b64:xJBvcsSRZQ=='); // Đ = U+0110 (272), đ = U+0111 (273)
+  it('should transliterate Slavic characters', () => {
+    expect(sanitizeHeaderValue('Marić')).toBe('Maric');
+    expect(sanitizeHeaderValue('Đorđe')).toBe('Dorde');
   });
 
-  it('should Base64 encode Polish characters (>255)', () => {
-    expect(encodeHeaderValue('Łukasz')).toBe('b64:xYF1a2Fzeg=='); // Ł = U+0141 (321)
+  it('should transliterate Polish characters', () => {
+    expect(sanitizeHeaderValue('Łukasz')).toBe('Lukasz');
   });
 
-  it('should Base64 encode various extended Unicode characters (>255)', () => {
-    expect(encodeHeaderValue('Žarko')).toBe('b64:xb1hcmtv'); // Ž = U+017D (381)
-    expect(encodeHeaderValue('Šime')).toBe('b64:xaBpbWU='); // Š = U+0160 (352)
+  it('should transliterate various extended Unicode characters', () => {
+    expect(sanitizeHeaderValue('Žarko')).toBe('Zarko');
+    expect(sanitizeHeaderValue('Šime')).toBe('Sime');
+    expect(sanitizeHeaderValue('Ćiro')).toBe('Ciro');
   });
 
-  it('should have correct b64: prefix format', () => {
-    const result = encodeHeaderValue('Ćiro'); // Ć = U+0106 (262)
-    expect(result.startsWith('b64:')).toBe(true);
-    // Verify the encoded part after prefix is valid Base64
-    const base64Part = result.slice(4);
-    expect(Buffer.from(base64Part, 'base64').toString('utf8')).toBe('Ćiro');
+  it('should handle full names with special characters', () => {
+    expect(sanitizeHeaderValue('Đorđe Marić')).toBe('Dorde Maric');
+    expect(sanitizeHeaderValue('Marko Marić')).toBe('Marko Maric');
   });
 
-  it('should handle mixed safe and unsafe characters', () => {
-    const result = encodeHeaderValue('Hello Đorđe!');
-    expect(result).toBe('b64:SGVsbG8gxJBvcsSRZSE=');
+  it('should handle mixed ASCII and special characters', () => {
+    expect(sanitizeHeaderValue('Hello Đorđe!')).toBe('Hello Dorde!');
   });
 
-  it('should be reversible with Base64 decode', () => {
-    const original = 'Marko Marić';
-    const encoded = encodeHeaderValue(original);
-    expect(encoded.startsWith('b64:')).toBe(true);
-
-    // Verify decoding works
-    const decoded = Buffer.from(encoded.slice(4), 'base64').toString('utf8');
-    expect(decoded).toBe(original);
+  it('should transliterate Cyrillic characters', () => {
+    expect(sanitizeHeaderValue('Иван')).toBe('Ivan');
+    expect(sanitizeHeaderValue('Москва')).toBe('Moskva');
   });
 
-  it('should handle emoji and other high Unicode characters', () => {
-    const result = encodeHeaderValue('Hello 👋');
-    expect(result.startsWith('b64:')).toBe(true);
-    const decoded = Buffer.from(result.slice(4), 'base64').toString('utf8');
-    expect(decoded).toBe('Hello 👋');
+  it('should transliterate CJK characters', () => {
+    expect(sanitizeHeaderValue('李明')).toBe('Li Ming');
+    expect(sanitizeHeaderValue('佐藤')).toBe('Zuo Teng');
+  });
+
+  it('should handle email addresses with special characters', () => {
+    const result = sanitizeHeaderValue('marić@example.com');
+    expect(result).toBe('maric@example.com');
+  });
+
+  it('should handle emoji by removing or converting them', () => {
+    const result = sanitizeHeaderValue('Hello 👋');
+    expect(result).toMatch(/^Hello/);
   });
 });
 

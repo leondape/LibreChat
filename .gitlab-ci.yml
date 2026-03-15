@@ -77,5 +77,14 @@ delete-user-and-data:
     GIT_STRATEGY: none
   before_script: []
   script:
-    - 'echo "Deleting user $USER_EMAIL $(date -Iseconds)"'
-    - docker exec wangpt npm run delete-user -- -y -y "$USER_EMAIL"
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p 22 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+    - echo "Deleting user $USER_EMAIL $(date -Iseconds)"
+    - |
+      ssh -p 22 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
+      export DOCKER_HOST
+      docker exec wangpt npm run delete-user -- -y -y $USER_EMAIL
+      EOF

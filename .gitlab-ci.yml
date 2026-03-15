@@ -75,7 +75,7 @@ delete-user-and-data:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL
   variables:
     GIT_STRATEGY: none
-  before_script: []  # Skip the global docker login
+  before_script: []
   script:
-    - 'echo "User Email: $USER_EMAIL"'
-    - 'echo "Timestamp: $(date -Iseconds)"'
+    - 'echo "Deleting user $USER_EMAIL $(date -Iseconds)"'
+    - docker exec wangpt npm run delete-user -- -y -y "$USER_EMAIL"

@@ -1,8 +1,16 @@
+const http = require('http');
 const FormData = require('form-data');
 const { getCodeBaseURL } = require('@librechat/agents');
 const { createAxiosInstance, logAxiosError } = require('@librechat/api');
 
 const axios = createAxiosInstance();
+
+/**
+ * Prevents follow-redirects from leaking socket.destroy timeout handlers
+ * into http.globalAgent's keep-alive pool, which would kill reused sockets
+ * after Node.js v23's default 5 s agent timeout fires.
+ */
+const codeServerAgent = new http.Agent({ keepAlive: false });
 
 const MAX_FILE_SIZE = 150 * 1024 * 1024;
 
@@ -21,6 +29,7 @@ async function getCodeOutputDownloadStream(fileIdentifier, apiKey) {
       method: 'get',
       url: `${baseURL}/download/${fileIdentifier}`,
       responseType: 'stream',
+      httpAgent: codeServerAgent,
       headers: {
         'User-Agent': 'LibreChat/1.0',
         'X-API-Key': apiKey,
@@ -62,6 +71,7 @@ async function uploadCodeEnvFile({ req, stream, filename, apiKey, entity_id = ''
     const baseURL = getCodeBaseURL();
     /** @type {import('axios').AxiosRequestConfig} */
     const options = {
+      httpAgent: codeServerAgent,
       headers: {
         ...form.getHeaders(),
         'Content-Type': 'multipart/form-data',

@@ -1,3 +1,4 @@
+const http = require('http');
 const path = require('path');
 const { v4 } = require('uuid');
 const axios = require('axios');
@@ -22,6 +23,13 @@ const { createFile, getFiles, updateFile, claimCodeFile } = require('~/models');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { convertImage } = require('~/server/services/Files/images/convert');
 const { determineFileType } = require('~/server/utils');
+
+/**
+ * Prevents follow-redirects from leaking socket.destroy timeout handlers
+ * into http.globalAgent's keep-alive pool, which would kill reused sockets
+ * after Node.js v23's default 5 s agent timeout fires.
+ */
+const codeServerAgent = new http.Agent({ keepAlive: false });
 
 /**
  * Creates a fallback download URL response when file cannot be processed locally.
@@ -98,6 +106,7 @@ const processCodeOutput = async ({
       method: 'get',
       url: `${baseURL}/download/${session_id}/${id}`,
       responseType: 'arraybuffer',
+      httpAgent: codeServerAgent,
       headers: {
         'User-Agent': 'LibreChat/1.0',
         'X-API-Key': apiKey,
@@ -280,6 +289,7 @@ async function getSessionInfo(fileIdentifier, apiKey) {
     const response = await axios({
       method: 'get',
       url: `${baseURL}/files/${session_id}`,
+      httpAgent: codeServerAgent,
       params: {
         detail: 'summary',
         ...queryParams,

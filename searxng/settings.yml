@@ -1,0 +1,8 @@
+# SearXNG settings for LibreChat integration
+use_default_settings: true
+
+search:
+  # JSON format is required for LibreChat to communicate with SearXNG
+  formats:
+    - html
+    - json

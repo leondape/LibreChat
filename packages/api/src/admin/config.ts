@@ -40,7 +40,7 @@ export function getTopLevelSection(fieldPath: string): string {
  * - `"interface.mcpServers.use"` → true (permission sub-key)
  * - `"interface.mcpServers.placeholder"` → false (UI-only sub-key)
  * - `"interface.peoplePicker.users"` → true (all peoplePicker sub-keys are permissions)
- * - `"interface.endpointsMenu"` → false (UI-only field)
+ * - `"interface.modelSelect"` → false (UI-only field)
  */
 function isInterfacePermissionPath(fieldPath: string): boolean {
   const parts = fieldPath.split('.');
@@ -333,18 +333,20 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
 
       const overrideSections = Object.keys(filteredOverrides);
 
-      if (overrideSections.length === 0) {
+      if (overrideSections.length === 0 && priority == null) {
         return res.status(200).json({ message: 'No actionable override sections provided' });
       }
 
-      const allowed = await Promise.all(
-        overrideSections.map((s) => hasConfigCapability(user, s as ConfigSection, 'manage')),
-      );
-      const denied = overrideSections.find((_, i) => !allowed[i]);
-      if (denied) {
-        return res.status(403).json({
-          error: `Insufficient permissions for config section: ${denied}`,
-        });
+      if (overrideSections.length > 0) {
+        const allowed = await Promise.all(
+          overrideSections.map((s) => hasConfigCapability(user, s as ConfigSection, 'manage')),
+        );
+        const denied = overrideSections.find((_, i) => !allowed[i]);
+        if (denied) {
+          return res.status(403).json({
+            error: `Insufficient permissions for config section: ${denied}`,
+          });
+        }
       }
 
       const config = await upsertConfig(

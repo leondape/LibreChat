@@ -78,7 +78,14 @@ export function createSafeUser(
   const safeUser: Partial<SafeUser> & { federatedTokens?: IUser['federatedTokens'] } = {};
   for (const field of ALLOWED_USER_FIELDS) {
     if (field in user) {
-      safeUser[field] = user[field];
+      /**
+       * Indexed write through a union-typed key would otherwise fail strict
+       * checking — TS computes the LHS type as the *intersection* of all
+       * field write types (which collapses to `undefined` when fields have
+       * mixed types). `Object.assign` widens the assignment so each field
+       * preserves its concrete type at runtime.
+       */
+      Object.assign(safeUser, { [field]: user[field] });
     }
   }
 
@@ -250,6 +257,13 @@ function processSingleValue({
   return value;
 }
 
+function processAdminValue(originalValue: string, dbSourced: boolean): string {
+  if (typeof originalValue !== 'string') {
+    return String(originalValue);
+  }
+  return dbSourced ? originalValue : extractEnvVariable(originalValue);
+}
+
 /**
  * Recursively processes an object to replace environment variables in string values
  * @param params - Processing parameters
@@ -351,6 +365,22 @@ export function processMCPEnv(params: {
     newObj.headers = processedHeaders;
   }
 
+  // Process OAuth headers if they exist; sent on OAuth discovery/token requests
+  if ('oauth_headers' in newObj && newObj.oauth_headers) {
+    const processedOAuthHeaders: Record<string, string> = {};
+    for (const [key, originalValue] of Object.entries(newObj.oauth_headers)) {
+      processedOAuthHeaders[key] = processSingleValue({
+        user,
+        body,
+        dbSourced,
+        originalValue,
+        customUserVars,
+        isHeader: true,
+      });
+    }
+    newObj.oauth_headers = processedOAuthHeaders;
+  }
+
   // Process URL if it exists (for WebSocket, SSE, StreamableHTTP types)
   if ('url' in newObj && newObj.url) {
     newObj.url = processSingleValue({
@@ -360,6 +390,11 @@ export function processMCPEnv(params: {
       customUserVars,
       originalValue: newObj.url,
     });
+  }
+
+  // Process outbound proxy if it exists (for SSE and StreamableHTTP types)
+  if ('proxy' in newObj && newObj.proxy) {
+    newObj.proxy = processAdminValue(newObj.proxy, dbSourced);
   }
 
   // Process OAuth configuration if it exists (for all transport types)
@@ -470,7 +505,7 @@ export function resolveHeaders(options?: {
   user?: Partial<IUser> | { id: string };
   body?: RequestBody;
   customUserVars?: Record<string, string>;
-}) {
+}): Record<string, string> {
   const { headers, user, body, customUserVars } = options ?? {};
   const inputHeaders = headers ?? {};
 

@@ -17,6 +17,7 @@ import { ArchivedChatsModal } from '~/components/Nav/SettingsTabs/General/Archiv
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
+import { formatCost } from '~/utils';
 import { useLocalize } from '~/hooks';
 import Settings from './Settings';
 import store from '~/store';
@@ -149,11 +150,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           <>
             <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
               {localize('com_nav_balance')}:{' '}
-              {new Intl.NumberFormat('de-DE', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }).format(Number(balanceQuery.data.tokenCredits) / 1_000_000)}{' '}
-              $
+              {formatCost(
+                Number(balanceQuery.data.tokenCredits) / 1_000_000,
+                startupConfig?.interface?.currency,
+              )}
             </div>
             <DropdownMenuSeparator />
           </>

@@ -13,5 +13,13 @@ librechat*
 Dockerfile*
 docs
 
+# TEMP: keep the curated skill/ tree out of the image so /app/skill stays empty
+# and no deployment skills are loaded at startup. Deployment skills can't yet be
+# pinned to an agent's allowlist (upstream bug: the agent write path prunes skill
+# ids with no backing Mongo doc), so the curated set is delivered as UI-imported
+# DB skills instead. Remove this line to bake the deployment skills back in once 
+# a PR fixes the bug.
+/skill
+
 # Ignore all hidden files
 .*

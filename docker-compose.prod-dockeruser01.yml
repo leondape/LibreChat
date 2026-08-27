@@ -13,12 +13,3 @@ services:
       - type: bind
         source: ./api/data/auth.json
         target: /app/api/data/auth.json
-
-  metrics:
-    container_name: wangpt_metrics
-    image: registry.leoninestudios.com/l9ai/chat-services/librechat_exporter:latest
-    depends_on:
-      - mongodb
-    ports:
-      - "8000:8000"
-    restart: unless-stopped

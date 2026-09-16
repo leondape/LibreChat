@@ -47,16 +47,16 @@ deploy-prod-dockeruser01:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p 22 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
 
     # Export commit tag
     - export COMMIT_TAG="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     
     # Deploy steps
-    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.yml
-    - scp -P 22 -o StrictHostKeyChecking=no docker-compose.prod-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.prod-dockeruser01.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.yml
+    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.prod-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.prod-dockeruser01.yml
     - |
-      ssh -p 22 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      ssh -p 35039 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
       export COMMIT_TAG=$COMMIT_TAG
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
@@ -80,10 +80,10 @@ delete-user-and-data:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p 22 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+    - ssh-keyscan -p 35039 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
     - echo "Deleting user $USER_EMAIL $(date -Iseconds)"
     - |
-      ssh -p 22 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      ssh -p 35039 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
       docker exec wangpt npm run delete-user -- -y -y $USER_EMAIL

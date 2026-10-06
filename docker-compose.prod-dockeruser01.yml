@@ -8,6 +8,15 @@ services:
       - "3080:3080"
     container_name: wangpt
     command: sh -c "npm run backend"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - MEM_DIAG=true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "-T", "3", "http://127.0.0.1:3080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     volumes:
       - ./librechat.yaml:/app/librechat.yaml
       - type: bind

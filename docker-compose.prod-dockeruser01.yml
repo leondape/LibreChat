@@ -22,3 +22,11 @@ services:
       - type: bind
         source: ./api/data/auth.json
         target: /app/api/data/auth.json
+  meilisearch:
+    environment:
+      - MEILI_MAX_INDEXING_MEMORY=4GiB
+      - MEILI_MAX_INDEXING_THREADS=2
+    mem_limit: 12g
+    memswap_limit: 12g
+  mongodb:
+    command: mongod --noauth --wiredTigerCacheSizeGB 4

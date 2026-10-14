@@ -18,7 +18,7 @@ const TokenCreditsItem: React.FC<TokenCreditsItemProps> = ({ tokenCredits }) => 
       </div>
 
       {/* Right Section: tokenCredits Value */}
-      <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
+      <span className="text-sm font-medium text-text-primary" role="note">
         {tokenCredits !== undefined
           ? `${new Intl.NumberFormat('de-DE', {
               minimumFractionDigits: 2,

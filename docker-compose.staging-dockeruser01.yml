@@ -1,0 +1,40 @@
+version: '3.4'
+
+# Staging runs on the same host as prod (dockeruser01). Every container_name and
+# named volume must differ from prod wangpt to avoid clobbering running services.
+# deploy-staging-dockeruser01 copies this file. The prod override stays
+# docker-compose.prod-dockeruser01.yml, so a later staging-to-main merge still
+# deploys prod on 3080 as container wangpt.
+
+services:
+  api:
+    image: ${COMMIT_TAG}
+    # !override drops base "${PORT}:${PORT}" so we don't also bind host 3080.
+    # App listens on container :3080 via .env PORT=3080; HAProxy targets host :3081.
+    ports: !override
+      - "3081:3080"
+    container_name: wangpt-staging
+    command: sh -c "npm run backend"
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+      - type: bind
+        source: ./api/data/auth.json
+        target: /app/api/data/auth.json
+
+  mongodb:
+    container_name: chat-mongodb-staging
+
+  meilisearch:
+    container_name: chat-meilisearch-staging
+
+  vectordb:
+    container_name: vectordb-staging
+
+  rag_api:
+    container_name: rag_api-staging
+
+volumes:
+  pgdata2:
+    name: wangpt-staging-pgdata2
+  librechat-data:
+    name: wangpt-staging-librechat-data

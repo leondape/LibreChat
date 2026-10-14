@@ -1,7 +1,7 @@
 import { logger } from '@librechat/data-schemas';
 import { isSensitiveEnvVar } from 'librechat-data-provider';
 import type { AppConfig } from '@librechat/data-schemas';
-import { encodeHeaderValue, stripUnresolvedPlaceholders } from '~/utils/env';
+import { sanitizeHeaderValue, stripUnresolvedPlaceholders } from '~/utils/env';
 import { decryptConfigSecret } from '~/admin/secrets';
 import { normalizeString } from '~/utils/text';
 
@@ -210,12 +210,12 @@ export function resolveLangfuseHeaders(
     if (trimmed === '') {
       continue;
     }
-    /** Nothing else encodes these values, so a literal or interpolated
+    /** Nothing else sanitizes these values, so a literal or interpolated
      *  character above U+00FF would reach `Headers` unencoded and throw,
      *  taking down export, verification, and feedback alike. */
-    const encoded = encodeHeaderValue(trimmed);
-    /** `encodeHeaderValue` only encodes above U+00FF, so control bytes below it
-     *  still reach `Headers` and throw — an embedded CR/LF would also be a
+    const encoded = sanitizeHeaderValue(trimmed);
+    /** Transliteration leaves ASCII control bytes in place, so an embedded
+     *  CR/LF still reaches `Headers` and throws — it would also be a
      *  request-splitting attempt, so this drops rather than strips. */
     if (!HEADER_VALUE_PATTERN.test(encoded)) {
       warnDroppedHeader(name, 'its value contains characters not allowed in an HTTP header.');

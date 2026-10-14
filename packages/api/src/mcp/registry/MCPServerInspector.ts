@@ -2,7 +2,6 @@ import { logger } from '@librechat/data-schemas';
 import { Constants, normalizeServerName, stripServerNamePrefixes } from 'librechat-data-provider';
 import type { JsonSchemaType } from '@librechat/data-schemas';
 import type { MCPConnection } from '~/mcp/connection';
-import { sanitizeToolSchema } from '~/mcp/zod';
 import type * as t from '~/mcp/types';
 import {
   hasCustomUserVars,
@@ -13,6 +12,7 @@ import {
   isUserSourced,
 } from '~/mcp/utils';
 import { isMCPDomainAllowed, extractMCPServerDomain } from '~/auth/domain';
+import { normalizeJsonSchema, resolveJsonSchemaRefs } from '~/mcp/zod';
 import { isDirectOpenIDBearerRecoveryEnabled } from '~/mcp/openid';
 import { MCPConnectionFactory } from '~/mcp/MCPConnectionFactory';
 import { MCPDomainNotAllowedError } from '~/mcp/errors';
@@ -218,7 +218,13 @@ export class MCPServerInspector {
         ['function']: {
           name,
           description: tool.description,
-          parameters: sanitizeToolSchema(tool.inputSchema as JsonSchemaType),
+          // Normalize before persisting: resolves `$ref`s and strips
+          // `$`-prefixed keywords (e.g. a spec-compliant `$schema`), which
+          // MongoDB rejects as field names and would otherwise crash storage
+          // of this `parameters` blob during server registration.
+          parameters: normalizeJsonSchema(
+            resolveJsonSchemaRefs(tool.inputSchema as Record<string, unknown>),
+          ) as JsonSchemaType,
         },
       };
     });

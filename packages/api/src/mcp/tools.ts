@@ -10,7 +10,7 @@ import type { JsonSchemaType } from '@librechat/agents';
 import type { LCAvailableTools, LCFunctionTool, ParsedServerConfig } from './types';
 import { canUseAppConnection, requiresEphemeralUserConnection } from './utils';
 import { getMCPAppToolsPublicationGeneration } from './toolsChanged';
-import { sanitizeToolSchema } from './zod';
+import { normalizeJsonSchema, resolveJsonSchemaRefs } from './zod';
 
 export type MCPToolInput = Pick<Tool, 'name' | 'description'> & Partial<Pick<Tool, 'inputSchema'>>;
 
@@ -99,7 +99,9 @@ export function formatMCPServerTools(serverName: string, tools: MCPToolInput[]):
       ['function']: {
         name,
         description: tool.description ?? '',
-        parameters: sanitizeToolSchema(tool.inputSchema as JsonSchemaType | undefined),
+        parameters: tool.inputSchema
+          ? (normalizeJsonSchema(resolveJsonSchemaRefs(tool.inputSchema)) as JsonSchemaType)
+          : ({ type: 'object', properties: {} } as JsonSchemaType),
       },
     };
     if (keyToolName !== tool.name) {

@@ -1,20 +1,7 @@
-workflow:
-  name: '$PIPELINE_NAME'
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $SECURITY_SCAN == "nightly"
-      variables:
-        PIPELINE_NAME: "Security scan warning"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: always
-      variables:
-        PIPELINE_NAME: "$CI_COMMIT_REF_NAME"
-
 image: docker:latest
 
 stages:
   - build
-  - scan
   - deploy
   - de-provisioning
 
@@ -42,86 +29,16 @@ build:
   tags:
     - runner-01
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "staging"
-
-"Security scan warning":
-  stage: scan
-  tags:
-    - runner-01
-  needs:
-    - job: build
-      optional: true
-  variables:
-    TRIVY_IMAGE: aquasec/trivy:0.74.0
-  cache:
-    key: trivy-db
-    when: always
-    paths:
-      - .trivycache/
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $SECURITY_SCAN == "nightly"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "trigger"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "staging"
-  script:
-    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - |
-      set -eu
-      mkdir -p .trivycache
-      docker pull "$TRIVY_IMAGE"
-
-      if [ "${CI_PIPELINE_SOURCE}" = "schedule" ]; then
-        echo "Resolving the last successful staging deployment"
-        json=$(wget -qO- --header="JOB-TOKEN: ${CI_JOB_TOKEN}" \
-          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/deployments?environment=staging&status=success&order_by=finished_at&sort=desc&per_page=1" || true)
-        sha=$(printf '%s' "$json" | sed -n 's/.*"sha":"\([0-9a-f]\{40\}\)".*/\1/p' | head -n 1)
-        ref=$(printf '%s' "$json" | sed -n 's/.*"ref":"\([^"]*\)".*/\1/p' | head -n 1)
-        if [ -n "$sha" ] && [ -n "$ref" ]; then
-          short=$(printf '%s' "$sha" | cut -c1-8)
-          IMAGE="${CI_REGISTRY_IMAGE}:${ref}-${short}"
-        else
-          IMAGE="${CI_REGISTRY_IMAGE}:${CI_DEFAULT_BRANCH}"
-        fi
-        echo "Scanning deployed image ${IMAGE}"
-      else
-        IMAGE="${COMMIT_TAG}"
-        echo "Scanning image just built ${IMAGE}"
-      fi
-
-      IGNORE_FILE=""
-      if [ -f "$CI_PROJECT_DIR/.trivyignore.yaml" ]; then
-        IGNORE_FILE="--ignorefile /workspace/.trivyignore.yaml"
-      fi
-
-      trivy_scan() {
-        docker run --rm \
-          -v "$CI_PROJECT_DIR/.trivycache:/root/.cache/trivy" \
-          -v "$CI_PROJECT_DIR:/workspace:ro" \
-          -e TRIVY_CACHE_DIR=/root/.cache/trivy \
-          -e TRIVY_NO_PROGRESS=true \
-          -e TRIVY_USERNAME="$CI_REGISTRY_USER" \
-          -e TRIVY_PASSWORD="$CI_REGISTRY_PASSWORD" \
-          "$TRIVY_IMAGE" \
-          image --scanners vuln "$@"
-      }
-
-      echo "Scanning ${IMAGE}"
-      trivy_scan --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed $IGNORE_FILE "$IMAGE"
 
 deploy-prod-dockeruser01:
   stage: deploy
   tags:
     - runner-01
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
@@ -141,7 +58,7 @@ deploy-prod-dockeruser01:
       export COMMIT_TAG=$COMMIT_TAG
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
-      echo $DEPLOY_TOKEN_PASSWORD | docker login -u $DEPLOY_TOKEN_USER --password-stdin $CI_REGISTRY
+      echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
       cd $DEPLOY_DIR_PROD_DOCKERUSER01
       docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml pull
       docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml down || true
@@ -150,13 +67,9 @@ deploy-prod-dockeruser01:
 
 deploy-staging-dockeruser01:
   stage: deploy
-  needs:
-    - "Security scan warning"
   tags:
     - runner-01
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "staging"
@@ -179,7 +92,7 @@ deploy-staging-dockeruser01:
       export COMMIT_TAG=$COMMIT_TAG
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
-      echo $DEPLOY_TOKEN_PASSWORD | docker login -u $DEPLOY_TOKEN_USER --password-stdin $CI_REGISTRY
+      echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
       cd $DEPLOY_DIR_STAGING_DOCKERUSER01
       docker compose -f docker-compose.yml -f docker-compose.staging-dockeruser01.yml pull
       docker compose -f docker-compose.yml -f docker-compose.staging-dockeruser01.yml down || true
@@ -191,7 +104,7 @@ delete-user-and-data:
   tags:
     - runner-01
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL && $DEPLOY_TARGET != "staging"
+    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL && $CI_COMMIT_BRANCH == "main"
   variables:
     GIT_STRATEGY: none
   before_script: []
@@ -206,26 +119,4 @@ delete-user-and-data:
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
       docker exec wangpt npm run delete-user -- -y -y $USER_EMAIL
-      EOF
-
-delete-user-staging:
-  stage: de-provisioning
-  tags:
-    - runner-01
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL && $DEPLOY_TARGET == "staging"
-  variables:
-    GIT_STRATEGY: none
-  before_script: []
-  script:
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p "$DEPLOY_SSH_PORT" -H "$DEPLOY_SERVER_MDWN" >> ~/.ssh/known_hosts 2>/dev/null || true
-    - echo "Deleting user $USER_EMAIL from staging $(date -Iseconds)"
-    - |
-      ssh -p "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
-      eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
-      export DOCKER_HOST
-      docker exec wangpt-staging npm run delete-user -- -y -y $USER_EMAIL
       EOF

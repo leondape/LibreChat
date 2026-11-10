@@ -163,6 +163,7 @@ delete-user-and-data:
   before_script: []
   variables:
     TRIVY_CACHE_DIR: $CI_PROJECT_DIR/.trivycache
+    TRIVY_TIMEOUT: 30m
     TRIVY_NO_PROGRESS: "true"
     TRIVY_DISABLE_VEX_NOTICE: "true"
     COMPOSE_FILE: docker-compose.yml

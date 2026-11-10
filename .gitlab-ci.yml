@@ -12,6 +12,8 @@ variables:
   DEPLOY_SERVER_MDWN: $CI_DEPLOY_SERVER_MDWN
   DEPLOY_USER_DOCKERUSER01: $CI_DEPLOY_USER_DOCKERUSER01
   DEPLOY_DIR_PROD_DOCKERUSER01: /data/docker/dockeruser01/deployments/wangpt
+  DEPLOY_DIR_STAGING_DOCKERUSER01: /data/docker/dockeruser01/deployments/wangpt-staging
+  DEPLOY_SSH_PORT: "35039"
   CI_VERBOSE: "true"
 
 before_script:
@@ -30,31 +32,29 @@ build:
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "staging"
 
 deploy-prod-dockeruser01:
   stage: deploy
-  tags: 
+  tags:
     - runner-01
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
-    
+
   script:
-    # Pre-deploy steps
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p 35039 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+    - ssh-keyscan -p "$DEPLOY_SSH_PORT" $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
 
-    # Export commit tag
     - export COMMIT_TAG="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    
-    # Deploy steps
-    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.yml
-    - scp -P 35039 -o StrictHostKeyChecking=no docker-compose.prod-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.prod-dockeruser01.yml
+
+    - scp -P "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.yml
+    - scp -P "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no docker-compose.prod-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_PROD_DOCKERUSER01/docker-compose.prod-dockeruser01.yml
     - |
-      ssh -p 35039 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      ssh -p "$DEPLOY_SSH_PORT" $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
       export COMMIT_TAG=$COMMIT_TAG
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
@@ -65,12 +65,46 @@ deploy-prod-dockeruser01:
       docker compose -f docker-compose.yml -f docker-compose.prod-dockeruser01.yml up -d
       EOF
 
-delete-user-and-data:
-  stage: de-provisioning 
-  tags: 
+deploy-staging-dockeruser01:
+  stage: deploy
+  tags:
     - runner-01
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "staging"
+  environment:
+    name: staging
+
+  script:
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p "$DEPLOY_SSH_PORT" -H "$DEPLOY_SERVER_MDWN" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+    - export COMMIT_TAG="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+
+    - test -n "$DEPLOY_SERVER_MDWN" && test -n "$DEPLOY_USER_DOCKERUSER01"
+    - scp -P "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no docker-compose.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_STAGING_DOCKERUSER01/docker-compose.yml
+    - scp -P "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no docker-compose.staging-dockeruser01.yml $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN:$DEPLOY_DIR_STAGING_DOCKERUSER01/docker-compose.staging-dockeruser01.yml
+    - |
+      ssh -p "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      export COMMIT_TAG=$COMMIT_TAG
+      eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
+      export DOCKER_HOST
+      echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+      cd $DEPLOY_DIR_STAGING_DOCKERUSER01
+      docker compose -f docker-compose.yml -f docker-compose.staging-dockeruser01.yml pull
+      docker compose -f docker-compose.yml -f docker-compose.staging-dockeruser01.yml down || true
+      docker compose -f docker-compose.yml -f docker-compose.staging-dockeruser01.yml up -d
+      EOF
+
+delete-user-and-data:
+  stage: de-provisioning
+  tags:
+    - runner-01
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL && $CI_COMMIT_BRANCH == "main"
   variables:
     GIT_STRATEGY: none
   before_script: []
@@ -78,10 +112,10 @@ delete-user-and-data:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_DOCKERUSER01" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p 35039 $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
+    - ssh-keyscan -p "$DEPLOY_SSH_PORT" $DEPLOY_SERVER_MDWN >> ~/.ssh/known_hosts
     - echo "Deleting user $USER_EMAIL $(date -Iseconds)"
     - |
-      ssh -p 35039 $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
+      ssh -p "$DEPLOY_SSH_PORT" $DEPLOY_USER_DOCKERUSER01@$DEPLOY_SERVER_MDWN /bin/bash << EOF
       eval DOCKER_HOST=unix:///run/user/\$(id -u)/docker.sock
       export DOCKER_HOST
       docker exec wangpt npm run delete-user -- -y -y $USER_EMAIL

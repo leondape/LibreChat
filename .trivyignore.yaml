@@ -1,0 +1,1444 @@
+vulnerabilities:
+  - id: CVE-2022-27664
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-28131
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-2879
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-2880
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-29804
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30580
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30630
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30631
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30632
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30633
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30634
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-30635
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-32189
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41715
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41716
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41720
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41722
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41723
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41724
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2022-41725
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24534
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24536
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24537
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24538
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24539
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-24540
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-29400
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-29403
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-39325
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-45283
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-45287
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2023-45288
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2024-24790
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2024-34156
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-15467
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-58050
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-61726
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-61729
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-62727
+    paths:
+      - usr/local/lib/python3.12/site-packages/starlette-0.46.2.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-68121
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-68973
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-69421
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2025-7424
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102266
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102267
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102268
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102271
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102272
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102273
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102276
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-102278
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-103111
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-104850
+    paths:
+      - "app/node_modules/@modelcontextprotocol/sdk/package.json"
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-106435
+    paths:
+      - usr/local/lib/python3.12/site-packages/pymongo-4.18.1.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-106445
+    paths:
+      - app/node_modules/handlebars/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-106446
+    paths:
+      - app/node_modules/handlebars/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-107891
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-109383
+    paths:
+      - app/node_modules/undici/package.json
+      - usr/local/lib/node_modules/npm/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-109461
+    paths:
+      - "app/node_modules/@azure/msal-node/package.json"
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-109518
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-109829
+    paths:
+      - app/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-109869
+    paths:
+      - app/node_modules/undici/package.json
+      - usr/local/lib/node_modules/npm/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111064
+    paths:
+      - usr/local/lib/python3.12/site-packages/aiohttp-3.14.3.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111066
+    paths:
+      - usr/local/lib/python3.12/site-packages/aiohttp-3.14.3.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111181
+    paths:
+      - app/node_modules/body-parser/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111497
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111755
+    paths:
+      - app/node_modules/follow-redirects/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111756
+    paths:
+      - app/node_modules/follow-redirects/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111767
+    paths:
+      - "app/node_modules/@modelcontextprotocol/sdk/package.json"
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111768
+    paths:
+      - "app/node_modules/@modelcontextprotocol/sdk/package.json"
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-111943
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112390
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112392
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112393
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112397
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112398
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112399
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112400
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112402
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112403
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112404
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112405
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112406
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112892
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112893
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112894
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112895
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112896
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112897
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112900
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112902
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-112940
+    paths:
+      - usr/local/lib/python3.12/site-packages/filelock-3.32.7.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-113872
+    paths:
+      - app/node_modules/multer/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-114605
+    paths:
+      - usr/local/lib/python3.12/site-packages/dnspython-2.8.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-115572
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-115580
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-115585
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-116689
+    paths:
+      - app/node_modules/follow-redirects/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-116795
+    paths:
+      - app/node_modules/re2js/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-11822
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-11824
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119194
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyasn1-0.6.4.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119195
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyasn1-0.6.4.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119196
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyasn1-0.6.4.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119197
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyasn1-0.6.4.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119203
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119204
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119205
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119206
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119207
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119208
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-119209
+    paths:
+      - usr/local/lib/python3.12/site-packages/pypdf-6.19.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-12151
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-123817
+    paths:
+      - usr/local/lib/python3.12/site-packages/aiohttp-3.14.3.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-13149
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-13221
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14257
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14456
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14662
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14664
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14668
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14669
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14670
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14671
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14677
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14679
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-14680
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-15741
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-15742
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-16239
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-18408
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-19385
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-19534
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-2004
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-2005
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-2006
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-22184
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-25679
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-25681
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-27135
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-27136
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-27145
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-28387
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-28388
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-28389
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-28390
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-31789
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-32280
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-32281
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-32283
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33630
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33811
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33814
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33818
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33845
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-33846
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-3833
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39820
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39821
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39822
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39828
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39829
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39830
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39831
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39832
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39835
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-39836
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-40200
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-40355
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-40356
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-41992
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42009
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42010
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42496
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42497
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42499
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42504
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-42508
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-45447
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-46595
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-46597
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-46600
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-4878
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-48815
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/sigstore/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-48818
+    paths:
+      - usr/local/lib/python3.12/site-packages/starlette-0.46.2.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-48962
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-53612
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-53613
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-53614
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-53615
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-54283
+    paths:
+      - usr/local/lib/python3.12/site-packages/starlette-0.46.2.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56851
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56852
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56853
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56854
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56858
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56859
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56860
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-56862
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-57432
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-57433
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-5773
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-59869
+    paths:
+      - opt/js-yaml/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-59873
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/tar/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-59874
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/tar/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6276
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-63209
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6464
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6471
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6473
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6476
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6477
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6478
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6479
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-66046
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6637
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-6638
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-69152
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-69192
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/ip-address/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-73566
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/tar/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-76844
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-76956
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-76957
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-77214
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-78661
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-78667
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-78669
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-8286
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-8376
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-84375
+    paths:
+      - opt/js-yaml/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-84782
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-85091
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-86145
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-87018
+    paths:
+      - app/node_modules/undici/package.json
+      - usr/local/lib/node_modules/npm/node_modules/undici/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-87776
+    paths:
+      - app/node_modules/compression/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-89157
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-89161
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-8927
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-90711
+    paths:
+      - app/node_modules/proxy-addr/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-92392
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-93749
+    paths:
+      - app/node_modules/source-map-js/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-93990
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-9496
+    paths:
+      - usr/local/lib/node_modules/npm/node_modules/pacote/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96637
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96639
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96640
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96642
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96643
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96644
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96748
+    paths:
+      - usr/local/lib/python3.12/site-packages/pymongo-4.18.1.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96749
+    paths:
+      - usr/local/lib/python3.12/site-packages/pymongo-4.18.1.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-96778
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: CVE-2026-97031
+    paths:
+      - usr/bin/bsondump
+      - usr/bin/mongodump
+      - usr/bin/mongoexport
+      - usr/bin/mongofiles
+      - usr/bin/mongoimport
+      - usr/bin/mongorestore
+      - usr/bin/mongostat
+      - usr/bin/mongotop
+      - usr/local/bin/gosu
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-5p4m-2wfm-xmqj
+    paths:
+      - opt/js-yaml/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-6q48-6c7w-9gw2
+    paths:
+      - usr/local/lib/python3.12/site-packages/certifi-2026.7.22.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-78g4-xqwv-q3g8
+    paths:
+      - usr/local/lib/python3.12/site-packages/pillow-12.3.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-cg2g-xh64-v4q7
+    paths:
+      - app/node_modules/dompurify/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-f897-62hf-6gxq
+    paths:
+      - "app/node_modules/@modelcontextprotocol/sdk/package.json"
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-mrv2-3pqr-j5jr
+    paths:
+      - app/node_modules/dompurify/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-pxh4-856f-4h89
+    paths:
+      - usr/local/lib/python3.12/site-packages/pyjwt-2.13.0.dist-info/METADATA
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."
+  - id: GHSA-wq5f-xc86-pv6w
+    paths:
+      - app/node_modules/sharp/package.json
+    expired_at: 2026-12-10
+    statement: "Accepted until the next WangPT upgrade. These are in the LibreChat v0.8.8 images and packages this release ships."

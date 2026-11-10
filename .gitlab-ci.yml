@@ -1,7 +1,22 @@
+workflow:
+  name: '$PIPELINE_NAME'
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SECURITY_SCAN == "nightly"
+      variables:
+        PIPELINE_NAME: "Security scan warning"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: always
+      variables:
+        PIPELINE_NAME: "$CI_COMMIT_REF_NAME"
+
 image: docker:latest
 
 stages:
   - build
+  - scan
   - deploy
   - de-provisioning
 
@@ -29,6 +44,8 @@ build:
   tags:
     - runner-01
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
@@ -36,9 +53,15 @@ build:
 
 deploy-prod-dockeruser01:
   stage: deploy
+  needs:
+    - "Security scan warning"
+  environment:
+    name: production
   tags:
     - runner-01
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "main"
@@ -67,9 +90,13 @@ deploy-prod-dockeruser01:
 
 deploy-staging-dockeruser01:
   stage: deploy
+  needs:
+    - "Security scan warning"
   tags:
     - runner-01
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: never
     - if: $CI_COMMIT_BRANCH == "staging"
@@ -104,6 +131,8 @@ delete-user-and-data:
   tags:
     - runner-01
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger" && $USER_EMAIL && $CI_COMMIT_BRANCH == "main"
   variables:
     GIT_STRATEGY: none
@@ -120,3 +149,103 @@ delete-user-and-data:
       export DOCKER_HOST
       docker exec wangpt npm run delete-user -- -y -y $USER_EMAIL
       EOF
+
+"Security scan warning":
+  stage: scan
+  tags:
+    - runner-01
+  image:
+    name: aquasec/trivy:0.74.0
+    entrypoint: [""]
+  needs:
+    - job: build
+      optional: true
+  before_script: []
+  variables:
+    TRIVY_CACHE_DIR: $CI_PROJECT_DIR/.trivycache
+    TRIVY_TIMEOUT: 30m
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_DISABLE_VEX_NOTICE: "true"
+    COMPOSE_FILE: docker-compose.yml
+  cache:
+    key: trivy-db
+    when: always
+    paths:
+      - .trivycache/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SECURITY_SCAN == "nightly"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: always
+  script:
+    - |
+      set -eu
+      mkdir -p trivy-reports
+      echo "$CI_REGISTRY_PASSWORD" | trivy registry login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+      if [ "${CI_PIPELINE_SOURCE}" = "schedule" ] || { [ "${CI_COMMIT_BRANCH:-}" != "main" ] && [ "${CI_COMMIT_BRANCH:-}" != "master" ] && [ "${CI_COMMIT_BRANCH:-}" != "staging" ]; }; then
+        echo "Resolving the last successful production deployment"
+        json=$(wget -qO- --header="JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/deployments?environment=production&status=success&order_by=finished_at&sort=desc&per_page=1" || true)
+        sha=$(printf '%s' "$json" | sed -n 's/.*"sha":"\([0-9a-f]\{40\}\)".*/\1/p' | head -n 1)
+        ref=$(printf '%s' "$json" | sed -n 's/.*"ref":"\([^"]*\)".*/\1/p' | head -n 1)
+        if [ -n "$sha" ] && [ -n "$ref" ]; then
+          short=$(printf '%s' "$sha" | cut -c1-8)
+          IMAGE="${CI_REGISTRY_IMAGE}:${ref}-${short}"
+          echo "Scanning deployed image ${IMAGE}"
+        else
+          IMAGE="${CI_REGISTRY_IMAGE}:${CI_DEFAULT_BRANCH}"
+          echo "Could not read the last successful deployment. Scanning ${IMAGE} instead."
+        fi
+      else
+        IMAGE="${COMMIT_TAG}"
+        echo "Scanning image just built ${IMAGE}"
+      fi
+      pinned=$(sed -n 's/^[[:space:]]*image:[[:space:]]*//p' "$COMPOSE_FILE" | tr -d '"' | tr -d "'" | grep -v '\$' | grep -v 'librechat-dev:latest' | sort -u || true)
+      images="$IMAGE $pinned"
+      IGNORE_ARGS=""
+      if [ -f "$CI_PROJECT_DIR/.trivyignore.yaml" ]; then
+        IGNORE_ARGS="--ignorefile $CI_PROJECT_DIR/.trivyignore.yaml"
+      fi
+      failed=0
+      html_parts=""
+      for IMG in $images; do
+        echo "Scanning ${IMG}"
+        safe=$(printf '%s' "$IMG" | tr '/:' '__')
+        trivy image --quiet --exit-code 0 --format template --template "@/contrib/html.tpl" --output "trivy-reports/${safe}.html" "$IMG"
+        trivy image --quiet --exit-code 0 --format json --output "trivy-reports/${safe}.json" "$IMG"
+        if ! trivy image --quiet --table-mode detailed --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed $IGNORE_ARGS "$IMG"; then
+          echo "FAIL ${IMG}: fixable HIGH or CRITICAL" >&2
+          failed=1
+        else
+          echo "OK ${IMG}: no fixable HIGH or CRITICAL"
+        fi
+        html_parts="${html_parts} trivy-reports/${safe}.html"
+      done
+      cat $html_parts > trivy-reports/combined.html
+      sed -i \
+        -e 's/white-space: nowrap;/white-space: normal; overflow-wrap: anywhere; word-break: break-word;/' \
+        -e 's|</head>|<style>@page{size:A3 landscape;margin:8mm}table{width:100%}td.links a{display:block !important;word-break:break-all !important}a.toggle-more-links{display:none !important}</style></head>|' \
+        trivy-reports/combined.html
+      apk add --no-cache --quiet chromium jq
+      if ! chromium --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --no-pdf-header-footer \
+        --print-to-pdf="${CI_PROJECT_DIR}/security-scan-warning.pdf" "file://${CI_PROJECT_DIR}/trivy-reports/combined.html" \
+        2>trivy-reports/chromium.log; then
+        echo "Chromium PDF render failed:" >&2
+        cat trivy-reports/chromium.log >&2
+        exit 1
+      fi
+      jq -s '.' trivy-reports/*.json > "${CI_PROJECT_DIR}/security-scan-report.json"
+      if ! trivy image --quiet --exit-code 0 --severity HIGH,CRITICAL --format template --template "@/contrib/gitlab.tpl" --output gl-container-scanning-report.json "$IMAGE"; then
+        echo "GitLab container-scanning report was not produced. The PDF report is still saved."
+        rm -f gl-container-scanning-report.json
+      fi
+      rm -rf trivy-reports
+      exit "$failed"
+  artifacts:
+    when: always
+    expire_in: 90 days
+    paths:
+      - security-scan-warning.pdf
+      - security-scan-report.json
+    reports:
+      container_scanning: gl-container-scanning-report.json

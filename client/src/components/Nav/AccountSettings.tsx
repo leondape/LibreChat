@@ -6,6 +6,7 @@ import {
   Archive,
   ChevronRight,
   CircleHelp,
+  ClipboardList,
   Keyboard,
   LifeBuoy,
   LogOut,
@@ -16,6 +17,7 @@ import { ArchivedChatsModal } from '~/components/Nav/SettingsTabs/General/Archiv
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { formatCost, openInNewTab } from '~/utils';
+import { useSurvey } from '~/components/Survey';
 import { useLocalize } from '~/hooks';
 import Settings from './Settings';
 import store from '~/store';
@@ -98,6 +100,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
   });
+  const survey = useSurvey({ fetch: false });
   const [showSettings, setShowSettings] = useState(false);
   const setShowShortcutsDialog = useSetRecoilState(store.showShortcutsDialog);
   const [showArchived, setShowArchived] = useState(false);
@@ -107,7 +110,11 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
     <Menu.MenuProvider placement={collapsed ? 'right-end' : undefined}>
       <Menu.MenuButton
         ref={accountSettingsButtonRef}
-        aria-label={localize('com_nav_account_settings')}
+        aria-label={
+          survey.available
+            ? `${localize('com_nav_account_settings')}, ${localize('com_survey_badge')}`
+            : localize('com_nav_account_settings')
+        }
         data-testid="nav-user"
         className={
           collapsed
@@ -120,6 +127,13 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         >
           <div className="relative flex">
             <Avatar user={user} size={collapsed ? 28 : 32} />
+            {survey.available && (
+              <span
+                data-testid="survey-waiting"
+                className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-surface-destructive ring-2 ring-surface-primary-alt"
+                aria-hidden="true"
+              />
+            )}
           </div>
         </div>
         {!collapsed && (
@@ -165,6 +179,17 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           <Archive className="icon-md" aria-hidden="true" />
           {localize('com_nav_archived_chats')}
         </Menu.MenuItem>
+        {survey.available && (
+          <Menu.MenuItem onClick={survey.open} className="select-item text-sm">
+            <ClipboardList className="icon-md" aria-hidden="true" />
+            {localize('com_survey_menu')}
+            <span
+              data-testid="survey-waiting-menu"
+              className="ml-auto size-2 rounded-full bg-surface-destructive"
+              aria-hidden="true"
+            />
+          </Menu.MenuItem>
+        )}
         <Menu.MenuItem
           onClick={() => setShowSettings(true)}
           className="select-item text-sm"

@@ -10,12 +10,15 @@ import { createAgentTriggerDeliveryModel } from './triggerDelivery';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
+import { createSurveyResponseModel } from './surveyResponse';
 import { createAgentCategoryModel } from './agentCategory';
+import { createSurveyFlightModel } from './surveyFlight';
 import { createChatProjectModel } from './chatProject';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
 import { createSystemGrantModel } from './systemGrant';
+import { createSurveyNudgeModel } from './surveyNudge';
 import { createPluginAuthModel } from './pluginAuth';
 import { createSharedLinkModel } from './sharedLink';
 import { createAccessRoleModel } from './accessRole';
@@ -67,6 +70,9 @@ export function createModels(mongoose: typeof import('mongoose')): {
   Assistant: ReturnType<typeof createAssistantModel>;
   File: ReturnType<typeof createFileModel>;
   Banner: ReturnType<typeof createBannerModel>;
+  SurveyFlight: ReturnType<typeof createSurveyFlightModel>;
+  SurveyNudge: ReturnType<typeof createSurveyNudgeModel>;
+  SurveyResponse: ReturnType<typeof createSurveyResponseModel>;
   Key: ReturnType<typeof createKeyModel>;
   PluginAuth: ReturnType<typeof createPluginAuthModel>;
   Transaction: ReturnType<typeof createTransactionModel>;
@@ -116,6 +122,9 @@ export function createModels(mongoose: typeof import('mongoose')): {
     Assistant: createAssistantModel(mongoose),
     File: createFileModel(mongoose),
     Banner: createBannerModel(mongoose),
+    SurveyFlight: createSurveyFlightModel(mongoose),
+    SurveyNudge: createSurveyNudgeModel(mongoose),
+    SurveyResponse: createSurveyResponseModel(mongoose),
     Key: createKeyModel(mongoose),
     PluginAuth: createPluginAuthModel(mongoose),
     Transaction: createTransactionModel(mongoose),

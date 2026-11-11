@@ -1,0 +1,17 @@
+[
+  {
+    "id": "group",
+    "name": "Example Group",
+    "children": [
+      {
+        "id": "studios",
+        "name": "Studios",
+        "children": [
+          { "id": "studio-a", "name": "Studio A" },
+          { "id": "studio-b", "name": "Studio B" }
+        ]
+      },
+      { "id": "holding", "name": "Holding" }
+    ]
+  }
+]

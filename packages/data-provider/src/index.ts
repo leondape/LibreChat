@@ -44,6 +44,7 @@ export * from './types/runs';
 export * from './types/web';
 export * from './types/graph';
 export * from './types/insights';
+export * from './survey';
 export * from './types/traces';
 export * from './types/subagents';
 export * from './types/background';

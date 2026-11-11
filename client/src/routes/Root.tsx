@@ -41,6 +41,7 @@ import { TermsAndConditionsModal } from '~/components/ui';
 import useDrawerSwipe from '~/hooks/Nav/useDrawerSwipe';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
+import { Survey } from '~/components/Survey';
 import store from '~/store';
 
 /** Isolates keyboard shortcut listeners so they only mount after auth. */
@@ -218,6 +219,7 @@ export default function Root() {
                 modalContent={config.interface.termsOfService.modalContent}
               />
             )}
+            {!showTerms && <Survey />}
           </AssistantsMapContext.Provider>
         </FileMapContext.Provider>
       </SetConvoProvider>

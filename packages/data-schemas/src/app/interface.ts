@@ -71,6 +71,7 @@ export async function loadDefaultInterface({
     skills: interfaceConfig?.skills,
     sharedLinks: interfaceConfig?.sharedLinks,
     schedules: interfaceConfig?.schedules,
+    survey: interfaceConfig?.survey,
   });
 
   return loadedInterface;

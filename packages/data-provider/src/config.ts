@@ -2393,6 +2393,8 @@ export const interfaceSchema = z
         }),
       ])
       .optional(),
+    /** Set `false` to hide the usage survey even while a flight is armed. */
+    survey: z.boolean().optional(),
   })
   .default({
     modelSelect: true,

@@ -187,6 +187,9 @@ import {
 } from './mcpAuthority';
 /* Insights */
 import { createInsightsMethods, type InsightsMethods } from './insights';
+/* Survey */
+import { createSurveyUsageMethods, type SurveyUsageMethods } from './surveyUsage';
+import { createSurveyMethods, type SurveyMethods } from './survey';
 
 export {
   runAfterTransaction,
@@ -269,7 +272,9 @@ export type AllMethods = UserMethods &
   AgentMethods &
   ConfigMethods &
   MCPAuthorityMethods &
-  InsightsMethods;
+  InsightsMethods &
+  SurveyMethods &
+  SurveyUsageMethods;
 
 /** Dependencies injected from the api layer into createMethods */
 export interface CreateMethodsDeps {
@@ -507,6 +512,9 @@ export function createMethods(
     ...createMCPAuthorityMethods(mongoose),
     /* Insights */
     ...createInsightsMethods(mongoose),
+    /* Survey */
+    ...createSurveyMethods(mongoose),
+    ...createSurveyUsageMethods(mongoose),
   };
 }
 
@@ -589,6 +597,8 @@ export type {
   MCPAuthorityConfigSourceDocument,
   MCPAuthorityCredentialSourceDocument,
   InsightsMethods,
+  SurveyMethods,
+  SurveyUsageMethods,
 };
 
 export { recordAgentEventActorReceiptMetric, setAgentEventActorReceiptMetricObserver };

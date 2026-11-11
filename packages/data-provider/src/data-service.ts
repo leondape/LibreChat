@@ -6,6 +6,13 @@ import type {
   TTraceRecordParams,
   TTraceRecordDetail,
 } from './types/traces';
+import type {
+  TSurveyNudge,
+  TSurveyNudgeResult,
+  TSurveyResult,
+  TSurveyStatus,
+  TSurveySubmission,
+} from './survey';
 import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
 import type { TFileConfig } from './file-config';
 import type * as tl from './types/tools';
@@ -38,6 +45,18 @@ export function getInsights(params: TInsightsParams = {}): Promise<TInsightsResp
   }
   const suffix = query.toString() ? `?${query.toString()}` : '';
   return request.get(`${endpoints.insights()}${suffix}`);
+}
+
+export function getSurvey(): Promise<TSurveyStatus> {
+  return request.get(endpoints.survey());
+}
+
+export function submitSurvey(submission: TSurveySubmission): Promise<TSurveyResult> {
+  return request.post(endpoints.surveyResponses(), submission);
+}
+
+export function snoozeSurvey(nudge: TSurveyNudge): Promise<TSurveyNudgeResult> {
+  return request.post(endpoints.surveyNudge(), nudge);
 }
 
 export function getInsightsAccess(): Promise<TInsightsAccessResponse> {

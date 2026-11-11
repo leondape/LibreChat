@@ -27,6 +27,7 @@ export enum QueryKeys {
   startupConfig = 'startupConfig',
   insights = 'insights',
   insightsAccess = 'insightsAccess',
+  survey = 'survey',
   assistants = 'assistants',
   assistant = 'assistant',
   agents = 'agents',
@@ -112,6 +113,8 @@ export const DynamicQueryKeys = {
 } as const;
 
 export enum MutationKeys {
+  submitSurvey = 'submitSurvey',
+  snoozeSurvey = 'snoozeSurvey',
   subagentControl = 'subagentControl',
   cancelBackgroundTasks = 'cancelBackgroundTasks',
   enqueueAgentQueuedTurn = 'enqueueAgentQueuedTurn',

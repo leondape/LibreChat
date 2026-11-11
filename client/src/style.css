@@ -2688,3 +2688,82 @@ html[data-input-modality='keyboard']
 ::view-transition-group(chat-form) {
   z-index: 2;
 }
+
+/* Feedback fish: tail frames, a gentle bob, and the bubbles it trails.
+   Sprite stepping and the rise cannot be expressed with shared primitives. */
+.survey-fish-strip {
+  animation: survey-fish-strip 1.6s steps(4) infinite;
+}
+
+.survey-fish-bob {
+  animation: survey-fish-bob 4s ease-in-out infinite;
+}
+
+.survey-fish-bubble {
+  opacity: 0;
+  animation: survey-fish-bubble 4.6s ease-out infinite backwards;
+}
+
+@keyframes survey-fish-strip {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes survey-fish-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes survey-fish-bubble {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.85;
+  }
+
+  40% {
+    transform: translate(4px, -26px) scale(1);
+  }
+
+  70% {
+    transform: translate(-3px, -48px) scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translate(2px, -72px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.survey-fish-fade {
+  animation: survey-fish-fade 0.45s ease-out both;
+}
+
+@keyframes survey-fish-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey-fish-bob,
+  .survey-fish-strip,
+  .survey-fish-bubble {
+    animation: none;
+  }
+}

@@ -106,6 +106,8 @@ export * from './langfuse';
 export * from './traces';
 /* Insights */
 export * from './insights';
+export * from './survey';
+export * from './survey';
 /* Cache */
 export * from './cache';
 /* Cluster */

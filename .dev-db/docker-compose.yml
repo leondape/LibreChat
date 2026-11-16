@@ -7,7 +7,7 @@ services:
       - 27017
     ports:
       - 27017:27017
-    image: mongo
+    image: mongo:8.2
     # restart: always
     volumes:
       - ./data-node:/data/db

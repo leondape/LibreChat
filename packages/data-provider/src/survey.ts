@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const SURVEY_ID = 'wangpt-kpi';
-export const SURVEY_VERSION = 1;
+export const SURVEY_VERSION = 2;
 export const SURVEY_USAGE_VERSION = 1;
 export const SURVEY_DEFAULT_LOOKBACK_DAYS = 30;
 export const SURVEY_DEFAULT_MIN_RESPONSES = 50;
@@ -83,7 +83,8 @@ export const SURVEY_JOB_FUNCTIONS = [
   'other',
 ] as const;
 
-export const SURVEY_USE_CASES = [
+/** Kinds of work a person can name as the task WanGPT helps with most. */
+export const SURVEY_TASK_KINDS = [
   'summarize',
   'write',
   'email',
@@ -96,6 +97,15 @@ export const SURVEY_USE_CASES = [
   'meetings',
   'legal_review',
   'other',
+] as const;
+
+/** How often that task comes up. */
+export const SURVEY_TASK_FREQUENCIES = [
+  'daily',
+  'few_week',
+  'weekly',
+  'few_month',
+  'rarely',
 ] as const;
 
 export const SURVEY_HOURS_RANGES = [
@@ -118,35 +128,41 @@ export const SURVEY_TIME_USES = [
   'learning',
 ] as const;
 
-export const SURVEY_TIME_COSTS = [
+/** What WanGPT replaced that used to be bought or asked of someone else. */
+export const SURVEY_REPLACED = [
+  'translation',
+  'agency',
+  'colleagues',
+  'paid_tool',
+  'nothing',
+] as const;
+
+export const SURVEY_DISAPPOINTMENT = ['very', 'somewhat', 'not'] as const;
+
+/** Where WanGPT lets someone down or costs them time. */
+export const SURVEY_LETDOWNS = [
   'checking',
-  'prompting',
-  'errors',
+  'wrong',
+  'reach',
   'limits',
-  'learning',
+  'prompting',
+  'rules',
   'nowhere',
 ] as const;
 
-export const SURVEY_HELP = [
-  'training',
-  'time',
-  'examples',
-  'quality',
-  'integrations',
+/** What would make the biggest difference. At most two may be chosen. */
+export const SURVEY_WISHES = [
+  'connect_tool',
   'data_access',
-  'rules',
+  'training',
+  'agents',
+  'examples',
+  'answers',
   'other',
 ] as const;
 
-export const SURVEY_TOOLS = [
-  'chatgpt',
-  'copilot',
-  'gemini',
-  'claude',
-  'deepl',
-  'other',
-  'none',
-] as const;
+/** How the person's team approaches AI. */
+export const SURVEY_CULTURE = ['encouraged', 'tolerated', 'discouraged', 'never'] as const;
 
 export type TSurveyHoursRange = (typeof SURVEY_HOURS_RANGES)[number];
 
@@ -162,15 +178,18 @@ export const SURVEY_HOURS_VALUE: Record<TSurveyHoursRange, number | null> = {
   cant_say: null,
 };
 
-export const SURVEY_HELP_MAX = 3;
-export const SURVEY_QUALITY_MAX = 5;
+export const SURVEY_WISHES_MAX = 2;
+/** 1 is clearly worse, 5 is clearly better. 3 is no difference. */
+export const SURVEY_IMPROVEMENT_MAX = 5;
 export const SURVEY_SATISFACTION_MAX = 9;
 export const SURVEY_HOURS_MAX = 80;
+/** A single task cannot be reported as taking longer than a day. */
+export const SURVEY_MINUTES_MAX = 1440;
 export const SURVEY_NOTE_MAX = 500;
 export const SURVEY_FEEDBACK_MAX = 2000;
 
 /** Options that, when chosen, must be the only selection of their question. */
-export const SURVEY_EXCLUSIVE = { timeCosts: 'nowhere', tools: 'none' } as const;
+export const SURVEY_EXCLUSIVE = { replaced: 'nothing', letdowns: 'nowhere' } as const;
 
 const uniqueEnumArray = <T extends readonly [string, ...string[]]>(values: T) =>
   z
@@ -190,30 +209,50 @@ export const surveyHoursSavedSchema = z
     message: 'Provide either hours or a range',
   });
 
+export const surveyBestTaskSchema = z
+  .object({
+    kind: z.enum(SURVEY_TASK_KINDS),
+    note: z.string().trim().min(1).max(SURVEY_NOTE_MAX),
+    minutesWithout: z.number().int().min(0).max(SURVEY_MINUTES_MAX),
+    minutesWith: z.number().int().min(0).max(SURVEY_MINUTES_MAX),
+    frequency: z.enum(SURVEY_TASK_FREQUENCIES),
+  })
+  .strict();
+
 export const surveyAnswersSchema = z
   .object({
     company: z.array(z.string().min(1).max(100)).min(1).max(12),
     jobFunction: z.enum(SURVEY_JOB_FUNCTIONS),
     jobOther: z.string().trim().max(100).optional(),
-    useCases: uniqueEnumArray(SURVEY_USE_CASES),
-    topUseCase: z.enum(SURVEY_USE_CASES),
-    topUseCaseNote: note,
+    bestTask: surveyBestTaskSchema,
     hoursSaved: surveyHoursSavedSchema,
     timeUses: uniqueEnumArray(SURVEY_TIME_USES).optional(),
-    quality: z.number().int().min(1).max(SURVEY_QUALITY_MAX),
+    improvement: z.number().int().min(1).max(SURVEY_IMPROVEMENT_MAX),
     enabled: z.boolean(),
     enabledNote: note,
-    timeCosts: uniqueEnumArray(SURVEY_TIME_COSTS),
-    help: uniqueEnumArray(SURVEY_HELP).refine((items) => items.length <= SURVEY_HELP_MAX),
-    trained: z.boolean(),
-    tools: uniqueEnumArray(SURVEY_TOOLS),
+    replaced: uniqueEnumArray(SURVEY_REPLACED),
+    disappointment: z.enum(SURVEY_DISAPPOINTMENT),
+    letdowns: uniqueEnumArray(SURVEY_LETDOWNS),
+    letdownNote: note,
+    wishes: uniqueEnumArray(SURVEY_WISHES).refine((items) => items.length <= SURVEY_WISHES_MAX),
+    wishTask: note,
+    culture: z.enum(SURVEY_CULTURE),
     satisfaction: z.number().int().min(1).max(SURVEY_SATISFACTION_MAX),
     feedback: z.string().trim().max(SURVEY_FEEDBACK_MAX).optional(),
   })
   .strict();
 
 export type TSurveyAnswers = z.infer<typeof surveyAnswersSchema>;
+export type TSurveyBestTask = z.infer<typeof surveyBestTaskSchema>;
 export type TSurveyHoursSaved = z.infer<typeof surveyHoursSavedSchema>;
+
+/**
+ * Answers while the form is still being filled. `bestTask` is filled one
+ * field at a time, so it is partial until the step is complete.
+ */
+export type TSurveyDraftAnswers = Omit<Partial<TSurveyAnswers>, 'bestTask'> & {
+  bestTask?: Partial<TSurveyBestTask>;
+};
 
 /** The hours a person reports saving, or `null` when they cannot say. */
 export function getSurveyHoursSaved(hoursSaved?: Partial<TSurveyHoursSaved>): number | null {
@@ -235,37 +274,37 @@ export function hasSurveyTimeGain(hoursSaved?: Partial<TSurveyHoursSaved>): bool
 export type TSurveyStepId =
   | 'company'
   | 'job'
-  | 'useCases'
-  | 'topUseCase'
+  | 'bestTask'
   | 'hours'
   | 'timeUses'
-  | 'quality'
+  | 'improvement'
   | 'enabled'
-  | 'timeCosts'
-  | 'help'
-  | 'trained'
-  | 'tools'
+  | 'replaced'
+  | 'disappointment'
+  | 'letdowns'
+  | 'wishes'
+  | 'culture'
   | 'satisfaction'
   | 'feedback';
 
 export const SURVEY_STEPS: readonly TSurveyStepId[] = [
   'company',
   'job',
-  'useCases',
-  'topUseCase',
+  'bestTask',
   'hours',
   'timeUses',
-  'quality',
+  'improvement',
   'enabled',
-  'timeCosts',
-  'help',
-  'trained',
-  'tools',
+  'replaced',
+  'disappointment',
+  'letdowns',
+  'wishes',
+  'culture',
   'satisfaction',
   'feedback',
 ];
 
-export function getSurveySteps(answers: Partial<TSurveyAnswers>): TSurveyStepId[] {
+export function getSurveySteps(answers: TSurveyDraftAnswers): TSurveyStepId[] {
   return SURVEY_STEPS.filter(
     (step) => step !== 'timeUses' || hasSurveyTimeGain(answers.hoursSaved),
   );
@@ -273,9 +312,11 @@ export function getSurveySteps(answers: Partial<TSurveyAnswers>): TSurveyStepId[
 
 const filled = (items?: readonly unknown[]) => (items?.length ?? 0) > 0;
 
+const described = (value?: string) => (value?.trim().length ?? 0) > 0;
+
 export function isSurveyStepComplete(
   step: TSurveyStepId,
-  answers: Partial<TSurveyAnswers>,
+  answers: TSurveyDraftAnswers,
   companies: TSurveyCompany[],
 ): boolean {
   switch (step) {
@@ -283,12 +324,16 @@ export function isSurveyStepComplete(
       return isSurveyCompanyLeafPath(companies, answers.company ?? []);
     case 'job':
       return answers.jobFunction !== undefined;
-    case 'useCases':
-      return filled(answers.useCases);
-    case 'topUseCase':
+    case 'bestTask': {
+      const task = answers.bestTask;
       return (
-        answers.topUseCase !== undefined && answers.useCases?.includes(answers.topUseCase) === true
+        task?.kind !== undefined &&
+        described(task?.note) &&
+        task?.minutesWithout !== undefined &&
+        task?.minutesWith !== undefined &&
+        task?.frequency !== undefined
       );
+    }
     case 'hours':
       return (
         answers.hoursSaved !== undefined &&
@@ -296,18 +341,20 @@ export function isSurveyStepComplete(
       );
     case 'timeUses':
       return filled(answers.timeUses);
-    case 'quality':
-      return answers.quality !== undefined;
+    case 'improvement':
+      return answers.improvement !== undefined;
     case 'enabled':
       return answers.enabled !== undefined;
-    case 'timeCosts':
-      return filled(answers.timeCosts);
-    case 'help':
-      return filled(answers.help);
-    case 'trained':
-      return answers.trained !== undefined;
-    case 'tools':
-      return filled(answers.tools);
+    case 'replaced':
+      return filled(answers.replaced);
+    case 'disappointment':
+      return answers.disappointment !== undefined;
+    case 'letdowns':
+      return filled(answers.letdowns);
+    case 'wishes':
+      return filled(answers.wishes);
+    case 'culture':
+      return answers.culture !== undefined;
     case 'satisfaction':
       return answers.satisfaction !== undefined;
     case 'feedback':
@@ -348,20 +395,17 @@ export function parseSurveyAnswers(
   if (answers.jobOther !== undefined && answers.jobFunction !== 'other') {
     fields.push('jobOther');
   }
-  if (!answers.useCases.includes(answers.topUseCase)) {
-    fields.push('topUseCase');
-  }
   if (hasSurveyTimeGain(answers.hoursSaved) !== (answers.timeUses !== undefined)) {
     fields.push('timeUses');
   }
   if (answers.enabledNote !== undefined && !answers.enabled) {
     fields.push('enabledNote');
   }
-  if (!isExclusiveValid(answers.timeCosts, SURVEY_EXCLUSIVE.timeCosts)) {
-    fields.push('timeCosts');
+  if (!isExclusiveValid(answers.replaced, SURVEY_EXCLUSIVE.replaced)) {
+    fields.push('replaced');
   }
-  if (!isExclusiveValid(answers.tools, SURVEY_EXCLUSIVE.tools)) {
-    fields.push('tools');
+  if (!isExclusiveValid(answers.letdowns, SURVEY_EXCLUSIVE.letdowns)) {
+    fields.push('letdowns');
   }
   return fields.length > 0 ? invalid(fields) : { ok: true, value: answers };
 }

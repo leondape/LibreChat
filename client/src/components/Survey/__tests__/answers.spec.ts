@@ -1,4 +1,4 @@
-import { applyAnswers, parseHours, toggleChoice } from '../answers';
+import { applyAnswers, parseHours, parseMinutes, shuffleOptions, toggleChoice } from '../answers';
 
 describe('applyAnswers', () => {
   it('drops the time uses once the hours no longer show a gain', () => {
@@ -14,18 +14,12 @@ describe('applyAnswers', () => {
     expect(answers.timeUses).toBeUndefined();
   });
 
-  it('clears the top use case when it is deselected and fills it for a single choice', () => {
-    const both = applyAnswers({}, { useCases: ['write', 'email'], topUseCase: 'email' });
-    expect(both.topUseCase).toBe('email');
+  it('trims the task description and drops it when it is blank', () => {
+    const filled = applyAnswers({}, { bestTask: { note: '  Pitch deck  ' } });
+    expect(filled.bestTask?.note).toBe('Pitch deck');
 
-    const removed = applyAnswers(both, { useCases: ['write', 'translate'] });
-    expect(removed.topUseCase).toBeUndefined();
-
-    const single = applyAnswers(removed, { useCases: ['translate'] });
-    expect(single.topUseCase).toBe('translate');
-
-    const none = applyAnswers(single, { useCases: [] });
-    expect(none.topUseCase).toBeUndefined();
+    const blank = applyAnswers(filled, { bestTask: { note: '   ' } });
+    expect(blank.bestTask).not.toHaveProperty('note');
   });
 
   it('keeps the job description only for "other" and trims it', () => {
@@ -69,5 +63,34 @@ describe('parseHours', () => {
     expect(parseHours('2.3')).toBe(2.5);
     expect(parseHours('-4')).toBe(0);
     expect(parseHours('500')).toBe(80);
+  });
+});
+
+describe('parseMinutes', () => {
+  it('turns typing into whole minutes within a day', () => {
+    expect(parseMinutes('')).toBeUndefined();
+    expect(parseMinutes('abc')).toBeUndefined();
+    expect(parseMinutes('12.6')).toBe(13);
+    expect(parseMinutes('-8')).toBe(0);
+    expect(parseMinutes('9000')).toBe(1440);
+  });
+});
+
+describe('shuffleOptions', () => {
+  const values = ['a', 'b', 'c', 'd', 'e', 'other'] as const;
+
+  it('keeps the same order for the same seed and pins the last options', () => {
+    const once = shuffleOptions(values, 'user-1:flight', ['other']);
+    const twice = shuffleOptions(values, 'user-1:flight', ['other']);
+    expect(twice).toEqual(once);
+    expect(once.at(-1)).toBe('other');
+    expect(once.slice(0, -1).sort()).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(values).toEqual(['a', 'b', 'c', 'd', 'e', 'other']);
+  });
+
+  it('can order the same options differently for another person', () => {
+    const first = shuffleOptions(values, 'user-1:flight', ['other']);
+    const second = shuffleOptions(values, 'user-2:flight', ['other']);
+    expect(second).not.toEqual(first);
   });
 });

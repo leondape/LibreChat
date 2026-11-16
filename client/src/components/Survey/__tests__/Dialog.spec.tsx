@@ -102,10 +102,10 @@ describe('SurveyDialog', () => {
     renderDialog();
 
     await user.click(screen.getByRole('radio', { name: 'None' }));
-    expect(screen.getByText('Question 5 of 13')).toBeInTheDocument();
+    expect(screen.getByText('Question 4 of 13')).toBeInTheDocument();
 
     await user.click(screen.getByRole('radio', { name: '2–5 hours' }));
-    expect(screen.getByText('Question 5 of 14')).toBeInTheDocument();
+    expect(screen.getByText('Question 4 of 14')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
     expect(
@@ -128,37 +128,40 @@ describe('SurveyDialog', () => {
     );
   });
 
-  it('lets an exclusive tools answer replace the others', async () => {
+  it('lets an exclusive letdown replace the others', async () => {
     const user = userEvent.setup();
-    seed('tools', { ...answers, tools: undefined });
+    seed('letdowns', { ...answers, letdowns: undefined });
     renderDialog();
 
-    await user.click(screen.getByRole('button', { name: 'ChatGPT' }));
-    await user.click(screen.getByRole('button', { name: 'None' }));
+    await user.click(screen.getByRole('button', { name: 'Wrong or made-up answers' }));
+    await user.click(screen.getByRole('button', { name: "Nowhere, it doesn't let me down" }));
 
-    expect(screen.getByRole('button', { name: 'None' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'ChatGPT' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: "Nowhere, it doesn't let me down" })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Wrong or made-up answers' })).toHaveAttribute(
       'aria-pressed',
       'false',
     );
   });
 
-  it('caps the help choices at three', async () => {
+  it('caps the wishes at two', async () => {
     const user = userEvent.setup();
-    seed('help', { ...answers, help: undefined });
+    seed('wishes', { ...answers, wishes: undefined });
     renderDialog();
 
-    for (const name of ['Training', 'Better answer quality', 'Clearer rules for use']) {
+    for (const name of ['Training for my kind of work', 'Better answers']) {
       await user.click(screen.getByRole('button', { name }));
     }
 
-    expect(screen.getByText('3 of 3 selected')).toBeInTheDocument();
+    expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Something else' })).toBeDisabled();
   });
 
   it('asks to be reminded later and keeps the draft', async () => {
     const user = userEvent.setup();
-    seed('quality');
+    seed('improvement');
     const onLater = jest.fn();
     const onClose = renderDialog(jest.fn(), onLater);
 
@@ -166,7 +169,7 @@ describe('SurveyDialog', () => {
 
     expect(onLater).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
-    expect(store.get(surveyDraftAtom)?.step).toBe('quality');
+    expect(store.get(surveyDraftAtom)?.step).toBe('improvement');
   });
 
   it('runs the loader, then celebrates with the usage overview and no comparison yet', async () => {
@@ -252,10 +255,21 @@ describe('SurveyDialog', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('ignores a draft saved before this survey version', () => {
+    store.set(surveyDraftAtom, {
+      key: `${userId}:${flight.flightId}`,
+      step: 'feedback',
+      answers,
+    });
+    renderDialog();
+
+    expect(screen.getByText('Help us improve WanGPT')).toBeInTheDocument();
+  });
+
   it('does not store a draft for another account', () => {
     store.set(surveyDraftAtom, {
       key: getSurveyKey('someone-else', flight.flightId),
-      step: 'quality',
+      step: 'improvement',
       answers,
     });
     renderDialog();

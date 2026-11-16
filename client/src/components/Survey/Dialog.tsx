@@ -30,12 +30,12 @@ const BLOCKING_CODES = ['already_submitted', 'survey_closed'];
 /** Steps that carry a line of guidance under the question. */
 const HINTS: SurveyStepId[] = [
   'company',
-  'useCases',
+  'bestTask',
   'hours',
   'timeUses',
-  'timeCosts',
-  'help',
-  'tools',
+  'replaced',
+  'letdowns',
+  'wishes',
 ];
 
 const getPrimaryLabel = (isIntro: boolean, isLast: boolean, hasDraft: boolean) => {
@@ -255,6 +255,7 @@ export default function SurveyDialog({ flight, userId, onClose, onLater }: Dialo
                   answers={answers}
                   companies={flight.companies}
                   labelId={questionId}
+                  seed={key}
                   onChange={update}
                 />
               </div>

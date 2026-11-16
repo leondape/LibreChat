@@ -25,15 +25,21 @@ const flight = {
 const answers: TSurveyAnswers = {
   company: ['a'],
   jobFunction: 'legal',
-  useCases: ['write'],
-  topUseCase: 'write',
+  bestTask: {
+    kind: 'write',
+    note: 'Weekly pitch deck',
+    minutesWithout: 180,
+    minutesWith: 90,
+    frequency: 'weekly',
+  },
   hoursSaved: { range: 'none' },
-  quality: 3,
+  improvement: 3,
   enabled: false,
-  timeCosts: ['nowhere'],
-  help: ['training'],
-  trained: false,
-  tools: ['none'],
+  replaced: ['nothing'],
+  disappointment: 'not',
+  letdowns: ['nowhere'],
+  wishes: ['training'],
+  culture: 'never',
   satisfaction: 5,
 };
 

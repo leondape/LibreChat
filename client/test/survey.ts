@@ -26,15 +26,21 @@ export const flight: TSurveyFlight = {
 export const answers: TSurveyAnswers = {
   company: ['group', 'news'],
   jobFunction: 'legal',
-  useCases: ['write', 'email'],
-  topUseCase: 'email',
+  bestTask: {
+    kind: 'email',
+    note: 'Weekly status mail',
+    minutesWithout: 40,
+    minutesWith: 15,
+    frequency: 'weekly',
+  },
   hoursSaved: { range: 'none' },
-  quality: 4,
+  improvement: 4,
   enabled: false,
-  timeCosts: ['nowhere'],
-  help: ['training'],
-  trained: true,
-  tools: ['none'],
+  replaced: ['nothing'],
+  disappointment: 'somewhat',
+  letdowns: ['nowhere'],
+  wishes: ['training'],
+  culture: 'tolerated',
   satisfaction: 7,
 };
 

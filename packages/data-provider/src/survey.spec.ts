@@ -24,16 +24,22 @@ const companies: TSurveyCompany[] = [
 const valid = (): TSurveyAnswers => ({
   company: ['group', 'studio', 'studio-de'],
   jobFunction: 'legal',
-  useCases: ['summarize', 'write'],
-  topUseCase: 'write',
+  bestTask: {
+    kind: 'write',
+    note: 'Weekly pitch deck',
+    minutesWithout: 180,
+    minutesWith: 90,
+    frequency: 'weekly',
+  },
   hoursSaved: { hours: 2 },
   timeUses: ['more_same'],
-  quality: 4,
+  improvement: 4,
   enabled: false,
-  timeCosts: ['checking'],
-  help: ['training', 'time'],
-  trained: true,
-  tools: ['chatgpt'],
+  replaced: ['translation'],
+  disappointment: 'somewhat',
+  letdowns: ['checking'],
+  wishes: ['training', 'agents'],
+  culture: 'encouraged',
   satisfaction: 7,
 });
 
@@ -62,19 +68,25 @@ describe('parseSurveyAnswers', () => {
   it.each<[string, (answers: Record<string, unknown>) => void, string]>([
     ['a non-leaf company', (a) => (a.company = ['group', 'studio']), 'company'],
     ['an unknown option', (a) => (a.jobFunction = 'wizard'), 'jobFunction'],
+    ['more than two wishes', (a) => (a.wishes = ['training', 'agents', 'examples']), 'wishes'],
     [
-      'more than three help answers',
-      (a) => (a.help = ['training', 'time', 'examples', 'quality']),
-      'help',
+      'a task without a description',
+      (a) => (a.bestTask = { ...(a.bestTask as object), note: '  ' }),
+      'bestTask',
     ],
-    ['a top use case that was not selected', (a) => (a.topUseCase = 'code'), 'topUseCase'],
+    [
+      'a task longer than a day',
+      (a) => (a.bestTask = { ...(a.bestTask as object), minutesWithout: 2000 }),
+      'bestTask',
+    ],
     ['time uses without a time gain', (a) => (a.hoursSaved = { range: 'none' }), 'timeUses'],
     ['a missing time uses answer on a gain', (a) => delete a.timeUses, 'timeUses'],
     [
-      'an exclusive option mixed with others',
-      (a) => (a.timeCosts = ['nowhere', 'checking']),
-      'timeCosts',
+      'nothing mixed with something it replaced',
+      (a) => (a.replaced = ['nothing', 'translation']),
+      'replaced',
     ],
+    ['nowhere mixed with a letdown', (a) => (a.letdowns = ['nowhere', 'checking']), 'letdowns'],
     ['both hours and a range', (a) => (a.hoursSaved = { hours: 1, range: 'none' }), 'hoursSaved'],
     ['an out of range scale', (a) => (a.satisfaction = 10), 'satisfaction'],
     ['an unexpected field', (a) => (a.userId = 'u1'), ''],
@@ -117,8 +129,14 @@ describe('steps', () => {
     expect(isSurveyStepComplete('company', { company: ['group'] }, companies)).toBe(false);
     expect(isSurveyStepComplete('company', valid(), companies)).toBe(true);
     expect(
-      isSurveyStepComplete('topUseCase', { useCases: ['write'], topUseCase: 'code' }, companies),
+      isSurveyStepComplete(
+        'bestTask',
+        { bestTask: { kind: 'write', note: 'Pitch', minutesWithout: 60 } },
+        companies,
+      ),
     ).toBe(false);
+    expect(isSurveyStepComplete('bestTask', valid(), companies)).toBe(true);
+    expect(isSurveyStepComplete('wishes', { wishes: [] }, companies)).toBe(false);
     expect(isSurveyStepComplete('feedback', {}, companies)).toBe(true);
     expect(isSurveyStepComplete('enabled', { enabled: false }, companies)).toBe(true);
   });

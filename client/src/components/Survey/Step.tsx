@@ -1,24 +1,28 @@
 import { Input, Textarea } from '@librechat/client';
 import {
-  SURVEY_HELP,
-  SURVEY_TOOLS,
-  SURVEY_HELP_MAX,
+  SURVEY_CULTURE,
+  SURVEY_WISHES,
   SURVEY_EXCLUSIVE,
+  SURVEY_LETDOWNS,
   SURVEY_NOTE_MAX,
-  SURVEY_HOURS_MAX,
-  SURVEY_USE_CASES,
+  SURVEY_REPLACED,
   SURVEY_TIME_USES,
-  SURVEY_TIME_COSTS,
+  SURVEY_WISHES_MAX,
+  SURVEY_HOURS_MAX,
+  SURVEY_TASK_KINDS,
   SURVEY_FEEDBACK_MAX,
-  SURVEY_JOB_FUNCTIONS,
   SURVEY_HOURS_RANGES,
-  SURVEY_QUALITY_MAX,
+  SURVEY_JOB_FUNCTIONS,
+  SURVEY_MINUTES_MAX,
+  SURVEY_DISAPPOINTMENT,
+  SURVEY_IMPROVEMENT_MAX,
   SURVEY_SATISFACTION_MAX,
+  SURVEY_TASK_FREQUENCIES,
 } from 'librechat-data-provider';
-import type { TSurveyStepId, TSurveyCompany, TSurveyAnswers } from 'librechat-data-provider';
+import type { TSurveyBestTask, TSurveyCompany, TSurveyStepId } from 'librechat-data-provider';
 import type { SurveyDraftAnswers } from './answers';
 import type { TranslationKeys } from '~/hooks';
-import { parseHours, toggleChoice } from './answers';
+import { parseHours, parseMinutes, shuffleOptions, toggleChoice } from './answers';
 import { useLocalize } from '~/hooks';
 import Company from './Company';
 import Pills from './Pills';
@@ -29,6 +33,8 @@ type StepProps = {
   companies: TSurveyCompany[];
   /** Id of the heading, which labels the controls below it. */
   labelId: string;
+  /** Keeps shuffled option order stable for this person. */
+  seed: string;
   onChange: (patch: SurveyDraftAnswers) => void;
 };
 
@@ -43,6 +49,7 @@ function Note({
   label,
   max = SURVEY_NOTE_MAX,
   rows = 3,
+  spaced = true,
   onChange,
 }: {
   id: string;
@@ -50,10 +57,12 @@ function Note({
   label: string;
   max?: number;
   rows?: number;
+  /** False when the parent already separates this field from the one above it. */
+  spaced?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="mt-4 flex flex-col gap-1">
+    <div className={spaced ? 'mt-4 flex flex-col gap-1' : 'flex flex-col gap-1'}>
       <label htmlFor={id} className="text-sm text-text-secondary">
         {label}
       </label>
@@ -68,19 +77,60 @@ function Note({
   );
 }
 
-export default function Step({ step, answers, companies, labelId, onChange }: StepProps) {
+function Minutes({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value?: number;
+  onChange: (input: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm text-text-secondary">
+        {label}
+      </label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={SURVEY_MINUTES_MAX}
+        step={1}
+        className="w-28"
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
+
+export default function Step({ step, answers, companies, labelId, seed, onChange }: StepProps) {
   const localize = useLocalize();
 
   const options = (prefix: string, values: readonly string[]) =>
     values.map((value) => ({ value, label: localize(surveyKey(prefix, value)) }));
 
+  const ordered = (values: readonly string[], pinned: readonly string[] = []) =>
+    shuffleOptions(values, seed, pinned);
+
   const jobs = options('job', SURVEY_JOB_FUNCTIONS);
-  const useCases = options('usecase', SURVEY_USE_CASES);
+  const taskKinds = options('task', SURVEY_TASK_KINDS);
+  const frequencies = options('frequency', SURVEY_TASK_FREQUENCIES);
   const ranges = options('hours', SURVEY_HOURS_RANGES);
-  const timeUses = options('timeuse', SURVEY_TIME_USES);
-  const timeCosts = options('timecost', SURVEY_TIME_COSTS);
-  const help = options('help', SURVEY_HELP);
-  const tools = options('tool', SURVEY_TOOLS);
+  const timeUses = options('timeuse', ordered(SURVEY_TIME_USES));
+  const replaced = options('replaced', ordered(SURVEY_REPLACED, [SURVEY_EXCLUSIVE.replaced]));
+  const disappointment = options('disappointment', SURVEY_DISAPPOINTMENT);
+  const letdowns = options('letdown', ordered(SURVEY_LETDOWNS, [SURVEY_EXCLUSIVE.letdowns]));
+  const wishes = options('wish', ordered(SURVEY_WISHES, ['other']));
+  const culture = options('culture', SURVEY_CULTURE);
+  const improvement = Array.from({ length: SURVEY_IMPROVEMENT_MAX }, (_, index) => {
+    const value = String(index + 1);
+    return { value, label: localize(surveyKey('improvement', value)) };
+  });
   const yesNo = [
     { value: 'yes', label: localize('com_survey_yes') },
     { value: 'no', label: localize('com_survey_no') },
@@ -92,17 +142,30 @@ export default function Step({ step, answers, companies, labelId, onChange }: St
     }));
 
   const choose =
-    <K extends keyof TSurveyAnswers>(field: K) =>
+    <K extends keyof SurveyDraftAnswers>(field: K) =>
     (value: string) =>
       onChange({ [field]: value } as SurveyDraftAnswers);
-  const toggle =
-    (field: 'useCases' | 'timeUses' | 'timeCosts' | 'help' | 'tools') => (value: string) => {
-      const exclusive =
-        field === 'timeCosts' || field === 'tools' ? SURVEY_EXCLUSIVE[field] : undefined;
-      onChange({
-        [field]: toggleChoice(answers[field], value, exclusive),
-      } as SurveyDraftAnswers);
-    };
+  const toggle = (field: 'timeUses' | 'replaced' | 'letdowns' | 'wishes') => (value: string) => {
+    const exclusive =
+      field === 'replaced' || field === 'letdowns' ? SURVEY_EXCLUSIVE[field] : undefined;
+    onChange({
+      [field]: toggleChoice(answers[field], value, exclusive),
+    } as SurveyDraftAnswers);
+  };
+
+  const task = answers.bestTask ?? {};
+  const setTask = (patch: Partial<TSurveyBestTask>) =>
+    onChange({ bestTask: { ...task, ...patch } });
+  const setMinutes = (field: 'minutesWithout' | 'minutesWith') => (input: string) => {
+    const minutes = parseMinutes(input);
+    const next: Partial<TSurveyBestTask> = { ...task };
+    if (minutes === undefined) {
+      delete next[field];
+    } else {
+      next[field] = minutes;
+    }
+    onChange({ bestTask: next });
+  };
 
   switch (step) {
     case 'company':
@@ -138,34 +201,50 @@ export default function Step({ step, answers, companies, labelId, onChange }: St
           )}
         </>
       );
-    case 'useCases':
+    case 'bestTask':
       return (
-        <Pills
-          multiple
-          options={useCases}
-          value={answers.useCases ?? []}
-          labelledBy={labelId}
-          onToggle={toggle('useCases')}
-        />
-      );
-    case 'topUseCase':
-      return (
-        <>
+        <div className="flex flex-col gap-4">
           <Pills
-            options={useCases.filter((option) =>
-              answers.useCases?.some((item) => item === option.value),
-            )}
-            value={answers.topUseCase ? [answers.topUseCase] : []}
+            options={taskKinds}
+            value={task.kind ? [task.kind] : []}
             labelledBy={labelId}
-            onToggle={choose('topUseCase')}
+            onToggle={(kind) => setTask({ kind: kind as TSurveyBestTask['kind'] })}
           />
           <Note
-            id="survey-top-note"
-            label={localize('com_survey_note_optional')}
-            value={answers.topUseCaseNote}
-            onChange={(topUseCaseNote) => onChange({ topUseCaseNote })}
+            id="survey-best-note"
+            spaced={false}
+            label={localize('com_survey_best_task_note')}
+            value={task.note}
+            onChange={(note) => setTask({ note })}
           />
-        </>
+          <div className="flex flex-wrap gap-4">
+            <Minutes
+              id="survey-minutes-without"
+              label={localize('com_survey_best_task_without')}
+              value={task.minutesWithout}
+              onChange={setMinutes('minutesWithout')}
+            />
+            <Minutes
+              id="survey-minutes-with"
+              label={localize('com_survey_best_task_with')}
+              value={task.minutesWith}
+              onChange={setMinutes('minutesWith')}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p id="survey-best-often" className="text-sm text-text-secondary">
+              {localize('com_survey_best_task_often')}
+            </p>
+            <Pills
+              options={frequencies}
+              value={task.frequency ? [task.frequency] : []}
+              labelledBy="survey-best-often"
+              onToggle={(frequency) =>
+                setTask({ frequency: frequency as TSurveyBestTask['frequency'] })
+              }
+            />
+          </div>
+        </div>
       );
     case 'hours':
       return (
@@ -213,15 +292,13 @@ export default function Step({ step, answers, companies, labelId, onChange }: St
           onToggle={toggle('timeUses')}
         />
       );
-    case 'quality':
+    case 'improvement':
       return (
-        <Scale
-          options={scale(SURVEY_QUALITY_MAX)}
-          value={answers.quality}
+        <Pills
+          options={improvement}
+          value={answers.improvement === undefined ? [] : [String(answers.improvement)]}
           labelledBy={labelId}
-          low={localize('com_survey_quality_low')}
-          high={localize('com_survey_quality_high')}
-          onSelect={(quality) => onChange({ quality })}
+          onToggle={(value) => onChange({ improvement: Number(value) })}
         />
       );
     case 'enabled':
@@ -243,54 +320,77 @@ export default function Step({ step, answers, companies, labelId, onChange }: St
           )}
         </>
       );
-    case 'timeCosts':
+    case 'replaced':
       return (
         <Pills
           multiple
-          options={timeCosts}
-          value={answers.timeCosts ?? []}
+          options={replaced}
+          value={answers.replaced ?? []}
           labelledBy={labelId}
-          onToggle={toggle('timeCosts')}
+          onToggle={toggle('replaced')}
         />
       );
-    case 'help': {
-      const full = (answers.help?.length ?? 0) >= SURVEY_HELP_MAX;
+    case 'disappointment':
+      return (
+        <Pills
+          options={disappointment}
+          value={answers.disappointment ? [answers.disappointment] : []}
+          labelledBy={labelId}
+          onToggle={choose('disappointment')}
+        />
+      );
+    case 'letdowns':
       return (
         <>
           <Pills
             multiple
-            options={help}
-            value={answers.help ?? []}
+            options={letdowns}
+            value={answers.letdowns ?? []}
+            labelledBy={labelId}
+            onToggle={toggle('letdowns')}
+          />
+          <Note
+            id="survey-letdown-note"
+            label={localize('com_survey_letdown_note')}
+            value={answers.letdownNote}
+            onChange={(letdownNote) => onChange({ letdownNote })}
+          />
+        </>
+      );
+    case 'wishes': {
+      const full = (answers.wishes?.length ?? 0) >= SURVEY_WISHES_MAX;
+      return (
+        <>
+          <Pills
+            multiple
+            options={wishes}
+            value={answers.wishes ?? []}
             labelledBy={labelId}
             isDisabled={() => full}
-            onToggle={toggle('help')}
+            onToggle={toggle('wishes')}
           />
           <p className="mt-3 text-sm text-text-secondary" aria-live="polite">
-            {localize('com_survey_help_count', {
-              0: answers.help?.length ?? 0,
-              1: SURVEY_HELP_MAX,
+            {localize('com_survey_selected_count', {
+              0: answers.wishes?.length ?? 0,
+              1: SURVEY_WISHES_MAX,
             })}
           </p>
+          <Note
+            id="survey-wish-task"
+            label={localize('com_survey_wish_task')}
+            value={answers.wishTask}
+            onChange={(wishTask) => onChange({ wishTask })}
+          />
         </>
       );
     }
-    case 'trained':
+    case 'culture':
       return (
         <Pills
-          options={yesNo}
-          value={asText(answers.trained)}
+          options={culture}
+          value={answers.culture ? [answers.culture] : []}
           labelledBy={labelId}
-          onToggle={(value) => onChange({ trained: value === 'yes' })}
-        />
-      );
-    case 'tools':
-      return (
-        <Pills
-          multiple
-          options={tools}
-          value={answers.tools ?? []}
-          labelledBy={labelId}
-          onToggle={toggle('tools')}
+          onToggle={choose('culture')}
         />
       );
     case 'satisfaction':

@@ -10,6 +10,7 @@ import {
   SURVEY_HOURS_RANGES,
   SURVEY_DISAPPOINTMENT,
   SURVEY_TASK_FREQUENCIES,
+  SURVEY_TASK_DURATIONS,
   SURVEY_IMPROVEMENT_MAX,
 } from 'librechat-data-provider';
 import English from '~/locales/en/translation.json';
@@ -39,6 +40,7 @@ const dynamicKeys = [
   ...options('job', SURVEY_JOB_FUNCTIONS),
   ...options('task', SURVEY_TASK_KINDS),
   ...options('frequency', SURVEY_TASK_FREQUENCIES),
+  ...options('duration', SURVEY_TASK_DURATIONS),
   ...options('hours', SURVEY_HOURS_RANGES),
   ...options('timeuse', SURVEY_TIME_USES),
   ...options('replaced', SURVEY_REPLACED),
@@ -67,7 +69,21 @@ const dynamicKeys = [
     'agentsCreated',
     'agentsShared',
     'agentsUsed',
+    'agents',
+    'toolCalls',
+    'toolsDistinct',
+    'mcpServers',
   ]),
+  ...options('title', [
+    'agent_architect',
+    'automation_pro',
+    'tool_explorer',
+    'data_wrangler',
+    'daily_driver',
+    'power_prompter',
+    'curious_explorer',
+  ]),
+  ...options('tip', ['tools', 'agents', 'schedules', 'code', 'files']),
 ];
 
 describe.each(locales)('survey copy (%s)', (_name, locale) => {

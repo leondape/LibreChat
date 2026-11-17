@@ -1,5 +1,11 @@
-import { PrincipalType, ResourceType, SURVEY_USAGE_VERSION } from 'librechat-data-provider';
-import type { TSurveyUsage } from 'librechat-data-provider';
+import {
+  Constants,
+  PrincipalType,
+  ResourceType,
+  SURVEY_TOP_TOOLS,
+  SURVEY_USAGE_VERSION,
+} from 'librechat-data-provider';
+import type { TSurveyToolUse, TSurveyUsage } from 'librechat-data-provider';
 import type { Model } from 'mongoose';
 import type {
   IAclEntry,
@@ -29,7 +35,7 @@ type ReceivedRow = {
   up: number;
   down: number;
 };
-type CountRow = { total: number };
+type ToolRow = { _id: string; calls: number };
 type IdRow<T> = { _id: T };
 type OwnedAgent = { _id: unknown; id: string; createdAt?: Date };
 type UsedAgent = { id: string; author: { toString(): string } };
@@ -39,6 +45,46 @@ const weekMs = 7 * dayMs;
 const CODE_TOOL_NAMES = ['execute_code', 'run_tools_with_code'];
 const SPREADSHEET_TYPE = /csv|spreadsheet|excel/i;
 const SPREADSHEET_NAME = /\.(csv|tsv|xlsx?|xlsm|ods)$/i;
+
+/** Counts, distinct tools, MCP usage and the few tools worth naming, from one grouping. */
+function summarizeTools(rows: ToolRow[]): {
+  toolCalls: number;
+  toolsDistinct: number;
+  mcpToolCalls: number;
+  mcpServers: number;
+  codeRuns: number;
+  topTools: TSurveyToolUse[];
+} {
+  const marker = Constants.mcp_delimiter;
+  const servers = new Set<string>();
+  let toolCalls = 0;
+  let mcpToolCalls = 0;
+  let codeRuns = 0;
+  const named = rows.filter((row) => row._id.length > 0 && row.calls > 0);
+  for (const row of named) {
+    toolCalls += row.calls;
+    if ((CODE_TOOL_NAMES as readonly string[]).includes(row._id)) {
+      codeRuns += row.calls;
+    }
+    const split = row._id.lastIndexOf(marker);
+    if (split > 0) {
+      mcpToolCalls += row.calls;
+      servers.add(row._id.slice(split + marker.length));
+    }
+  }
+  const topTools = [...named]
+    .sort((a, b) => b.calls - a.calls || a._id.localeCompare(b._id))
+    .slice(0, SURVEY_TOP_TOOLS)
+    .map((row) => ({ name: row._id, calls: row.calls }));
+  return {
+    toolCalls,
+    toolsDistinct: named.length,
+    mcpToolCalls,
+    mcpServers: servers.size,
+    codeRuns,
+    topTools,
+  };
+}
 
 function median(values: number[]): number {
   if (values.length === 0) {
@@ -182,7 +228,7 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
       prompts,
       filesUploaded,
       spreadsheetUploads,
-      codeRunRows,
+      toolRows,
       account,
     ] = await Promise.all([
       Message.aggregate<DayRow>([
@@ -237,16 +283,16 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
         createdAt: inWindow,
         $or: [{ type: SPREADSHEET_TYPE }, { filename: SPREADSHEET_NAME }],
       }),
-      Message.aggregate<CountRow>([
-        { $match: { ...received, 'content.tool_call.name': { $in: CODE_TOOL_NAMES } } },
+      Message.aggregate<ToolRow>([
+        { $match: received },
         { $unwind: '$content' },
         {
           $match: {
             'content.type': 'tool_call',
-            'content.tool_call.name': { $in: CODE_TOOL_NAMES },
+            'content.tool_call.name': { $type: 'string', $ne: '' },
           },
         },
-        { $count: 'total' },
+        { $group: { _id: '$content.tool_call.name', calls: { $sum: 1 } } },
       ]),
       User.findById(userId).select('createdAt').lean<{ createdAt?: Date }>(),
     ]);
@@ -257,6 +303,7 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
     const reply = receivedRows[0];
     const tokensInput = dayRows.reduce((total, row) => total + row.tokens, 0);
     const tokensOutput = reply?.tokens ?? 0;
+    const tools = summarizeTools(toolRows);
 
     return {
       version: SURVEY_USAGE_VERSION,
@@ -286,12 +333,17 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
       promptsOwned: prompts.owned,
       promptsShared: prompts.shared,
       filesUploaded,
-      codeRuns: codeRunRows[0]?.total ?? 0,
+      codeRuns: tools.codeRuns,
+      toolCalls: tools.toolCalls,
+      toolsDistinct: tools.toolsDistinct,
+      mcpToolCalls: tools.mcpToolCalls,
+      mcpServers: tools.mcpServers,
       spreadsheetUploads,
       regenerations: regenerationRows[0]?.extra ?? 0,
       failedResponses: reply?.failed ?? 0,
       feedbackUp: reply?.up ?? 0,
       feedbackDown: reply?.down ?? 0,
+      topTools: tools.topTools,
     };
   }
 

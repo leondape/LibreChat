@@ -185,6 +185,13 @@ html {
   --surface-overlay: var(--gray-500);
   --surface-submit: var(--green-700);
   --surface-submit-hover: var(--green-800);
+  --scale-negative: var(--red-700);
+  --scale-negative-soft: var(--red-100);
+  --scale-neutral: 82 82 91;
+  --scale-positive-soft: var(--green-100);
+  --scale-positive: var(--green-700);
+  --surface-highlight: var(--accent-primary);
+  --text-on-highlight: var(--white);
   --surface-destructive: var(--red-700);
   --surface-destructive-hover: var(--red-800);
   --surface-chat: var(--white);
@@ -309,6 +316,13 @@ html {
   --surface-overlay: 0 0 0;
   --surface-submit: var(--green-700);
   --surface-submit-hover: var(--green-800);
+  --scale-negative: var(--red-400);
+  --scale-negative-soft: var(--red-900);
+  --scale-neutral: 161 161 170;
+  --scale-positive-soft: var(--green-900);
+  --scale-positive: var(--green-400);
+  --surface-highlight: var(--accent-primary);
+  --text-on-highlight: var(--gray-900);
   --surface-destructive: var(--red-800);
   --surface-destructive-hover: var(--red-900);
   --surface-chat: var(--gray-700);

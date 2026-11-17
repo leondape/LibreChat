@@ -18,6 +18,8 @@ export interface SurveyFlightData {
   /** Absent on flights armed before cooldowns existed; readers fill in the default. */
   nudgeDays?: number[];
   companies: TSurveyCompany[];
+  /** Absent or empty means every user. Stored emails are trimmed and lowercased. */
+  audience?: string[];
   tenantId?: string;
 }
 

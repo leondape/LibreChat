@@ -1,4 +1,4 @@
-import { applyAnswers, parseHours, parseMinutes, shuffleOptions, toggleChoice } from '../answers';
+import { applyAnswers, parseHours, shuffleOptions, toggleChoice } from '../answers';
 
 describe('applyAnswers', () => {
   it('drops the time uses once the hours no longer show a gain', () => {
@@ -40,6 +40,14 @@ describe('applyAnswers', () => {
     const blank = applyAnswers({}, { feedback: '   ' });
     expect(blank.feedback).toBeUndefined();
   });
+
+  it('keeps the replaced note only while "other" is chosen', () => {
+    const other = applyAnswers({}, { replaced: ['other'], replacedNote: '  A freelancer ' });
+    expect(other.replacedNote).toBe('A freelancer');
+
+    const nothing = applyAnswers(other, { replaced: ['nothing'] });
+    expect(nothing.replacedNote).toBeUndefined();
+  });
 });
 
 describe('toggleChoice', () => {
@@ -63,16 +71,6 @@ describe('parseHours', () => {
     expect(parseHours('2.3')).toBe(2.5);
     expect(parseHours('-4')).toBe(0);
     expect(parseHours('500')).toBe(80);
-  });
-});
-
-describe('parseMinutes', () => {
-  it('turns typing into whole minutes within a day', () => {
-    expect(parseMinutes('')).toBeUndefined();
-    expect(parseMinutes('abc')).toBeUndefined();
-    expect(parseMinutes('12.6')).toBe(13);
-    expect(parseMinutes('-8')).toBe(0);
-    expect(parseMinutes('9000')).toBe(1440);
   });
 });
 

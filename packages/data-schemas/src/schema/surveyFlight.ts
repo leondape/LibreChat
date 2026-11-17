@@ -13,6 +13,8 @@ const surveyFlightSchema: Schema<ISurveyFlight> = new Schema<ISurveyFlight>(
     minResponses: { type: Number, required: true },
     nudgeDays: { type: [Number], required: true, default: () => [1, 2, 4, 7] },
     companies: { type: Schema.Types.Mixed, required: true },
+    /** Absent or empty means every user. Emails are stored trimmed and lowercased. */
+    audience: { type: [String], default: undefined },
     tenantId: { type: String, index: true },
   },
   { timestamps: true },

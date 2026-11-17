@@ -1,0 +1,384 @@
+[
+  {
+    "id": "mediawan",
+    "name": "Mediawan",
+    "children": [
+      {
+        "id": "mediawan-france",
+        "name": "Mediawan France",
+        "children": [
+          {
+            "id": "mediawan-holding",
+            "name": "Mediawan Holding"
+          },
+          {
+            "id": "mediawan-thematics",
+            "name": "Mediawan Thematics"
+          },
+          {
+            "id": "mediawan-kids-and-family",
+            "name": "Mediawan Kids & Family",
+            "children": [
+              {
+                "id": "magical-society",
+                "name": "Magical Society"
+              },
+              {
+                "id": "method",
+                "name": "Method"
+              },
+              {
+                "id": "on-animation",
+                "name": "On Animation"
+              },
+              {
+                "id": "somewhere-animation",
+                "name": "Somewhere Animation"
+              }
+            ]
+          },
+          {
+            "id": "mediawan-france-production-companies",
+            "name": "Production companies",
+            "children": [
+              {
+                "id": "909",
+                "name": "909"
+              },
+              {
+                "id": "white-lion-films",
+                "name": "White Lion Films"
+              },
+              {
+                "id": "2425-films",
+                "name": "2425 Films"
+              },
+              {
+                "id": "ango-production",
+                "name": "Ango Production"
+              },
+              {
+                "id": "arezzo-films",
+                "name": "Arezzo Films"
+              },
+              {
+                "id": "atlantique-production",
+                "name": "Atlantique Production"
+              },
+              {
+                "id": "auteurs-associes",
+                "name": "Auteurs Associes"
+              },
+              {
+                "id": "behive",
+                "name": "Behive"
+              },
+              {
+                "id": "black-dynamite",
+                "name": "Black Dynamite"
+              },
+              {
+                "id": "black-swan-tales",
+                "name": "Black Swan Tales"
+              },
+              {
+                "id": "blue-morning-pictures",
+                "name": "Blue Morning Pictures"
+              },
+              {
+                "id": "camerons-content",
+                "name": "Camerons Content"
+              },
+              {
+                "id": "cc-and-c",
+                "name": "CC&C"
+              },
+              {
+                "id": "chapter-2",
+                "name": "Chapter 2"
+              },
+              {
+                "id": "one-entertainement",
+                "name": "One Entertainement"
+              },
+              {
+                "id": "chifoumi",
+                "name": "Chifoumi"
+              },
+              {
+                "id": "demd",
+                "name": "DEMD"
+              },
+              {
+                "id": "ego-production",
+                "name": "Ego Production"
+              },
+              {
+                "id": "electron-libre",
+                "name": "Electron Libre"
+              },
+              {
+                "id": "georgia",
+                "name": "Georgia"
+              },
+              {
+                "id": "gmt-productions",
+                "name": "GMT Productions"
+              },
+              {
+                "id": "troisieme-oeil",
+                "name": "Troisieme Oeil"
+              },
+              {
+                "id": "image-et-compagnie",
+                "name": "Image et Compagnie"
+              },
+              {
+                "id": "imagissime",
+                "name": "Imagissime"
+              },
+              {
+                "id": "jpg-films",
+                "name": "JPG Films"
+              },
+              {
+                "id": "mai-juin-productions",
+                "name": "Mai Juin Productions"
+              },
+              {
+                "id": "makingprod",
+                "name": "MakingProd"
+              },
+              {
+                "id": "maximal-productions",
+                "name": "Maximal Productions"
+              },
+              {
+                "id": "merlin-productions",
+                "name": "Merlin Productions"
+              },
+              {
+                "id": "mon-voisin-productions",
+                "name": "Mon Voisin Productions"
+              },
+              {
+                "id": "moonbow",
+                "name": "Moonbow"
+              },
+              {
+                "id": "pinklizard",
+                "name": "Pinklizard"
+              },
+              {
+                "id": "radar",
+                "name": "Radar"
+              },
+              {
+                "id": "reservoir-prod",
+                "name": "Reservoir Prod"
+              },
+              {
+                "id": "save-ferris",
+                "name": "Save Ferris"
+              },
+              {
+                "id": "scarlett-production",
+                "name": "Scarlett Production"
+              },
+              {
+                "id": "septembre-productions",
+                "name": "Septembre Productions"
+              },
+              {
+                "id": "sequel-production",
+                "name": "Sequel Production"
+              },
+              {
+                "id": "soleil-vert",
+                "name": "Soleil Vert"
+              },
+              {
+                "id": "storia-tv",
+                "name": "Storia TV"
+              },
+              {
+                "id": "vema-production",
+                "name": "Vema Production"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "leonine-germany",
+        "name": "Leonine Germany",
+        "children": [
+          {
+            "id": "leonine-holding",
+            "name": "Leonine Holding"
+          },
+          {
+            "id": "leonine-distribution",
+            "name": "Leonine Distribution"
+          },
+          {
+            "id": "leonine-licencing",
+            "name": "Leonine Licencing"
+          },
+          {
+            "id": "production-companies",
+            "name": "Production companies",
+            "children": [
+              {
+                "id": "nova-unit",
+                "name": "Nova-Unit"
+              },
+              {
+                "id": "w-and-b-film-and-tv",
+                "name": "W&B Film & TV"
+              },
+              {
+                "id": "odeon-fiction",
+                "name": "Odeon Fiction"
+              },
+              {
+                "id": "seo-entertainment",
+                "name": "SEO Entertainment"
+              },
+              {
+                "id": "i-and-u-studios",
+                "name": "i&u Studios",
+                "children": [
+                  {
+                    "id": "i-and-u-studios-direct",
+                    "name": "i&u Studios"
+                  },
+                  {
+                    "id": "stern-tv",
+                    "name": "Stern TV"
+                  },
+                  {
+                    "id": "leonine-c",
+                    "name": "Leonine C"
+                  }
+                ]
+              },
+              {
+                "id": "hyperbole",
+                "name": "Hyperbole"
+              },
+              {
+                "id": "toon2tango",
+                "name": "Toon2Tango"
+              },
+              {
+                "id": "madame-zheng",
+                "name": "Madame Zheng"
+              },
+              {
+                "id": "home-of-talents",
+                "name": "Home of Talents"
+              },
+              {
+                "id": "beetz-brothers",
+                "name": "Beetz Brothers"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "international",
+        "name": "International",
+        "children": [
+          {
+            "id": "mediawan-ai",
+            "name": "Mediawan AI"
+          },
+          {
+            "id": "mediawan-international",
+            "name": "Mediawan International"
+          },
+          {
+            "id": "miraculous",
+            "name": "Miraculous"
+          },
+          {
+            "id": "drama-republic",
+            "name": "Drama Republic"
+          },
+          {
+            "id": "hidepark",
+            "name": "Hidepark"
+          },
+          {
+            "id": "mediawan-finland",
+            "name": "Mediawan Finland"
+          },
+          {
+            "id": "our-films",
+            "name": "Our Films"
+          },
+          {
+            "id": "submarine",
+            "name": "Submarine"
+          },
+          {
+            "id": "skyhigh-tv",
+            "name": "Skyhigh TV"
+          },
+          {
+            "id": "palomar",
+            "name": "Palomar"
+          },
+          {
+            "id": "plan-b",
+            "name": "Plan B",
+            "children": [
+              {
+                "id": "planb-us",
+                "name": "PlanB US"
+              },
+              {
+                "id": "planb-uk",
+                "name": "PlanB UK"
+              }
+            ]
+          },
+          {
+            "id": "misfits",
+            "name": "Misfits"
+          },
+          {
+            "id": "the-good-mood-productions",
+            "name": "The Good Mood Productions"
+          },
+          {
+            "id": "boomerang",
+            "name": "Boomerang"
+          },
+          {
+            "id": "mediawan-africa",
+            "name": "Mediawan Africa"
+          },
+          {
+            "id": "mark-woollen-and-associates",
+            "name": "Mark Woollen & Associates"
+          },
+          {
+            "id": "veranda-tv",
+            "name": "Veranda TV"
+          },
+          {
+            "id": "see-saw-films",
+            "name": "See-Saw Films"
+          },
+          {
+            "id": "north-road-company",
+            "name": "North Road Company"
+          }
+        ]
+      }
+    ]
+  }
+]

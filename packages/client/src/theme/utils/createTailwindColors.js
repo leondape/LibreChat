@@ -153,6 +153,14 @@ function createTailwindColors() {
     'series-8': cssVar('--series-8'),
 
     'switch-unchecked': cssVar('--switch-unchecked'),
+
+    'scale-negative': cssVar('--scale-negative'),
+    'scale-negative-soft': cssVar('--scale-negative-soft'),
+    'scale-neutral': cssVar('--scale-neutral'),
+    'scale-positive-soft': cssVar('--scale-positive-soft'),
+    'scale-positive': cssVar('--scale-positive'),
+    'surface-highlight': cssVar('--surface-highlight'),
+    'text-on-highlight': cssVar('--text-on-highlight'),
   };
 }
 

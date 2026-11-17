@@ -127,6 +127,15 @@ export const defaultTheme: IThemeRGB = {
    *  track, so the control reads in either state. */
   'rgb-switch-unchecked': '148 148 148', // #949494
 
+  /** Sentiment scale. Soft stops tint an unselected choice; solid stops fill the selected one. */
+  'rgb-scale-negative': '185 28 28', // #b91c1c
+  'rgb-scale-negative-soft': '254 226 226', // #fee2e2
+  'rgb-scale-neutral': '82 82 91', // #52525b
+  'rgb-scale-positive-soft': '209 250 229', // #d1fae5
+  'rgb-scale-positive': '4 120 87', // #047857
+  'rgb-surface-highlight': '18 110 107', // #126e6b
+  'rgb-text-on-highlight': '255 255 255', // #ffffff
+
   // Presentation
   'rgb-presentation': '255 255 255', // #fff (white)
 };

@@ -1,3 +1,4 @@
+import { SURVEY_VERSION } from 'librechat-data-provider';
 import type { TSurveyAnswers, TSurveyUsage } from 'librechat-data-provider';
 import type { Response } from 'express';
 import type { ServerRequest } from '~/types';
@@ -14,7 +15,7 @@ jest.mock('@librechat/data-schemas', () => ({
 const flight = {
   flightId: 'f1',
   surveyId: 'wangpt-kpi',
-  surveyVersion: 1,
+  surveyVersion: SURVEY_VERSION,
   status: 'armed' as const,
   opensAt: new Date(),
   lookbackDays: 30,
@@ -28,8 +29,8 @@ const answers: TSurveyAnswers = {
   bestTask: {
     kind: 'write',
     note: 'Weekly pitch deck',
-    minutesWithout: 180,
-    minutesWith: 90,
+    durationWithout: 'one_two_h',
+    durationWith: 'thirty_60',
     frequency: 'weekly',
   },
   hoursSaved: { range: 'none' },
@@ -41,6 +42,7 @@ const answers: TSurveyAnswers = {
   wishes: ['training'],
   culture: 'never',
   satisfaction: 5,
+  contact: false,
 };
 
 const usage = { version: 1, windowDays: 30, messagesSent: 7 } as TSurveyUsage;
@@ -51,8 +53,16 @@ const createResponse = () => {
   return { response: { status, json } as Partial<Response> as Response, status, json };
 };
 
-const request = (body: unknown = {}, config: unknown = {}): ServerRequest =>
-  ({ body, config, user: { id: 'user-1', tenantId: 'tenant-a' } }) as unknown as ServerRequest;
+const request = (
+  body: unknown = {},
+  config: unknown = {},
+  user: { email?: string } = {},
+): ServerRequest =>
+  ({
+    body,
+    config,
+    user: { id: 'user-1', tenantId: 'tenant-a', ...user },
+  }) as unknown as ServerRequest;
 
 const nextAt = new Date('2026-06-16T12:00:00.000Z');
 
@@ -79,7 +89,7 @@ describe('survey status handler', () => {
     expect(json).toHaveBeenCalledWith({
       flight: {
         flightId: 'f1',
-        surveyVersion: 1,
+        surveyVersion: SURVEY_VERSION,
         lookbackDays: 30,
         minResponses: 50,
         companies: flight.companies,
@@ -171,8 +181,22 @@ describe('survey submit handler', () => {
         tenantId: 'tenant-a',
       }),
     );
+    expect(d.getSurveyComparison).toHaveBeenCalledWith('f1', 50, usage);
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalledWith({ usage, comparison: { responses: 3, threshold: 50 } });
+  });
+
+  it('treats a flight from another survey version as closed', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue({ ...flight, surveyVersion: SURVEY_VERSION - 1 });
+    const { response: statusResponse, json } = createResponse();
+    await createSurveyStatusHandler(d)(request(), statusResponse);
+    expect(json).toHaveBeenCalledWith({ flight: null, submitted: false, nextNudgeAt: null });
+
+    const { response, status } = createResponse();
+    await createSurveySubmitHandler(d)(request(body), response);
+    expect(status).toHaveBeenCalledWith(409);
+    expect(d.getUserUsageSnapshot).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -345,5 +369,81 @@ describe('survey nudge handler', () => {
 
     expect(status).toHaveBeenCalledWith(500);
     expect(JSON.stringify(json.mock.calls)).not.toContain('secret-host');
+  });
+});
+
+describe('survey audience', () => {
+  const listed = { ...flight, audience: ['alice@acme.com'] };
+  const body = { flightId: 'f1', locale: 'de', durationSeconds: 120, answers };
+
+  it('shows the flight to a listed email regardless of case, without the list', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue(listed);
+    const { response, json } = createResponse();
+    await createSurveyStatusHandler(d)(request({}, {}, { email: 'Alice@Acme.com' }), response);
+
+    expect(json).toHaveBeenCalledWith(
+      expect.objectContaining({ flight: expect.objectContaining({ flightId: 'f1' }) }),
+    );
+    expect(json.mock.calls[0][0].flight).not.toHaveProperty('audience');
+    expect(JSON.stringify(json.mock.calls)).not.toContain('alice@acme.com');
+  });
+
+  it.each([
+    ['a different email', { email: 'other@acme.com' }],
+    ['no email', {}],
+  ])('hides the flight from %s', async (_label, user) => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue(listed);
+    const { response, json } = createResponse();
+    await createSurveyStatusHandler(d)(request({}, {}, user), response);
+
+    expect(json).toHaveBeenCalledWith({ flight: null, submitted: false, nextNudgeAt: null });
+    expect(d.hasSurveyResponse).not.toHaveBeenCalled();
+  });
+
+  it('treats an empty audience as every user', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue({ ...flight, audience: [] });
+    const { response, json } = createResponse();
+    await createSurveyStatusHandler(d)(request({}, {}, { email: 'anyone@acme.com' }), response);
+
+    expect(json).toHaveBeenCalledWith(
+      expect.objectContaining({ flight: expect.objectContaining({ flightId: 'f1' }) }),
+    );
+  });
+
+  it('rejects a submission from someone outside the audience', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue(listed);
+    const { response, status, json } = createResponse();
+    await createSurveySubmitHandler(d)(request(body, {}, { email: 'other@acme.com' }), response);
+
+    expect(status).toHaveBeenCalledWith(409);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ code: 'survey_closed' }));
+    expect(d.getUserUsageSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('accepts a submission from a listed email', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue(listed);
+    const { response, status } = createResponse();
+    await createSurveySubmitHandler(d)(request(body, {}, { email: 'alice@acme.com' }), response);
+
+    expect(status).toHaveBeenCalledWith(201);
+  });
+
+  it('rejects a nudge from someone outside the audience', async () => {
+    const d = deps();
+    d.getArmedSurveyFlight.mockResolvedValue(listed);
+    const { response, status, json } = createResponse();
+    await createSurveyNudgeHandler(d)(
+      request({ flightId: 'f1', reason: 'later' }, {}, { email: 'other@acme.com' }),
+      response,
+    );
+
+    expect(status).toHaveBeenCalledWith(409);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ code: 'survey_closed' }));
+    expect(d.recordSurveyNudge).not.toHaveBeenCalled();
   });
 });

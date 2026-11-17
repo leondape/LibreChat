@@ -166,7 +166,7 @@ export default function SurveyDialog({ flight, userId, onClose, onLater }: Dialo
       <OGDialogContent
         showCloseButton={false}
         aria-describedby={undefined}
-        className="w-11/12 max-w-2xl border-none bg-surface-dialog text-text-primary"
+        className="w-11/12 max-w-4xl border-none bg-surface-dialog text-text-primary"
         onInteractOutside={(event) => phase === 'computing' && event.preventDefault()}
       >
         <OGDialogHeader>
@@ -183,7 +183,9 @@ export default function SurveyDialog({ flight, userId, onClose, onLater }: Dialo
           />
         )}
 
-        {phase === 'success' && result && <Success result={result} onClose={onClose} />}
+        {phase === 'success' && result && (
+          <Success result={result} answers={answers} flightId={flight.flightId} onClose={onClose} />
+        )}
 
         {phase === 'blocked' && (
           <div className="flex flex-col gap-4" role="alert">

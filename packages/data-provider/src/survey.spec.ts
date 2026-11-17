@@ -27,8 +27,8 @@ const valid = (): TSurveyAnswers => ({
   bestTask: {
     kind: 'write',
     note: 'Weekly pitch deck',
-    minutesWithout: 180,
-    minutesWith: 90,
+    durationWithout: 'one_two_h',
+    durationWith: 'thirty_60',
     frequency: 'weekly',
   },
   hoursSaved: { hours: 2 },
@@ -41,6 +41,7 @@ const valid = (): TSurveyAnswers => ({
   wishes: ['training', 'agents'],
   culture: 'encouraged',
   satisfaction: 7,
+  contact: true,
 });
 
 describe('company tree', () => {
@@ -75,8 +76,8 @@ describe('parseSurveyAnswers', () => {
       'bestTask',
     ],
     [
-      'a task longer than a day',
-      (a) => (a.bestTask = { ...(a.bestTask as object), minutesWithout: 2000 }),
+      'an unknown task duration',
+      (a) => (a.bestTask = { ...(a.bestTask as object), durationWithout: 'all_day' }),
       'bestTask',
     ],
     ['time uses without a time gain', (a) => (a.hoursSaved = { range: 'none' }), 'timeUses'],
@@ -92,6 +93,7 @@ describe('parseSurveyAnswers', () => {
     ['an unexpected field', (a) => (a.userId = 'u1'), ''],
     ['an enabled note while not enabled', (a) => (a.enabledNote = 'x'), 'enabledNote'],
     ['an "other" text without other', (a) => (a.jobOther = 'x'), 'jobOther'],
+    ['a replaced note without "other"', (a) => (a.replacedNote = 'x'), 'replacedNote'],
   ])('rejects %s', (_label, mutate, field) => {
     const answers = valid() as unknown as Record<string, unknown>;
     mutate(answers);
@@ -108,6 +110,11 @@ describe('parseSurveyAnswers', () => {
     expect(JSON.stringify(result)).not.toContain('secret-value');
   });
 
+  it('accepts a replaced note only together with "other"', () => {
+    const answers = { ...valid(), replaced: ['other' as const], replacedNote: 'A translator' };
+    expect(parseSurveyAnswers(answers, companies).ok).toBe(true);
+  });
+
   it('accepts a time-costing range without time uses', () => {
     const answers = { ...valid(), hoursSaved: { range: 'costs_time' } };
     delete (answers as Partial<TSurveyAnswers>).timeUses;
@@ -122,7 +129,9 @@ describe('steps', () => {
     expect(getSurveySteps({ hoursSaved: { range: 'costs_time' } })).not.toContain('timeUses');
     expect(getSurveySteps({ hoursSaved: { hours: 0 } })).not.toContain('timeUses');
     expect(getSurveySteps({ hoursSaved: { range: 'one_two' } })).toContain('timeUses');
-    expect(getSurveySteps({ hoursSaved: { hours: 3 } })).toHaveLength(14);
+    expect(getSurveySteps({ hoursSaved: { hours: 3 } })).toHaveLength(15);
+    expect(getSurveySteps({})[2]).toBe('hours');
+    expect(getSurveySteps({})[3]).toBe('bestTask');
   });
 
   it('tracks completion per step', () => {
@@ -131,13 +140,15 @@ describe('steps', () => {
     expect(
       isSurveyStepComplete(
         'bestTask',
-        { bestTask: { kind: 'write', note: 'Pitch', minutesWithout: 60 } },
+        { bestTask: { kind: 'write', note: 'Pitch', durationWithout: 'thirty_60' } },
         companies,
       ),
     ).toBe(false);
     expect(isSurveyStepComplete('bestTask', valid(), companies)).toBe(true);
     expect(isSurveyStepComplete('wishes', { wishes: [] }, companies)).toBe(false);
     expect(isSurveyStepComplete('feedback', {}, companies)).toBe(true);
+    expect(isSurveyStepComplete('contact', {}, companies)).toBe(false);
+    expect(isSurveyStepComplete('contact', { contact: false }, companies)).toBe(true);
     expect(isSurveyStepComplete('enabled', { enabled: false }, companies)).toBe(true);
   });
 });

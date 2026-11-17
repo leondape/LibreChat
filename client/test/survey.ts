@@ -8,7 +8,7 @@ import type {
 
 export const flight: TSurveyFlight = {
   flightId: 'wangpt-kpi-test',
-  surveyVersion: 1,
+  surveyVersion: 3,
   lookbackDays: 30,
   minResponses: 50,
   companies: [
@@ -29,8 +29,8 @@ export const answers: TSurveyAnswers = {
   bestTask: {
     kind: 'email',
     note: 'Weekly status mail',
-    minutesWithout: 40,
-    minutesWith: 15,
+    durationWithout: 'thirty_60',
+    durationWith: 'five_15',
     frequency: 'weekly',
   },
   hoursSaved: { range: 'none' },
@@ -40,8 +40,9 @@ export const answers: TSurveyAnswers = {
   disappointment: 'somewhat',
   letdowns: ['nowhere'],
   wishes: ['training'],
-  culture: 'tolerated',
+  culture: 'neutral',
   satisfaction: 7,
+  contact: true,
 };
 
 const values = (
@@ -62,11 +63,21 @@ export const usage = values(0, {
 });
 
 export const resultWithoutAverages: TSurveyResult = {
-  usage: { ...usage, version: 1, windowDays: 30 },
+  usage: { ...usage, version: 2, windowDays: 30, topTools: [] },
   comparison: { responses: 12, threshold: 50 },
 };
 
 export const resultWithAverages: TSurveyResult = {
-  usage: { ...usage, version: 1, windowDays: 30 },
-  comparison: { responses: 80, threshold: 50, averages: values(5, { messagesSent: 321 }) },
+  usage: {
+    ...usage,
+    version: 2,
+    windowDays: 30,
+    topTools: [{ name: 'lookup_mcp_docs', calls: 4 }],
+  },
+  comparison: {
+    responses: 80,
+    threshold: 50,
+    averages: values(5, { messagesSent: 321 }),
+    percentiles: values(40, { messagesSent: 82 }),
+  },
 };

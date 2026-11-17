@@ -140,6 +140,14 @@ export const darkTheme: IThemeRGB = {
    *  thumb, 5.74:1 against the checked `surface-inverted` track. */
   'rgb-switch-unchecked': '102 102 102', // #666666
 
+  'rgb-scale-negative': '248 113 113', // #f87171
+  'rgb-scale-negative-soft': '127 29 29', // #7f1d1d
+  'rgb-scale-neutral': '161 161 170', // #a1a1aa
+  'rgb-scale-positive-soft': '6 78 59', // #064e3b
+  'rgb-scale-positive': '52 211 153', // #34d399
+  'rgb-surface-highlight': '65 167 157', // #41a79d
+  'rgb-text-on-highlight': '13 13 13', // #0d0d0d
+
   // Presentation
   'rgb-presentation': '33 33 33', // #212121 (gray-800)
 };

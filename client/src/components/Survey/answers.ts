@@ -1,4 +1,4 @@
-import { SURVEY_HOURS_MAX, SURVEY_MINUTES_MAX, hasSurveyTimeGain } from 'librechat-data-provider';
+import { SURVEY_HOURS_MAX, hasSurveyTimeGain } from 'librechat-data-provider';
 import type { TSurveyDraftAnswers, TSurveyStepId } from 'librechat-data-provider';
 
 export type SurveyDraftAnswers = TSurveyDraftAnswers;
@@ -8,7 +8,14 @@ const clean = (value?: string) => {
   return trimmed ? trimmed : undefined;
 };
 
-const NOTES = ['letdownNote', 'wishTask', 'enabledNote', 'feedback'] as const;
+const NOTES = [
+  'letdownNote',
+  'wishTask',
+  'enabledNote',
+  'feedback',
+  'replacedNote',
+  'disappointmentNote',
+] as const;
 
 /** Applies a change, then drops or fills every answer that depends on another one. */
 export function applyAnswers(
@@ -39,6 +46,9 @@ export function applyAnswers(
 
   if (next.enabled !== true) {
     delete next.enabledNote;
+  }
+  if (!next.replaced?.includes('other')) {
+    delete next.replacedNote;
   }
   for (const field of NOTES) {
     if (!(field in next)) {
@@ -85,11 +95,6 @@ const clampNumber = (input: string, max: number, step: number): number | undefin
 /** Turns what was typed into the number of weekly hours, clamped to the allowed range. */
 export function parseHours(input: string): number | undefined {
   return clampNumber(input, SURVEY_HOURS_MAX, 0.5);
-}
-
-/** Turns what was typed into whole minutes, clamped to the allowed range. */
-export function parseMinutes(input: string): number | undefined {
-  return clampNumber(input, SURVEY_MINUTES_MAX, 1);
 }
 
 /** Same seed, same order. Pinned options stay at the end, in the order given. */

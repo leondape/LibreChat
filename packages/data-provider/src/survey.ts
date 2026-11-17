@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const SURVEY_ID = 'wangpt-kpi';
-export const SURVEY_VERSION = 2;
-export const SURVEY_USAGE_VERSION = 1;
+export const SURVEY_VERSION = 3;
+export const SURVEY_USAGE_VERSION = 2;
 export const SURVEY_DEFAULT_LOOKBACK_DAYS = 30;
 export const SURVEY_DEFAULT_MIN_RESPONSES = 50;
 /** Days to wait after each dismissal. The last entry repeats for the rest of the flight. */
@@ -108,6 +108,30 @@ export const SURVEY_TASK_FREQUENCIES = [
   'rarely',
 ] as const;
 
+/** How long one pass of that task takes, without WanGPT and with it. */
+export const SURVEY_TASK_DURATIONS = [
+  'under_5',
+  'five_15',
+  'fifteen_30',
+  'thirty_60',
+  'one_two_h',
+  'two_four_h',
+  'over_four_h',
+] as const;
+
+export type TSurveyTaskDuration = (typeof SURVEY_TASK_DURATIONS)[number];
+
+/** Minutes a duration counts as when a report turns the answer into a number. */
+export const SURVEY_DURATION_MINUTES: Record<TSurveyTaskDuration, number> = {
+  under_5: 3,
+  five_15: 10,
+  fifteen_30: 22,
+  thirty_60: 45,
+  one_two_h: 90,
+  two_four_h: 180,
+  over_four_h: 300,
+};
+
 export const SURVEY_HOURS_RANGES = [
   'costs_time',
   'none',
@@ -134,6 +158,7 @@ export const SURVEY_REPLACED = [
   'agency',
   'colleagues',
   'paid_tool',
+  'other',
   'nothing',
 ] as const;
 
@@ -144,7 +169,8 @@ export const SURVEY_LETDOWNS = [
   'checking',
   'wrong',
   'reach',
-  'limits',
+  'quota',
+  'slow',
   'prompting',
   'rules',
   'nowhere',
@@ -162,7 +188,7 @@ export const SURVEY_WISHES = [
 ] as const;
 
 /** How the person's team approaches AI. */
-export const SURVEY_CULTURE = ['encouraged', 'tolerated', 'discouraged', 'never'] as const;
+export const SURVEY_CULTURE = ['encouraged', 'neutral', 'discouraged', 'never'] as const;
 
 export type TSurveyHoursRange = (typeof SURVEY_HOURS_RANGES)[number];
 
@@ -183,8 +209,6 @@ export const SURVEY_WISHES_MAX = 2;
 export const SURVEY_IMPROVEMENT_MAX = 5;
 export const SURVEY_SATISFACTION_MAX = 9;
 export const SURVEY_HOURS_MAX = 80;
-/** A single task cannot be reported as taking longer than a day. */
-export const SURVEY_MINUTES_MAX = 1440;
 export const SURVEY_NOTE_MAX = 500;
 export const SURVEY_FEEDBACK_MAX = 2000;
 
@@ -213,8 +237,8 @@ export const surveyBestTaskSchema = z
   .object({
     kind: z.enum(SURVEY_TASK_KINDS),
     note: z.string().trim().min(1).max(SURVEY_NOTE_MAX),
-    minutesWithout: z.number().int().min(0).max(SURVEY_MINUTES_MAX),
-    minutesWith: z.number().int().min(0).max(SURVEY_MINUTES_MAX),
+    durationWithout: z.enum(SURVEY_TASK_DURATIONS),
+    durationWith: z.enum(SURVEY_TASK_DURATIONS),
     frequency: z.enum(SURVEY_TASK_FREQUENCIES),
   })
   .strict();
@@ -231,7 +255,9 @@ export const surveyAnswersSchema = z
     enabled: z.boolean(),
     enabledNote: note,
     replaced: uniqueEnumArray(SURVEY_REPLACED),
+    replacedNote: note,
     disappointment: z.enum(SURVEY_DISAPPOINTMENT),
+    disappointmentNote: note,
     letdowns: uniqueEnumArray(SURVEY_LETDOWNS),
     letdownNote: note,
     wishes: uniqueEnumArray(SURVEY_WISHES).refine((items) => items.length <= SURVEY_WISHES_MAX),
@@ -239,6 +265,7 @@ export const surveyAnswersSchema = z
     culture: z.enum(SURVEY_CULTURE),
     satisfaction: z.number().int().min(1).max(SURVEY_SATISFACTION_MAX),
     feedback: z.string().trim().max(SURVEY_FEEDBACK_MAX).optional(),
+    contact: z.boolean(),
   })
   .strict();
 
@@ -274,9 +301,9 @@ export function hasSurveyTimeGain(hoursSaved?: Partial<TSurveyHoursSaved>): bool
 export type TSurveyStepId =
   | 'company'
   | 'job'
-  | 'bestTask'
   | 'hours'
   | 'timeUses'
+  | 'bestTask'
   | 'improvement'
   | 'enabled'
   | 'replaced'
@@ -285,14 +312,15 @@ export type TSurveyStepId =
   | 'wishes'
   | 'culture'
   | 'satisfaction'
-  | 'feedback';
+  | 'feedback'
+  | 'contact';
 
 export const SURVEY_STEPS: readonly TSurveyStepId[] = [
   'company',
   'job',
-  'bestTask',
   'hours',
   'timeUses',
+  'bestTask',
   'improvement',
   'enabled',
   'replaced',
@@ -302,6 +330,7 @@ export const SURVEY_STEPS: readonly TSurveyStepId[] = [
   'culture',
   'satisfaction',
   'feedback',
+  'contact',
 ];
 
 export function getSurveySteps(answers: TSurveyDraftAnswers): TSurveyStepId[] {
@@ -329,8 +358,8 @@ export function isSurveyStepComplete(
       return (
         task?.kind !== undefined &&
         described(task?.note) &&
-        task?.minutesWithout !== undefined &&
-        task?.minutesWith !== undefined &&
+        task?.durationWithout !== undefined &&
+        task?.durationWith !== undefined &&
         task?.frequency !== undefined
       );
     }
@@ -359,6 +388,8 @@ export function isSurveyStepComplete(
       return answers.satisfaction !== undefined;
     case 'feedback':
       return true;
+    case 'contact':
+      return answers.contact !== undefined;
   }
 }
 
@@ -401,6 +432,9 @@ export function parseSurveyAnswers(
   if (answers.enabledNote !== undefined && !answers.enabled) {
     fields.push('enabledNote');
   }
+  if (answers.replacedNote !== undefined && !answers.replaced.includes('other')) {
+    fields.push('replacedNote');
+  }
   if (!isExclusiveValid(answers.replaced, SURVEY_EXCLUSIVE.replaced)) {
     fields.push('replaced');
   }
@@ -436,6 +470,10 @@ export const SURVEY_USAGE_KEYS = [
   'promptsShared',
   'filesUploaded',
   'codeRuns',
+  'toolCalls',
+  'toolsDistinct',
+  'mcpToolCalls',
+  'mcpServers',
   'spreadsheetUploads',
   'regenerations',
   'failedResponses',
@@ -445,7 +483,18 @@ export const SURVEY_USAGE_KEYS = [
 
 export type TSurveyUsageKey = (typeof SURVEY_USAGE_KEYS)[number];
 export type TSurveyUsageValues = Record<TSurveyUsageKey, number>;
-export type TSurveyUsage = TSurveyUsageValues & { version: number; windowDays: number };
+
+/** One tool and how often it ran. Kept beside the averages, which only cover numbers. */
+export type TSurveyToolUse = { name: string; calls: number };
+
+/** How many tools the snapshot and the result page name. */
+export const SURVEY_TOP_TOOLS = 5;
+
+export type TSurveyUsage = TSurveyUsageValues & {
+  version: number;
+  windowDays: number;
+  topTools: TSurveyToolUse[];
+};
 
 export type TSurveyFlight = {
   flightId: string;
@@ -478,6 +527,11 @@ export type TSurveyComparison = {
   threshold: number;
   /** Present only once `responses` reaches `threshold`. */
   averages?: TSurveyUsageValues;
+  /**
+   * Share of the other respondents strictly below this person, 0 to 100.
+   * Present only once `responses` reaches `threshold`.
+   */
+  percentiles?: TSurveyUsageValues;
 };
 
 export type TSurveyResult = { usage: TSurveyUsage; comparison: TSurveyComparison };

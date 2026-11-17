@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import Computing, { COMPUTING_LINE_MS, COMPUTING_MIN_MS, getRealLines } from '../Computing';
-import { resultWithAverages, resultWithoutAverages, usage } from 'test/survey';
+import { resultWithAverages, resultWithoutAverages } from 'test/survey';
 
 const tick = (ms: number) => act(() => void jest.advanceTimersByTime(ms));
 
@@ -57,7 +57,7 @@ describe('Computing', () => {
   it('skips the agent line for someone without agents and the comparison below the threshold', () => {
     const noAgents = {
       ...resultWithoutAverages,
-      usage: { ...usage, agentsOwned: 0, agentsUsedOthers: 0, version: 1, windowDays: 30 },
+      usage: { ...resultWithoutAverages.usage, agentsOwned: 0, agentsUsedOthers: 0 },
     };
     expect(getRealLines(noAgents).map((line) => line.key)).toEqual([
       'messages',

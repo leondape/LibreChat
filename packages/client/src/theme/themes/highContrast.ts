@@ -165,6 +165,14 @@ export const highContrastLightTheme: IThemeRGB = {
    *  `surface-inverted` track. */
   'rgb-switch-unchecked': '102 102 102', // #666666
 
+  'rgb-scale-negative': '161 0 0', // #a10000
+  'rgb-scale-negative-soft': '255 214 214', // #ffd6d6
+  'rgb-scale-neutral': '0 0 0', // #000000
+  'rgb-scale-positive-soft': '198 245 214', // #c6f5d6
+  'rgb-scale-positive': '0 92 46', // #005c2e
+  'rgb-surface-highlight': '0 0 0', // #000000
+  'rgb-text-on-highlight': '255 255 255', // #ffffff
+
   // Presentation
   'rgb-presentation': '255 255 255', // #ffffff
 };
@@ -301,6 +309,14 @@ export const highContrastDarkTheme: IThemeRGB = {
   /** Unchecked switch track: 5.32:1 against the page and the `surface-primary`
    *  thumb, 3.95:1 against the checked `surface-inverted` track. */
   'rgb-switch-unchecked': '128 128 128', // #808080
+
+  'rgb-scale-negative': '255 143 143', // #ff8f8f
+  'rgb-scale-negative-soft': '92 0 0', // #5c0000
+  'rgb-scale-neutral': '255 255 255', // #ffffff
+  'rgb-scale-positive-soft': '0 70 40', // #004628
+  'rgb-scale-positive': '127 240 179', // #7ff0b3
+  'rgb-surface-highlight': '255 255 255', // #ffffff
+  'rgb-text-on-highlight': '0 0 0', // #000000
 
   // Presentation
   'rgb-presentation': '0 0 0', // #000000

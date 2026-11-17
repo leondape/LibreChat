@@ -23,6 +23,8 @@ export type ArmSurveyFlightInput = {
   nudgeDays?: number[];
   opensAt?: Date;
   closesAt?: Date;
+  /** Empty or omitted arms the flight for every user. */
+  audience?: string[];
 };
 
 export type SurveyNudgeState = { nextAt: Date; dismissals: number };
@@ -51,7 +53,11 @@ export type SurveyMethods = {
   closeSurveyFlight: () => Promise<number>;
   hasSurveyResponse: (flightId: string, user: string) => Promise<boolean>;
   createSurveyResponse: (response: SurveyResponseData) => Promise<CreateSurveyResponseResult>;
-  getSurveyComparison: (flightId: string, threshold: number) => Promise<TSurveyComparison>;
+  getSurveyComparison: (
+    flightId: string,
+    threshold: number,
+    usage: TSurveyUsageValues,
+  ) => Promise<TSurveyComparison>;
   getSurveyStats: (flightId: string, activeSince: Date) => Promise<SurveyStats>;
   getSurveyNudge: (
     flightId: string,
@@ -83,6 +89,26 @@ function nudgeSchedule(schedule: readonly number[]): number[] {
   return schedule.length > 0 ? [...schedule] : [...SURVEY_DEFAULT_NUDGE_DAYS];
 }
 
+type ActiveAccountMatch = {
+  isCreatedByUser: true;
+  isTemporary: { $ne: true };
+  createdAt: { $gte: Date };
+  user?: { $in: string[] };
+};
+
+/** Empty after trim means "everyone", so nothing is stored. */
+function normalizeAudience(emails?: string[]): string[] | undefined {
+  if (!emails?.length) {
+    return undefined;
+  }
+  const normalized = [
+    ...new Set(
+      emails.map((email) => email.trim().toLowerCase()).filter((email) => email.length > 0),
+    ),
+  ];
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function createSurveyMethods(mongoose: typeof import('mongoose')): SurveyMethods {
   const Flight = () => mongoose.models.SurveyFlight as Model<ISurveyFlight>;
   const Response = () => mongoose.models.SurveyResponse as Model<ISurveyResponse>;
@@ -107,6 +133,7 @@ export function createSurveyMethods(mongoose: typeof import('mongoose')): Survey
 
   /** The new flight is written first, so a duplicate id leaves the running flight untouched. */
   async function armSurveyFlight(input: ArmSurveyFlightInput): Promise<SurveyFlightData> {
+    const audience = normalizeAudience(input.audience);
     const created = await Flight().create({
       flightId: input.flightId,
       surveyId: SURVEY_ID,
@@ -118,6 +145,7 @@ export function createSurveyMethods(mongoose: typeof import('mongoose')): Survey
       minResponses: input.minResponses,
       nudgeDays: nudgeSchedule(input.nudgeDays ?? []),
       companies: input.companies,
+      ...(audience ? { audience } : {}),
     });
     await Flight().updateMany(
       { status: 'armed', flightId: { $ne: input.flightId } },
@@ -149,18 +177,28 @@ export function createSurveyMethods(mongoose: typeof import('mongoose')): Survey
     }
   }
 
-  /** Averages are withheld below the threshold so a small group cannot be read back. */
+  /**
+   * Averages and percentiles are withheld below the threshold so a small group
+   * cannot be read back. A percentile is how many of the other respondents sit
+   * strictly below this person.
+   */
   async function getSurveyComparison(
     flightId: string,
     threshold: number,
+    usage: TSurveyUsageValues,
   ): Promise<TSurveyComparison> {
     const responses = await Response().countDocuments({ flightId });
     if (responses < threshold) {
       return { responses, threshold };
     }
-    const group: { _id: null } & Record<string, { $avg: string } | null> = { _id: null };
+    const group: { _id: null } & Record<string, unknown> = { _id: null };
     for (const key of SURVEY_USAGE_KEYS) {
       group[key] = { $avg: `$usage.${key}` };
+      group[`${key}Below`] = {
+        $sum: {
+          $cond: [{ $lt: [{ $ifNull: [`$usage.${key}`, 0] }, usage[key] ?? 0] }, 1, 0],
+        },
+      };
     }
     const [row] = await Response().aggregate<Record<string, number>>([
       { $match: { flightId } },
@@ -169,28 +207,58 @@ export function createSurveyMethods(mongoose: typeof import('mongoose')): Survey
     const averages = Object.fromEntries(
       SURVEY_USAGE_KEYS.map((key) => [key, round(row?.[key] ?? 0)]),
     ) as TSurveyUsageValues;
-    return { responses, threshold, averages };
+    const others = Math.max(responses - 1, 0);
+    const percentiles = Object.fromEntries(
+      SURVEY_USAGE_KEYS.map((key) => [
+        key,
+        others === 0 ? 0 : Math.round(((row?.[`${key}Below`] ?? 0) / others) * 100),
+      ]),
+    ) as TSurveyUsageValues;
+    return { responses, threshold, averages, percentiles };
+  }
+
+  async function countActiveAccounts(match: ActiveAccountMatch): Promise<number> {
+    const Message = mongoose.models.Message as Model<IMessage>;
+    const active = await Message.aggregate<{ total: number }>([
+      { $match: match },
+      { $group: { _id: '$user' } },
+      { $count: 'total' },
+    ]);
+    return active[0]?.total ?? 0;
   }
 
   async function getSurveyStats(flightId: string, activeSince: Date): Promise<SurveyStats> {
     const User = mongoose.models.User as Model<IUser>;
-    const Message = mongoose.models.Message as Model<IMessage>;
-    const [responses, accounts, active] = await Promise.all([
+    const flight = await Flight()
+      .findOne({ flightId })
+      .select('audience')
+      .lean<Pick<SurveyFlightData, 'audience'> | null>();
+    const audience = normalizeAudience(flight?.audience);
+    const activeMatch: ActiveAccountMatch = {
+      isCreatedByUser: true,
+      isTemporary: { $ne: true },
+      createdAt: { $gte: activeSince },
+    };
+
+    if (!audience) {
+      const [responses, accounts, activeAccounts] = await Promise.all([
+        Response().countDocuments({ flightId }),
+        User.countDocuments({}),
+        countActiveAccounts(activeMatch),
+      ]);
+      return { responses, accounts, activeAccounts };
+    }
+
+    const [responses, members] = await Promise.all([
       Response().countDocuments({ flightId }),
-      User.countDocuments({}),
-      Message.aggregate<{ total: number }>([
-        {
-          $match: {
-            isCreatedByUser: true,
-            isTemporary: { $ne: true },
-            createdAt: { $gte: activeSince },
-          },
-        },
-        { $group: { _id: '$user' } },
-        { $count: 'total' },
-      ]),
+      User.find({ email: { $in: audience } })
+        .select('_id')
+        .lean<Array<{ _id: { toString(): string } }>>(),
     ]);
-    return { responses, accounts, activeAccounts: active[0]?.total ?? 0 };
+    const ids = members.map((member) => String(member._id));
+    const activeAccounts =
+      ids.length === 0 ? 0 : await countActiveAccounts({ ...activeMatch, user: { $in: ids } });
+    return { responses, accounts: ids.length, activeAccounts };
   }
 
   function nudgeFilter(flightId: string, user: string, tenantId?: string) {

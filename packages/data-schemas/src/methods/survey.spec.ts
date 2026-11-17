@@ -50,6 +50,7 @@ const zeroUsage = (overrides: Partial<TSurveyUsage> = {}): TSurveyUsage => ({
   >),
   version: SURVEY_USAGE_VERSION,
   windowDays: 30,
+  topTools: [],
   ...overrides,
 });
 
@@ -92,6 +93,8 @@ describe('getUserUsageSnapshot', () => {
           { type: 'text', text: 'done' },
           { type: 'tool_call', tool_call: { name: 'execute_code' } },
           { type: 'tool_call', tool_call: { name: 'web_search' } },
+          { type: 'tool_call', tool_call: { name: 'lookup_mcp_docs' } },
+          { type: 'tool_call', tool_call: { name: '' } },
         ],
       }),
     ]);
@@ -190,11 +193,20 @@ describe('getUserUsageSnapshot', () => {
       promptsShared: 1,
       filesUploaded: 3,
       codeRuns: 2,
+      toolCalls: 4,
+      toolsDistinct: 3,
+      mcpToolCalls: 1,
+      mcpServers: 1,
       spreadsheetUploads: 2,
       regenerations: 1,
       failedResponses: 1,
       feedbackUp: 1,
       feedbackDown: 0,
+      topTools: [
+        { name: 'execute_code', calls: 2 },
+        { name: 'lookup_mcp_docs', calls: 1 },
+        { name: 'web_search', calls: 1 },
+      ],
     });
   });
 
@@ -275,6 +287,21 @@ describe('flights', () => {
     expect(await survey().getArmedSurveyFlight()).toBeNull();
     expect(await survey().closeSurveyFlight()).toBe(0);
   });
+
+  it('stores a normalized audience and omits it when none is given', async () => {
+    const targeted = await survey().armSurveyFlight(
+      input('targeted', {
+        audience: [' Alice@Acme.com ', 'alice@acme.com', 'bob@acme.com', ''],
+      }),
+    );
+    expect(targeted.audience).toEqual(['alice@acme.com', 'bob@acme.com']);
+
+    await survey().armSurveyFlight(input('everyone', { audience: ['  ', ''] }));
+    const stored = await mongoose.models.SurveyFlight.findOne({ flightId: 'everyone' }).lean<{
+      audience?: string[];
+    } | null>();
+    expect(stored?.audience).toBeUndefined();
+  });
 });
 
 describe('responses', () => {
@@ -317,11 +344,19 @@ describe('responses', () => {
       response('elsewhere', zeroUsage({ messagesSent: 999 }), 'f2'),
     );
 
-    expect(await survey().getSurveyComparison('f1', 4)).toEqual({ responses: 3, threshold: 4 });
-    const comparison = await survey().getSurveyComparison('f1', 3);
+    expect(await survey().getSurveyComparison('f1', 4, zeroUsage())).toEqual({
+      responses: 3,
+      threshold: 4,
+    });
+    const comparison = await survey().getSurveyComparison('f1', 3, zeroUsage({ messagesSent: 30 }));
     expect(comparison.responses).toBe(3);
     expect(comparison.averages?.messagesSent).toBe(20);
     expect(comparison.averages?.tokensTotal).toBe(0);
+    expect(comparison.percentiles?.messagesSent).toBe(100);
+    expect(comparison.percentiles?.tokensTotal).toBe(0);
+
+    const middle = await survey().getSurveyComparison('f1', 3, zeroUsage({ messagesSent: 20 }));
+    expect(middle.percentiles?.messagesSent).toBe(50);
   });
 
   it('counts accounts, responses and accounts active in the last seven days', async () => {
@@ -330,15 +365,42 @@ describe('responses', () => {
       ['a', 'b', 'c'].map((name) => ({ name, email: `${name}@example.com` })),
     );
     await collection('messages').insertMany([
-      { user: 'a', isCreatedByUser: true, createdAt: ago(1) },
-      { user: 'a', isCreatedByUser: true, createdAt: ago(2) },
-      { user: 'b', isCreatedByUser: true, createdAt: ago(20) },
-      { user: 'c', isCreatedByUser: false, createdAt: ago(1) },
+      { messageId: 'a1', user: 'a', isCreatedByUser: true, createdAt: ago(1) },
+      { messageId: 'a2', user: 'a', isCreatedByUser: true, createdAt: ago(2) },
+      { messageId: 'b1', user: 'b', isCreatedByUser: true, createdAt: ago(20) },
+      { messageId: 'c1', user: 'c', isCreatedByUser: false, createdAt: ago(1) },
     ]);
 
     expect(await survey().getSurveyStats('f1', ago(7))).toEqual({
       responses: 1,
       accounts: 3,
+      activeAccounts: 1,
+    });
+  });
+
+  it('limits the account counts to the flight audience', async () => {
+    const listed = new Types.ObjectId();
+    const other = new Types.ObjectId();
+    await survey().armSurveyFlight({
+      flightId: 'f1',
+      companies: [{ id: 'a', name: 'A' }],
+      lookbackDays: 30,
+      minResponses: 50,
+      audience: ['listed@example.com', 'later@example.com'],
+    });
+    await survey().createSurveyResponse(response('u1'));
+    await collection('users').insertMany([
+      { _id: listed, email: 'listed@example.com' },
+      { _id: other, email: 'other@example.com' },
+    ]);
+    await collection('messages').insertMany([
+      { user: listed.toString(), isCreatedByUser: true, createdAt: ago(1) },
+      { user: other.toString(), isCreatedByUser: true, createdAt: ago(1) },
+    ]);
+
+    expect(await survey().getSurveyStats('f1', ago(7))).toEqual({
+      responses: 1,
+      accounts: 1,
       activeAccounts: 1,
     });
   });

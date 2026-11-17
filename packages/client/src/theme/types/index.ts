@@ -144,6 +144,19 @@ export interface IThemeRGB {
    */
   'rgb-switch-unchecked'?: string;
 
+  /**
+   * Sentiment scale for a choice that runs from worse to better. Soft stops are
+   * the tint behind an unselected choice; the solid stops are the selected fill.
+   * `text-on-highlight` is the label on a solid stop and on `surface-highlight`.
+   */
+  'rgb-scale-negative'?: string;
+  'rgb-scale-negative-soft'?: string;
+  'rgb-scale-neutral'?: string;
+  'rgb-scale-positive-soft'?: string;
+  'rgb-scale-positive'?: string;
+  'rgb-surface-highlight'?: string;
+  'rgb-text-on-highlight'?: string;
+
   // Presentation
   'rgb-presentation'?: string;
 }
@@ -251,6 +264,14 @@ export interface IThemeVariables {
 
   '--switch-unchecked': string;
 
+  '--scale-negative': string;
+  '--scale-negative-soft': string;
+  '--scale-neutral': string;
+  '--scale-positive-soft': string;
+  '--scale-positive': string;
+  '--surface-highlight': string;
+  '--text-on-highlight': string;
+
   '--presentation': string;
 }
 
@@ -340,6 +361,13 @@ export interface IThemeColors {
   'series-7'?: string;
   'switch-unchecked'?: string;
   'series-8'?: string;
+  'scale-negative'?: string;
+  'scale-negative-soft'?: string;
+  'scale-neutral'?: string;
+  'scale-positive-soft'?: string;
+  'scale-positive'?: string;
+  'surface-highlight'?: string;
+  'text-on-highlight'?: string;
   presentation?: string;
 
   // Retained for excluded SidePanel/Agents + SidePanel/Builder (pending migration)

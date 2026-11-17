@@ -1,6 +1,7 @@
 import { logger } from '@librechat/data-schemas';
 import {
   SURVEY_DEFAULT_NUDGE_DAYS,
+  SURVEY_VERSION,
   parseSurveyAnswers,
   surveyNudgeSchema,
   surveySubmissionSchema,
@@ -34,6 +35,19 @@ const closedStatus = { flight: null, submitted: false, nextNudgeAt: null } satis
 
 const nudgeSchedule = (days?: number[]) => (days?.length ? days : [...SURVEY_DEFAULT_NUDGE_DAYS]);
 
+/** A flight written by an older build asks questions this build no longer accepts. */
+function isCurrentSurvey(flight: { surveyVersion: number }): boolean {
+  return flight.surveyVersion === SURVEY_VERSION;
+}
+
+/** An empty or missing audience is the whole deployment. Stored emails are lowercase. */
+function isInSurveyAudience(flight: { audience?: string[] }, email?: string): boolean {
+  if (!flight.audience?.length) {
+    return true;
+  }
+  return email != null && flight.audience.includes(email.toLowerCase());
+}
+
 export function createSurveyStatusHandler({
   getArmedSurveyFlight,
   hasSurveyResponse,
@@ -50,7 +64,7 @@ export function createSurveyStatusHandler({
         return;
       }
       const flight = await getArmedSurveyFlight();
-      if (!flight) {
+      if (!flight || !isCurrentSurvey(flight) || !isInSurveyAudience(flight, req.user.email)) {
         res.json(closedStatus);
         return;
       }
@@ -96,7 +110,12 @@ export function createSurveySubmitHandler({
         return;
       }
       const flight = isSurveyEnabled(req) ? await getArmedSurveyFlight() : null;
-      if (!flight || flight.flightId !== submission.data.flightId) {
+      if (
+        !flight ||
+        !isCurrentSurvey(flight) ||
+        flight.flightId !== submission.data.flightId ||
+        !isInSurveyAudience(flight, req.user.email)
+      ) {
         error(res, 409, 'survey_closed', 'This survey is closed');
         return;
       }
@@ -135,7 +154,7 @@ export function createSurveySubmitHandler({
         return;
       }
 
-      const comparison = await getSurveyComparison(flight.flightId, flight.minResponses);
+      const comparison = await getSurveyComparison(flight.flightId, flight.minResponses, usage);
       res.status(201).json({ usage, comparison } satisfies TSurveyResult);
     } catch (err) {
       logger.error('[Survey] Failed to submit survey', getSafeErrorMetadata(err));
@@ -161,7 +180,12 @@ export function createSurveyNudgeHandler({
         return;
       }
       const flight = isSurveyEnabled(req) ? await getArmedSurveyFlight() : null;
-      if (!flight || flight.flightId !== nudge.data.flightId) {
+      if (
+        !flight ||
+        !isCurrentSurvey(flight) ||
+        flight.flightId !== nudge.data.flightId ||
+        !isInSurveyAudience(flight, req.user.email)
+      ) {
         error(res, 409, 'survey_closed', 'This survey is closed');
         return;
       }

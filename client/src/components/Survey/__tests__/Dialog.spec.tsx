@@ -81,8 +81,8 @@ describe('SurveyDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Start' }));
 
     expect(screen.getByRole('heading', { name: 'Where do you work?' })).toBeInTheDocument();
-    expect(screen.getByText('Question 1 of 13')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Company level 1' })).toBeInTheDocument();
+    expect(screen.getByText('Question 1 of 14')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Group' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
   });
 
@@ -101,11 +101,11 @@ describe('SurveyDialog', () => {
     seed('hours', { ...answers, hoursSaved: undefined });
     renderDialog();
 
-    await user.click(screen.getByRole('radio', { name: 'None' }));
-    expect(screen.getByText('Question 4 of 13')).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: '0 h' }));
+    expect(screen.getByText('Question 3 of 14')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('radio', { name: '2–5 hours' }));
-    expect(screen.getByText('Question 4 of 14')).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: '2–5 h' }));
+    expect(screen.getByText('Question 3 of 15')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
     expect(
@@ -113,19 +113,19 @@ describe('SurveyDialog', () => {
     ).toBeInTheDocument();
   });
 
-  it('prefers the typed hours over a range', async () => {
+  it('turns Exact into an hours field and clears it when a range is chosen', async () => {
     const user = userEvent.setup();
     seed('hours', { ...answers, hoursSaved: undefined });
     renderDialog();
 
-    await user.click(screen.getByRole('radio', { name: '2–5 hours' }));
-    await user.type(screen.getByRole('spinbutton'), '6');
+    await user.click(screen.getByRole('button', { name: 'Exact…' }));
+    await user.type(screen.getByRole('spinbutton', { name: 'hours per week' }), '6');
 
-    expect(screen.getByRole('spinbutton')).toHaveValue(6);
-    expect(screen.getByRole('radio', { name: '2–5 hours' })).toHaveAttribute(
-      'aria-checked',
-      'false',
-    );
+    expect(screen.getByRole('spinbutton', { name: 'hours per week' })).toHaveValue(6);
+
+    await user.click(screen.getByRole('radio', { name: '2–5 h' }));
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '2–5 h' })).toHaveAttribute('aria-checked', 'true');
   });
 
   it('lets an exclusive letdown replace the others', async () => {
@@ -176,7 +176,7 @@ describe('SurveyDialog', () => {
     jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockSubmit.mockResolvedValue(resultWithoutAverages);
-    seed('feedback');
+    seed('contact');
     renderDialog();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));
@@ -190,15 +190,9 @@ describe('SurveyDialog', () => {
 
     await play(COMPUTING_MIN_MS + 1000);
 
-    expect(
-      screen.getByRole('heading', {
-        name: /Awesome, you did it!|Success!|Amazing, thank you!|You're amazing!/,
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('1,234')).toBeInTheDocument();
-    expect(
-      screen.getByText(/comparison with your colleagues unlocks once 50 people/),
-    ).toBeVisible();
+    expect(screen.getByRole('heading', { name: "You're a Power Prompter" })).toBeInTheDocument();
+    expect(screen.getAllByText('1,234').length).toBeGreaterThan(0);
+    expect(screen.getByText(/12 of 50 people have answered/)).toBeVisible();
     expect(screen.queryByText(/WanGPT average/)).not.toBeInTheDocument();
     expect(mockConfetti).toHaveBeenCalledWith(
       expect.objectContaining({ disableForReducedMotion: true }),
@@ -209,27 +203,29 @@ describe('SurveyDialog', () => {
     jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockSubmit.mockResolvedValue(resultWithAverages);
-    seed('feedback');
+    seed('contact');
     renderDialog();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));
     await play(COMPUTING_MIN_MS + 2000);
 
     expect(screen.getByText('WanGPT average: 321')).toBeInTheDocument();
-    expect(screen.queryByText(/unlocks once/)).not.toBeInTheDocument();
+    expect(screen.getAllByText('Ahead of 82% of colleagues').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('docs · lookup').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/people have answered/)).not.toBeInTheDocument();
   });
 
   it('returns to the last question with the draft intact when the request fails', async () => {
     const user = userEvent.setup();
     mockSubmit.mockRejectedValueOnce(axiosError(500, 'internal_error'));
     mockSubmit.mockResolvedValueOnce(resultWithoutAverages);
-    seed('feedback');
+    seed('contact');
     renderDialog();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/Something went wrong/);
-    expect(store.get(surveyDraftAtom)?.step).toBe('feedback');
+    expect(store.get(surveyDraftAtom)?.step).toBe('contact');
     expect(screen.queryByText('Computing your massive workload…')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));
@@ -243,7 +239,7 @@ describe('SurveyDialog', () => {
   ])('explains a %s response and drops the draft', async (code, message) => {
     const user = userEvent.setup();
     mockSubmit.mockRejectedValueOnce(axiosError(409, code));
-    seed('feedback');
+    seed('contact');
     const onClose = renderDialog();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));

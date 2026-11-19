@@ -113,6 +113,32 @@ describe('Fish', () => {
     expect(onGone).toHaveBeenCalled();
   });
 
+  it('says goodbye and swims off when the questionnaire is paused', async () => {
+    jest.useFakeTimers();
+    const onSnooze = jest.fn().mockResolvedValue(2);
+    const onGone = jest.fn();
+    render(<Fish departing onYes={jest.fn()} onSnooze={onSnooze} onGone={onGone} />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(onSnooze).toHaveBeenCalledTimes(1);
+    expect(onSnooze).toHaveBeenCalledWith('later');
+    expect(screen.getByText(/couple of days/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: "Yes, let's go" })).not.toBeInTheDocument();
+
+    await act(async () => {
+      jest.advanceTimersByTime(FISH_LEAVE_MS - 1);
+    });
+    expect(screen.getByText(/couple of days/)).toBeInTheDocument();
+    expect(onGone).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(onGone).toHaveBeenCalledTimes(1);
+  });
+
   it('opens the invitation in place when motion is reduced', () => {
     window.matchMedia = jest.fn().mockImplementation((query: string) => ({
       matches: String(query).includes('prefers-reduced-motion'),

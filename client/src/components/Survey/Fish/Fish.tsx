@@ -7,6 +7,7 @@ import {
   FISH_ENTER_MS,
   FISH_EXIT_MS,
   FISH_LEAVE_MS,
+  FISH_SETTLE_MS,
   FISH_TAUNT_MS,
   bubblePlacement,
   canSwim,
@@ -60,6 +61,8 @@ type FishProps = {
   /** Resolves with the server's delay, in days. Undefined when the request fails. */
   onSnooze: (reason: TSurveyNudgeReason) => Promise<number | undefined>;
   onGone: () => void;
+  /** Already caught. Shows the goodbye and swims off without roaming. */
+  departing?: boolean;
 };
 
 /** Offset from the mouth, size and start delay, so the bubbles rise unevenly. */
@@ -97,7 +100,7 @@ function Bubbles({ face }: { face: number }) {
   );
 }
 
-export default function Fish({ onYes, onSnooze, onGone }: FishProps) {
+export default function Fish({ onYes, onSnooze, onGone, departing = false }: FishProps) {
   const localize = useLocalize();
   const reduced = useMediaQuery('(prefers-reduced-motion: reduce)');
   const mover = useRef<HTMLDivElement>(null);
@@ -171,6 +174,16 @@ export default function Fish({ onYes, onSnooze, onGone }: FishProps) {
     const stage = measureStage();
     stageRef.current = stage;
     setOrigin(stage.originLeft);
+
+    if (departing) {
+      if (phaseRef.current === 'entering') {
+        place(node, centerOf(stage));
+      }
+      return () => {
+        stopSwim();
+      };
+    }
+
     let cancelled = false;
 
     const finishArrive = async () => {
@@ -216,7 +229,7 @@ export default function Fish({ onYes, onSnooze, onGone }: FishProps) {
       phaseRef.current = 'wandering';
       setPhase('wandering');
       setTaunt(true);
-      await rest(FISH_TAUNT_MS);
+      await rest(FISH_SETTLE_MS);
       while (!cancelled && phaseRef.current === 'wandering') {
         const from = readPoint(node);
         const next = pickWaypoint(stage, from);
@@ -245,7 +258,15 @@ export default function Fish({ onYes, onSnooze, onGone }: FishProps) {
       loopRef.current = false;
       stopSwim();
     };
-  }, [reduced]);
+  }, [departing, reduced]);
+
+  useEffect(() => {
+    if (!departing) {
+      return undefined;
+    }
+    void leaveRef.current('later');
+    return undefined;
+  }, [departing]);
 
   useLayoutEffect(() => {
     const box = stageBox.current;
@@ -314,7 +335,7 @@ export default function Fish({ onYes, onSnooze, onGone }: FishProps) {
     setSwimPace(value ? 0.3 : 1);
   };
 
-  const swimming = phase === 'entering' || phase === 'wandering';
+  const swimming = !departing && (phase === 'entering' || phase === 'wandering');
   const speech = speechFor(phase, swimming && taunt);
 
   useLayoutEffect(() => {

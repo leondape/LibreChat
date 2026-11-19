@@ -48,6 +48,8 @@ export default function Survey() {
   const [open, setOpen] = useAtom(surveyOpenAtom);
   const offered = useRef<string>();
   const [visiting, setVisiting] = useState(false);
+  /** The questionnaire was paused, so the fish should say goodbye and leave. */
+  const [farewell, setFarewell] = useState(false);
   /** Kept while open, so closing the flight mid-dialog cannot pull the success page away. */
   const [shown, setShown] = useState<TSurveyFlight | null>(null);
 
@@ -77,6 +79,7 @@ export default function Survey() {
       offered.current = getSurveyKey(userId, flight.flightId);
     }
     setVisiting(false);
+    setFarewell(false);
   }, [open, flight, userId]);
 
   useEffect(() => {
@@ -100,16 +103,15 @@ export default function Survey() {
         flight={shown}
         userId={userId}
         onClose={() => setOpen(false)}
-        onLater={() => {
-          void snooze('later').catch(() => undefined);
-        }}
+        onLater={() => setFarewell(true)}
       />
     );
   }
 
-  if (visiting && !open) {
+  if ((visiting || farewell) && !open) {
     return (
       <Fish
+        departing={farewell}
         onYes={() => {
           if (flight) {
             setShown(flight);
@@ -117,7 +119,10 @@ export default function Survey() {
           setOpen(true);
         }}
         onSnooze={dismiss}
-        onGone={() => setVisiting(false)}
+        onGone={() => {
+          setVisiting(false);
+          setFarewell(false);
+        }}
       />
     );
   }

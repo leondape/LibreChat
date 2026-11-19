@@ -5,6 +5,8 @@ const PIXEL = 4;
 export const FISH_WIDTH = FRAME_WIDTH * PIXEL;
 export const FISH_HEIGHT = FRAME_HEIGHT * PIXEL;
 export const FISH_TAUNT_MS = 6_000;
+/** How long the fish holds still after swimming in, before it starts roaming. */
+export const FISH_SETTLE_MS = 1_000;
 /** How long the goodbye stays readable before the fish starts to swim off. */
 export const FISH_LEAVE_MS = 3_500;
 export const FISH_ENTER_MS = 4_000;

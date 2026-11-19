@@ -3,12 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { act, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { TSurveyStatus } from 'librechat-data-provider';
-import { surveyDraftAtom, surveyOpenAtom } from '../store';
-import { flight } from 'test/survey';
+import { getSurveyKey, surveyDraftAtom, surveyOpenAtom } from '../store';
+import { answers, flight, resultWithoutAverages } from 'test/survey';
+import { COMPUTING_MIN_MS } from '../Computing';
 import Survey from '../Survey';
 
 const mockGetSurvey = jest.fn();
 const mockSnooze = jest.fn();
+const mockSubmit = jest.fn();
 let mockStartupConfig: { interface?: { survey?: boolean } } = {};
 
 jest.mock('canvas-confetti', () => ({ __esModule: true, default: jest.fn() }));
@@ -21,6 +23,7 @@ jest.mock('librechat-data-provider', () => {
       ...actual.dataService,
       getSurvey: (...args: unknown[]) => mockGetSurvey(...args),
       snoozeSurvey: (...args: unknown[]) => mockSnooze(...args),
+      submitSurvey: (...args: unknown[]) => mockSubmit(...args),
     },
   };
 });
@@ -53,12 +56,20 @@ async function mount(status: TSurveyStatus) {
   await act(async () => void jest.advanceTimersByTime(3000));
 }
 
+/** Advances in small steps so state set by resolved requests renders between them. */
+async function play(ms: number) {
+  for (let elapsed = 0; elapsed < ms; elapsed += 250) {
+    await act(async () => void jest.advanceTimersByTime(250));
+  }
+}
+
 describe('Survey', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     localStorage.clear();
     mockStartupConfig = {};
     mockSnooze.mockReset();
+    mockSubmit.mockReset();
     store.set(surveyOpenAtom, false);
     store.set(surveyDraftAtom, null);
   });
@@ -86,7 +97,35 @@ describe('Survey', () => {
     expect(screen.getByText('Help us improve WanGPT')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Later' }));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockSnooze).toHaveBeenCalledTimes(1);
     expect(mockSnooze).toHaveBeenCalledWith({ flightId: flight.flightId, reason: 'later' });
+    expect(screen.getByText(/be back tomorrow/)).toBeInTheDocument();
+  });
+
+  it('stays away after the questionnaire is finished', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    mockSubmit.mockResolvedValue(resultWithoutAverages);
+    store.set(surveyDraftAtom, {
+      key: getSurveyKey('user-1', flight.flightId),
+      step: 'contact',
+      answers,
+    });
+    await mount({ flight, submitted: false, nextNudgeAt: null });
+
+    await user.click(screen.getByRole('button', { name: 'Feedback fish' }));
+    await user.click(screen.getByRole('button', { name: "Yes, let's go" }));
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await play(COMPUTING_MIN_MS + 1000);
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Feedback fish' })).not.toBeInTheDocument();
+    expect(mockSnooze).not.toHaveBeenCalled();
   });
 
   it('stays away for someone who already answered', async () => {

@@ -4,9 +4,9 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { TSurveyAnswers } from 'librechat-data-provider';
 import type { SurveyStepId } from '../store';
-import { answers, flight, resultWithAverages, resultWithoutAverages } from 'test/survey';
+import { answers, flight, resultReady, resultWaiting } from 'test/survey';
+import { COMPUTING_LINE_MS, COMPUTING_MIN_MS } from '../Computing';
 import { getSurveyKey, surveyDraftAtom } from '../store';
-import { COMPUTING_MIN_MS } from '../Computing';
 import SurveyDialog from '../Dialog';
 
 const mockSubmit = jest.fn();
@@ -172,10 +172,21 @@ describe('SurveyDialog', () => {
     expect(store.get(surveyDraftAtom)?.step).toBe('improvement');
   });
 
-  it('runs the loader, then celebrates with the usage overview and no comparison yet', async () => {
+  async function finish(result: unknown) {
     jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    mockSubmit.mockResolvedValue(resultWithoutAverages);
+    mockSubmit.mockResolvedValue(result);
+    seed('contact');
+    renderDialog();
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await play(COMPUTING_MIN_MS + COMPUTING_LINE_MS * 5);
+    return user;
+  }
+
+  it('runs the loader, then celebrates with the month and a waiting state for colleagues', async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    mockSubmit.mockResolvedValue(resultWaiting);
     seed('contact');
     renderDialog();
 
@@ -192,33 +203,72 @@ describe('SurveyDialog', () => {
 
     expect(screen.getByRole('heading', { name: "You're a Power Prompter" })).toBeInTheDocument();
     expect(screen.getAllByText('1,234').length).toBeGreaterThan(0);
-    expect(screen.getByText(/12 of 50 people have answered/)).toBeVisible();
-    expect(screen.queryByText(/WanGPT average/)).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Your month' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument();
     expect(mockConfetti).toHaveBeenCalledWith(
       expect.objectContaining({ disableForReducedMotion: true }),
     );
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getByText('Not enough answers yet')).toBeVisible();
+    expect(screen.queryByText(/\d+ (people|colleagues)/)).not.toBeInTheDocument();
   });
 
-  it('shows the company averages next to the figures once enough people answered', async () => {
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    mockSubmit.mockResolvedValue(resultWithAverages);
-    seed('contact');
-    renderDialog();
+  it('walks through the three pages and closes on the last one', async () => {
+    const user = await finish(resultReady);
+    const onClose = jest.fn();
+    expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
+    expect(screen.getByText('1 of 3')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Submit' }));
-    await play(COMPUTING_MIN_MS + 2000);
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('tab', { name: 'Your time' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('2 of 3')).toBeInTheDocument();
 
-    expect(screen.getByText('WanGPT average: 321')).toBeInTheDocument();
-    expect(screen.getAllByText('Ahead of 82% of colleagues').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('docs · lookup').length).toBeGreaterThan(0);
-    expect(screen.queryByText(/people have answered/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('tab', { name: 'Your month' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    await user.click(screen.getByRole('tab', { name: 'Colleagues' }));
+    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('shows the person next to their colleagues without ever counting them', async () => {
+    const user = await finish(resultReady);
+
+    await user.click(screen.getByRole('tab', { name: 'Colleagues' }));
+
+    expect(screen.getByText('Ahead of 82% of colleagues')).toBeVisible();
+    expect(screen.getAllByText(/^Ahead of \d+% of colleagues$/)).toHaveLength(1);
+    expect(screen.queryByText(/WanGPT average/)).not.toBeInTheDocument();
+
+    expect(screen.getAllByText('Typical').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('You').length).toBeGreaterThan(0);
+    expect(screen.getByText('What they use it for most')).toBeVisible();
+    expect(screen.queryByText(/\d+ (people|colleagues)/)).toBeNull();
+  });
+
+  it('draws an empty month without breaking when nothing was sent', async () => {
+    await finish({
+      ...resultWaiting,
+      activity: resultWaiting.activity.map((day) => ({ ...day, messages: 0 })),
+    });
+
+    expect(screen.getByText('No messages in this period.')).toBeVisible();
   });
 
   it('returns to the last question with the draft intact when the request fails', async () => {
     const user = userEvent.setup();
     mockSubmit.mockRejectedValueOnce(axiosError(500, 'internal_error'));
-    mockSubmit.mockResolvedValueOnce(resultWithoutAverages);
+    mockSubmit.mockResolvedValueOnce(resultWaiting);
     seed('contact');
     renderDialog();
 

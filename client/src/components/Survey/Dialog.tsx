@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { isAxiosError } from 'axios';
+import { ChartColumn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getSurveySteps, isSurveyStepComplete, parseSurveyAnswers } from 'librechat-data-provider';
 import {
@@ -184,7 +185,7 @@ export default function SurveyDialog({ flight, userId, onClose, onLater }: Dialo
         )}
 
         {phase === 'success' && result && (
-          <Success result={result} answers={answers} flightId={flight.flightId} onClose={onClose} />
+          <Success result={result} answers={answers} onClose={onClose} />
         )}
 
         {phase === 'blocked' && (
@@ -230,6 +231,10 @@ export default function SurveyDialog({ flight, userId, onClose, onLater }: Dialo
                 </h2>
                 <p className="text-sm text-text-primary">
                   {localize('com_survey_intro_body', { 0: flight.lookbackDays })}
+                </p>
+                <p className="flex items-start gap-2 text-sm text-text-primary">
+                  <ChartColumn className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  {localize('com_survey_intro_reward')}
                 </p>
                 <p className="text-sm text-text-secondary">
                   {localize('com_survey_intro_privacy', { 0: 5, 1: flight.lookbackDays })}

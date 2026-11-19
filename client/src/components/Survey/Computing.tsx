@@ -20,9 +20,7 @@ export function getRealLines(result: TSurveyResult): Line[] {
     { key: 'messages', count: usage.messagesSent },
     { key: 'tokens', count: usage.tokensTotal },
     ...(agents > 0 ? [{ key: 'agents', count: agents }] : []),
-    ...(comparison.averages
-      ? [{ key: 'compare', count: Math.max(comparison.responses - 1, 0) }]
-      : []),
+    ...(comparison.ready ? [{ key: 'compare' }] : []),
     { key: 'polish' },
   ];
 }

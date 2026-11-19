@@ -65,6 +65,10 @@ const request = (
   }) as unknown as ServerRequest;
 
 const nextAt = new Date('2026-06-16T12:00:00.000Z');
+const activity = [
+  { date: '2026-06-14', messages: 0 },
+  { date: '2026-06-15', messages: 4 },
+];
 
 const deps = () => ({
   getArmedSurveyFlight: jest.fn().mockResolvedValue(flight),
@@ -74,8 +78,8 @@ const deps = () => ({
   createSurveyResponse: jest
     .fn()
     .mockResolvedValue({ ok: true, value: { submittedAt: new Date() } }),
-  getSurveyComparison: jest.fn().mockResolvedValue({ responses: 3, threshold: 50 }),
-  getUserUsageSnapshot: jest.fn().mockResolvedValue(usage),
+  getSurveyComparison: jest.fn().mockResolvedValue({ ready: false }),
+  getUserUsageSnapshot: jest.fn().mockResolvedValue({ usage, activity }),
 });
 
 describe('survey status handler', () => {
@@ -183,7 +187,17 @@ describe('survey submit handler', () => {
     );
     expect(d.getSurveyComparison).toHaveBeenCalledWith('f1', 50, usage);
     expect(status).toHaveBeenCalledWith(201);
-    expect(json).toHaveBeenCalledWith({ usage, comparison: { responses: 3, threshold: 50 } });
+    expect(json).toHaveBeenCalledWith({ usage, activity, comparison: { ready: false } });
+  });
+
+  it('returns the daily activity without storing it', async () => {
+    const d = deps();
+    const { response } = createResponse();
+    await createSurveySubmitHandler(d)(request(body), response);
+
+    const stored = d.createSurveyResponse.mock.calls[0][0];
+    expect(JSON.stringify(stored)).not.toContain('2026-06-15');
+    expect(stored).not.toHaveProperty('activity');
   });
 
   it('treats a flight from another survey version as closed', async () => {

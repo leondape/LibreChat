@@ -5,7 +5,7 @@ import {
   SURVEY_TOP_TOOLS,
   SURVEY_USAGE_VERSION,
 } from 'librechat-data-provider';
-import type { TSurveyToolUse, TSurveyUsage } from 'librechat-data-provider';
+import type { TSurveyDay, TSurveyToolUse, TSurveyUsage } from 'librechat-data-provider';
 import type { Model } from 'mongoose';
 import type {
   IAclEntry,
@@ -23,8 +23,14 @@ import type {
 
 export type SurveyUsageWindow = { userId: string; from: Date; to: Date; windowDays: number };
 
+export type SurveyUsageSnapshot = {
+  usage: TSurveyUsage;
+  /** One entry per UTC day from `from` to `to`, quiet days included. Not stored. */
+  activity: TSurveyDay[];
+};
+
 export type SurveyUsageMethods = {
-  getUserUsageSnapshot: (window: SurveyUsageWindow) => Promise<TSurveyUsage>;
+  getUserUsageSnapshot: (window: SurveyUsageWindow) => Promise<SurveyUsageSnapshot>;
 };
 
 type DayRow = { _id: string; messages: number; tokens: number; first: Date };
@@ -86,6 +92,20 @@ function summarizeTools(rows: ToolRow[]): {
   };
 }
 
+const utcDay = (date: Date) => date.toISOString().slice(0, 10);
+
+/** Every UTC day in the window, with the messages sent on it. */
+function fillActivity(rows: DayRow[], from: Date, to: Date): TSurveyDay[] {
+  const sent = new Map(rows.map((row) => [row._id, row.messages]));
+  const last = Date.parse(utcDay(to));
+  const days: TSurveyDay[] = [];
+  for (let time = Date.parse(utcDay(from)); time <= last; time += dayMs) {
+    const date = utcDay(new Date(time));
+    days.push({ date, messages: sent.get(date) ?? 0 });
+  }
+  return days;
+}
+
 function median(values: number[]): number {
   if (values.length === 0) {
     return 0;
@@ -106,7 +126,7 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
     from,
     to,
     windowDays,
-  }: SurveyUsageWindow): Promise<TSurveyUsage> {
+  }: SurveyUsageWindow): Promise<SurveyUsageSnapshot> {
     const Message = mongoose.models.Message as Model<IMessage>;
     const Conversation = mongoose.models.Conversation as Model<IConversation>;
     const Agent = mongoose.models.Agent as Model<IAgent>;
@@ -305,7 +325,7 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
     const tokensOutput = reply?.tokens ?? 0;
     const tools = summarizeTools(toolRows);
 
-    return {
+    const usage: TSurveyUsage = {
       version: SURVEY_USAGE_VERSION,
       windowDays,
       messagesSent: dayRows.reduce((total, row) => total + row.messages, 0),
@@ -345,6 +365,7 @@ export function createSurveyUsageMethods(mongoose: typeof import('mongoose')): S
       feedbackDown: reply?.down ?? 0,
       topTools: tools.topTools,
     };
+    return { usage, activity: fillActivity(dayRows, from, to) };
   }
 
   return { getUserUsageSnapshot };

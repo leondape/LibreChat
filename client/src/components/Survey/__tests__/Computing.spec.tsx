@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import Computing, { COMPUTING_LINE_MS, COMPUTING_MIN_MS, getRealLines } from '../Computing';
-import { resultWithAverages, resultWithoutAverages } from 'test/survey';
+import { resultReady, resultWaiting } from 'test/survey';
 
 const tick = (ms: number) => act(() => void jest.advanceTimersByTime(ms));
 
@@ -26,7 +26,7 @@ describe('Computing', () => {
     const onComplete = jest.fn();
     const { rerender } = render(<Computing windowDays={30} onComplete={onComplete} />);
 
-    rerender(<Computing windowDays={30} result={resultWithoutAverages} onComplete={onComplete} />);
+    rerender(<Computing windowDays={30} result={resultWaiting} onComplete={onComplete} />);
     expect(screen.getByRole('status')).toHaveTextContent('Counting your 1,234 messages…');
 
     tick(COMPUTING_LINE_MS);
@@ -45,7 +45,7 @@ describe('Computing', () => {
 
   it('never finishes before the minimum duration, even for an instant answer', () => {
     const onComplete = jest.fn();
-    render(<Computing windowDays={30} result={resultWithoutAverages} onComplete={onComplete} />);
+    render(<Computing windowDays={30} result={resultWaiting} onComplete={onComplete} />);
 
     tick(COMPUTING_MIN_MS - 1);
     expect(onComplete).not.toHaveBeenCalled();
@@ -54,10 +54,10 @@ describe('Computing', () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
-  it('skips the agent line for someone without agents and the comparison below the threshold', () => {
+  it('skips the agent line for someone without agents and the comparison until it is ready', () => {
     const noAgents = {
-      ...resultWithoutAverages,
-      usage: { ...resultWithoutAverages.usage, agentsOwned: 0, agentsUsedOthers: 0 },
+      ...resultWaiting,
+      usage: { ...resultWaiting.usage, agentsOwned: 0, agentsUsedOthers: 0 },
     };
     expect(getRealLines(noAgents).map((line) => line.key)).toEqual([
       'messages',
@@ -66,9 +66,15 @@ describe('Computing', () => {
     ]);
   });
 
-  it('adds the colleagues line only when the comparison is unlocked', () => {
-    const keys = getRealLines(resultWithAverages).map((line) => line.key);
-    expect(keys).toEqual(['messages', 'tokens', 'agents', 'compare', 'polish']);
-    expect(getRealLines(resultWithAverages)[3].count).toBe(79);
+  it('adds the colleagues line, without any number, once the comparison is ready', () => {
+    const lines = getRealLines(resultReady);
+    expect(lines.map((line) => line.key)).toEqual([
+      'messages',
+      'tokens',
+      'agents',
+      'compare',
+      'polish',
+    ]);
+    expect(lines[3].count).toBeUndefined();
   });
 });

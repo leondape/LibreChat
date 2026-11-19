@@ -4,7 +4,7 @@ import { act, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { TSurveyStatus } from 'librechat-data-provider';
 import { getSurveyKey, surveyDraftAtom, surveyOpenAtom } from '../store';
-import { answers, flight, resultWithoutAverages } from 'test/survey';
+import { answers, flight, resultWaiting } from 'test/survey';
 import { COMPUTING_MIN_MS } from '../Computing';
 import Survey from '../Survey';
 
@@ -109,7 +109,7 @@ describe('Survey', () => {
 
   it('stays away after the questionnaire is finished', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    mockSubmit.mockResolvedValue(resultWithoutAverages);
+    mockSubmit.mockResolvedValue(resultWaiting);
     store.set(surveyDraftAtom, {
       key: getSurveyKey('user-1', flight.flightId),
       step: 'contact',
@@ -121,6 +121,8 @@ describe('Survey', () => {
     await user.click(screen.getByRole('button', { name: "Yes, let's go" }));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
     await play(COMPUTING_MIN_MS + 1000);
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
     await user.click(screen.getByRole('button', { name: 'Done' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

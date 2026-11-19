@@ -164,7 +164,7 @@ describe('getUserUsageSnapshot', () => {
 
   it('mines every metric inside the window for that user only', async () => {
     await seed();
-    const usage = await usageMethods().getUserUsageSnapshot(window(u));
+    const { usage } = await usageMethods().getUserUsageSnapshot(window(u));
 
     expect(usage).toEqual({
       version: SURVEY_USAGE_VERSION,
@@ -211,15 +211,28 @@ describe('getUserUsageSnapshot', () => {
   });
 
   it('returns zeros for an account with no activity', async () => {
-    const usage = await usageMethods().getUserUsageSnapshot(
+    const { usage, activity } = await usageMethods().getUserUsageSnapshot(
       window(new Types.ObjectId().toString()),
     );
     expect(usage).toEqual(zeroUsage());
+    expect(activity.every((day) => day.messages === 0)).toBe(true);
   });
 
-  it('reports every key the comparison averages', async () => {
+  it('returns one entry per UTC day, with quiet days at zero', async () => {
     await seed();
-    const usage = await usageMethods().getUserUsageSnapshot(window(u));
+    const { usage, activity } = await usageMethods().getUserUsageSnapshot(window(u));
+
+    expect(activity).toHaveLength(31);
+    expect(activity[0]).toEqual({ date: '2026-05-16', messages: 0 });
+    expect(activity[activity.length - 1]).toEqual({ date: '2026-06-15', messages: 2 });
+    expect(activity.find((day) => day.date === '2026-06-05')?.messages).toBe(1);
+    expect(activity.filter((day) => day.messages > 0)).toHaveLength(usage.activeDays);
+    expect(activity.reduce((total, day) => total + day.messages, 0)).toBe(usage.messagesSent);
+  });
+
+  it('reports every key the comparison measures', async () => {
+    await seed();
+    const { usage } = await usageMethods().getUserUsageSnapshot(window(u));
     for (const key of SURVEY_USAGE_KEYS) {
       expect(typeof usage[key]).toBe('number');
     }
@@ -334,7 +347,7 @@ describe('responses', () => {
     ).rejects.toThrow();
   });
 
-  it('withholds averages below the threshold and returns them at it', async () => {
+  it('answers ready: false and nothing else below the threshold', async () => {
     for (const [index, messages] of [10, 20, 30].entries()) {
       await survey().createSurveyResponse(
         response(`u${index}`, zeroUsage({ messagesSent: messages })),
@@ -344,19 +357,74 @@ describe('responses', () => {
       response('elsewhere', zeroUsage({ messagesSent: 999 }), 'f2'),
     );
 
-    expect(await survey().getSurveyComparison('f1', 4, zeroUsage())).toEqual({
-      responses: 3,
-      threshold: 4,
-    });
-    const comparison = await survey().getSurveyComparison('f1', 3, zeroUsage({ messagesSent: 30 }));
-    expect(comparison.responses).toBe(3);
-    expect(comparison.averages?.messagesSent).toBe(20);
-    expect(comparison.averages?.tokensTotal).toBe(0);
-    expect(comparison.percentiles?.messagesSent).toBe(100);
-    expect(comparison.percentiles?.tokensTotal).toBe(0);
+    expect(await survey().getSurveyComparison('f1', 4, zeroUsage())).toEqual({ ready: false });
+  });
+
+  it('returns percentiles and distributions at the threshold', async () => {
+    for (const [index, messages] of [10, 20, 30].entries()) {
+      await survey().createSurveyResponse(
+        response(`u${index}`, zeroUsage({ messagesSent: messages })),
+      );
+    }
+
+    const top = await survey().getSurveyComparison('f1', 3, zeroUsage({ messagesSent: 30 }));
+    if (!top.ready) {
+      throw new Error('expected the comparison to be ready');
+    }
+    expect(top.percentiles.messagesSent).toBe(100);
+    expect(top.percentiles.tokensTotal).toBe(0);
+    expect(top.distributions.messagesSent.median).toBe(20);
+    expect(
+      top.distributions.messagesSent.bins.reduce((sum, bin) => sum + bin.share, 0),
+    ).toBeGreaterThan(98);
+    expect(Object.keys(top).sort()).toEqual(['distributions', 'gains', 'percentiles', 'ready']);
 
     const middle = await survey().getSurveyComparison('f1', 3, zeroUsage({ messagesSent: 20 }));
-    expect(middle.percentiles?.messagesSent).toBe(50);
+    expect(middle.ready && middle.percentiles.messagesSent).toBe(50);
+  });
+
+  it('turns the positive answers into shares', async () => {
+    const answer = (
+      hoursSaved: TSurveyAnswers['hoursSaved'],
+      kind: 'email' | 'write',
+      extra: Partial<TSurveyAnswers> = {},
+    ) =>
+      ({
+        hoursSaved,
+        enabled: true,
+        bestTask: {
+          kind,
+          note: 'x',
+          durationWithout: 'thirty_60',
+          durationWith: 'five_15',
+          frequency: 'weekly',
+        },
+        ...extra,
+      }) as TSurveyAnswers;
+    const people = [
+      answer({ hours: 3 }, 'email', { timeUses: ['less_pressure', 'evaporates'] }),
+      answer({ range: 'five_ten' }, 'email', { timeUses: ['less_pressure'] }),
+      answer({ range: 'none' }, 'write'),
+      answer({ range: 'cant_say' }, 'write', { enabled: false }),
+    ];
+    for (const [index, answers] of people.entries()) {
+      await survey().createSurveyResponse({ ...response(`u${index}`), answers });
+    }
+
+    const result = await survey().getSurveyComparison('f1', 4, zeroUsage());
+    if (!result.ready) {
+      throw new Error('expected the comparison to be ready');
+    }
+    const { gains } = result;
+    expect(gains.savers).toBe(67);
+    expect(gains.medianHours).toBe(5.3);
+    expect(gains.hours.two_five).toBe(50);
+    expect(gains.hours.five_ten).toBe(50);
+    expect(gains.uses.less_pressure).toBe(100);
+    expect(gains.uses).not.toHaveProperty('evaporates');
+    expect(gains.tasks.email).toBe(50);
+    expect(gains.taskMinutes).toEqual({ without: 45, with: 10 });
+    expect(gains.enabled).toBe(75);
   });
 
   it('counts accounts, responses and accounts active in the last seven days', async () => {

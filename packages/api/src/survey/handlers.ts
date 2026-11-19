@@ -130,7 +130,7 @@ export function createSurveySubmitHandler({
       }
 
       const to = new Date();
-      const usage = await getUserUsageSnapshot({
+      const { usage, activity } = await getUserUsageSnapshot({
         userId,
         from: new Date(to.getTime() - flight.lookbackDays * dayMs),
         to,
@@ -155,7 +155,7 @@ export function createSurveySubmitHandler({
       }
 
       const comparison = await getSurveyComparison(flight.flightId, flight.minResponses, usage);
-      res.status(201).json({ usage, comparison } satisfies TSurveyResult);
+      res.status(201).json({ usage, activity, comparison } satisfies TSurveyResult);
     } catch (err) {
       logger.error('[Survey] Failed to submit survey', getSafeErrorMetadata(err));
       error(res, 500, 'internal_error', 'Failed to submit the survey');

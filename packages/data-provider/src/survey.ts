@@ -108,6 +108,16 @@ export const SURVEY_TASK_FREQUENCIES = [
   'rarely',
 ] as const;
 
+/** How many times a month the task comes up, with a working month of about 20 days. */
+export const SURVEY_FREQUENCY_PER_MONTH: Record<(typeof SURVEY_TASK_FREQUENCIES)[number], number> =
+  {
+    daily: 20,
+    few_week: 10,
+    weekly: 4,
+    few_month: 2,
+    rarely: 0.5,
+  };
+
 /** How long one pass of that task takes, without WanGPT and with it. */
 export const SURVEY_TASK_DURATIONS = [
   'under_5',
@@ -191,6 +201,17 @@ export const SURVEY_WISHES = [
 export const SURVEY_CULTURE = ['encouraged', 'neutral', 'discouraged', 'never'] as const;
 
 export type TSurveyHoursRange = (typeof SURVEY_HOURS_RANGES)[number];
+
+/** The ranges that mean time was gained, in order. */
+export const SURVEY_GAIN_RANGES = [
+  'under_1',
+  'one_two',
+  'two_five',
+  'five_ten',
+  'over_ten',
+] as const;
+
+export type TSurveyGainRange = (typeof SURVEY_GAIN_RANGES)[number];
 
 /** Hours a range counts as; `null` ranges do not count towards the median. */
 export const SURVEY_HOURS_VALUE: Record<TSurveyHoursRange, number | null> = {
@@ -290,6 +311,23 @@ export function getSurveyHoursSaved(hoursSaved?: Partial<TSurveyHoursSaved>): nu
     return hoursSaved.hours;
   }
   return hoursSaved.range !== undefined ? SURVEY_HOURS_VALUE[hoursSaved.range] : null;
+}
+
+/** The range a number of weekly hours falls in, or `null` when no time was gained. */
+export function getSurveyGainRange(hours: number | null | undefined): TSurveyGainRange | null {
+  if (hours == null || !(hours > 0)) {
+    return null;
+  }
+  if (hours < 1) {
+    return 'under_1';
+  }
+  if (hours < 2) {
+    return 'one_two';
+  }
+  if (hours < 5) {
+    return 'two_five';
+  }
+  return hours <= 10 ? 'five_ten' : 'over_ten';
 }
 
 /** Only people who gain time are asked where it goes. */
@@ -522,19 +560,69 @@ export type TSurveyNudge = z.infer<typeof surveyNudgeSchema>;
 
 export type TSurveyNudgeResult = { nextNudgeAt: string; delayDays: number };
 
-export type TSurveyComparison = {
-  responses: number;
-  threshold: number;
-  /** Present only once `responses` reaches `threshold`. */
-  averages?: TSurveyUsageValues;
-  /**
-   * Share of the other respondents strictly below this person, 0 to 100.
-   * Present only once `responses` reaches `threshold`.
-   */
-  percentiles?: TSurveyUsageValues;
+/** The numbers whose spread among respondents is drawn as a histogram. */
+export const SURVEY_DISTRIBUTION_KEYS = [
+  'messagesSent',
+  'activeDays',
+  'conversations',
+  'toolCalls',
+] as const;
+
+export type TSurveyDistributionKey = (typeof SURVEY_DISTRIBUTION_KEYS)[number];
+
+/** `share` is a percentage of respondents. A bin without `to` also holds everything above it. */
+export type TSurveyBin = { from: number; to?: number; share: number };
+
+export type TSurveyDistribution = { median: number; bins: TSurveyBin[] };
+
+/** What respondents do with time they get back. "Evaporates" is not a gain. */
+export const SURVEY_GAIN_USES = SURVEY_TIME_USES.filter(
+  (use): use is Exclude<(typeof SURVEY_TIME_USES)[number], 'evaporates'> => use !== 'evaporates',
+);
+
+export type TSurveyGainUse = (typeof SURVEY_GAIN_USES)[number];
+
+/** The positive side of the answers. Every share is a percentage; no counts are exposed. */
+export type TSurveyGains = {
+  /** Share of respondents who gave a number of hours and gain time. */
+  savers: number;
+  /** Median weekly hours among those who gain time. */
+  medianHours: number;
+  /** Among those who gain time, by range. */
+  hours: Record<TSurveyGainRange, number>;
+  /** Among those who gain time, several answers allowed. */
+  uses: Record<TSurveyGainUse, number>;
+  /** Among all respondents, by their most helpful task. */
+  tasks: Record<(typeof SURVEY_TASK_KINDS)[number], number>;
+  /** Median minutes for one pass of that task. */
+  taskMinutes: { without: number; with: number };
+  /** Share of respondents who can now do things they could not before. */
+  enabled: number;
 };
 
-export type TSurveyResult = { usage: TSurveyUsage; comparison: TSurveyComparison };
+/** One day of the person's own messages, as `YYYY-MM-DD` in UTC. */
+export type TSurveyDay = { date: string; messages: number };
+
+/**
+ * Below the response threshold nothing but `ready: false` is sent, so the
+ * browser never learns how many people have answered.
+ */
+export type TSurveyComparison =
+  | { ready: false }
+  | {
+      ready: true;
+      /** Share of the other respondents strictly below this person, 0 to 100. */
+      percentiles: TSurveyUsageValues;
+      distributions: Record<TSurveyDistributionKey, TSurveyDistribution>;
+      gains: TSurveyGains;
+    };
+
+export type TSurveyResult = {
+  usage: TSurveyUsage;
+  /** The daily series behind the activity chart. Returned once, never stored. */
+  activity: TSurveyDay[];
+  comparison: TSurveyComparison;
+};
 
 export const surveySubmissionSchema = z
   .object({

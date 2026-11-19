@@ -1,9 +1,14 @@
 import { SURVEY_USAGE_KEYS } from 'librechat-data-provider';
 import type {
+  TSurveyBin,
+  TSurveyDay,
   TSurveyResult,
   TSurveyFlight,
+  TSurveyGains,
   TSurveyAnswers,
+  TSurveyDistribution,
   TSurveyUsageValues,
+  TSurveyDistributionKey,
 } from 'librechat-data-provider';
 
 export const flight: TSurveyFlight = {
@@ -62,22 +67,67 @@ export const usage = values(0, {
   agentsUsedOthers: 1,
 });
 
-export const resultWithoutAverages: TSurveyResult = {
-  usage: { ...usage, version: 2, windowDays: 30, topTools: [] },
-  comparison: { responses: 12, threshold: 50 },
+const activity: TSurveyDay[] = Array.from({ length: 31 }, (_, index) => {
+  const date = new Date(Date.UTC(2026, 4, 20 + index)).toISOString().slice(0, 10);
+  const messages = [0, 40, 120, 80, 0, 0, 0][index % 7] + (index % 3 === 0 ? 10 : 0);
+  return { date, messages };
+});
+
+const bins = (shares: number[], step: number): TSurveyBin[] =>
+  shares.map((share, index) => ({
+    from: index * step,
+    ...(index < shares.length - 1 ? { to: (index + 1) * step - 1 } : {}),
+    share,
+  }));
+
+const distributions: Record<TSurveyDistributionKey, TSurveyDistribution> = {
+  messagesSent: { median: 500, bins: bins([24, 19, 14, 11, 8, 6, 6, 12], 200) },
+  activeDays: { median: 11, bins: bins([14, 18, 20, 17, 13, 10, 8], 4) },
+  conversations: { median: 22, bins: bins([22, 24, 18, 12, 9, 6, 4, 5], 10) },
+  toolCalls: { median: 45, bins: bins([52, 17, 10, 7, 5, 3, 2, 4], 50) },
 };
 
-export const resultWithAverages: TSurveyResult = {
+const gains: TSurveyGains = {
+  savers: 78,
+  medianHours: 3,
+  hours: { under_1: 16, one_two: 27, two_five: 34, five_ten: 15, over_ten: 8 },
+  uses: { more_same: 41, new_tasks: 29, less_pressure: 38, more_care: 33, learning: 17 },
+  tasks: {
+    summarize: 24,
+    write: 19,
+    email: 16,
+    translate: 13,
+    research: 11,
+    brainstorm: 4,
+    analyze_data: 3,
+    code: 2,
+    presentations: 2,
+    meetings: 2,
+    legal_review: 1,
+    other: 3,
+  },
+  taskMinutes: { without: 45, with: 22 },
+  enabled: 62,
+};
+
+export const resultWaiting: TSurveyResult = {
+  usage: { ...usage, version: 2, windowDays: 30, topTools: [] },
+  activity,
+  comparison: { ready: false },
+};
+
+export const resultReady: TSurveyResult = {
   usage: {
     ...usage,
     version: 2,
     windowDays: 30,
     topTools: [{ name: 'lookup_mcp_docs', calls: 4 }],
   },
+  activity,
   comparison: {
-    responses: 80,
-    threshold: 50,
-    averages: values(5, { messagesSent: 321 }),
+    ready: true,
     percentiles: values(40, { messagesSent: 82 }),
+    distributions,
+    gains,
   },
 };

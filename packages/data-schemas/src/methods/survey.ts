@@ -1,7 +1,6 @@
 import {
   SURVEY_DEFAULT_NUDGE_DAYS,
   SURVEY_ID,
-  SURVEY_USAGE_KEYS,
   SURVEY_VERSION,
   getSurveyNudgeDelayDays,
 } from 'librechat-data-provider';
@@ -14,6 +13,8 @@ import type {
 import type { Model } from 'mongoose';
 import type { ISurveyFlight, ISurveyNudge, ISurveyResponse, IMessage, IUser } from '~/types';
 import type { SurveyFlightData, SurveyNudgeData, SurveyResponseData } from '~/types';
+import type { SurveyRow } from './surveyDistribution';
+import { toComparison } from './surveyDistribution';
 
 export type ArmSurveyFlightInput = {
   flightId: string;
@@ -74,7 +75,6 @@ const isDuplicateKey = (error: unknown): boolean =>
   error !== null &&
   (error as { code?: number }).code === DUPLICATE_KEY;
 
-const round = (value: number) => Math.round(value * 10) / 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Flights armed before cooldowns existed have no schedule stored. */
@@ -178,43 +178,23 @@ export function createSurveyMethods(mongoose: typeof import('mongoose')): Survey
   }
 
   /**
-   * Averages and percentiles are withheld below the threshold so a small group
-   * cannot be read back. A percentile is how many of the other respondents sit
-   * strictly below this person.
+   * Withheld below the threshold so a small group cannot be read back, and
+   * then answered with `ready: false` alone so the browser never learns the
+   * count. One projected read of the respondents feeds every number.
    */
   async function getSurveyComparison(
     flightId: string,
     threshold: number,
     usage: TSurveyUsageValues,
   ): Promise<TSurveyComparison> {
-    const responses = await Response().countDocuments({ flightId });
-    if (responses < threshold) {
-      return { responses, threshold };
+    const rows = await Response()
+      .find({ flightId })
+      .select('usage answers.hoursSaved answers.timeUses answers.bestTask answers.enabled')
+      .lean<SurveyRow[]>();
+    if (rows.length < threshold) {
+      return { ready: false };
     }
-    const group: { _id: null } & Record<string, unknown> = { _id: null };
-    for (const key of SURVEY_USAGE_KEYS) {
-      group[key] = { $avg: `$usage.${key}` };
-      group[`${key}Below`] = {
-        $sum: {
-          $cond: [{ $lt: [{ $ifNull: [`$usage.${key}`, 0] }, usage[key] ?? 0] }, 1, 0],
-        },
-      };
-    }
-    const [row] = await Response().aggregate<Record<string, number>>([
-      { $match: { flightId } },
-      { $group: group },
-    ]);
-    const averages = Object.fromEntries(
-      SURVEY_USAGE_KEYS.map((key) => [key, round(row?.[key] ?? 0)]),
-    ) as TSurveyUsageValues;
-    const others = Math.max(responses - 1, 0);
-    const percentiles = Object.fromEntries(
-      SURVEY_USAGE_KEYS.map((key) => [
-        key,
-        others === 0 ? 0 : Math.round(((row?.[`${key}Below`] ?? 0) / others) * 100),
-      ]),
-    ) as TSurveyUsageValues;
-    return { responses, threshold, averages, percentiles };
+    return { ready: true, ...toComparison(rows, usage) };
   }
 
   async function countActiveAccounts(match: ActiveAccountMatch): Promise<number> {

@@ -2703,8 +2703,15 @@ html[data-input-modality='keyboard']
   z-index: 2;
 }
 
-/* Feedback fish: tail frames, a gentle bob, and the bubbles it trails.
-   Sprite stepping and the rise cannot be expressed with shared primitives. */
+/* Feedback fish: tail frames, a gentle bob, the bubbles it trails, and a soft
+   shadow under the sprite. Stepping, the rise, and a silhouette shadow cannot
+   be expressed with shared primitives. */
+.survey-fish-shadow {
+  filter:
+    drop-shadow(0 6px 4px rgb(var(--text-primary) / 0.4))
+    drop-shadow(0 14px 16px rgb(var(--text-primary) / 0.32));
+}
+
 .survey-fish-strip {
   animation: survey-fish-strip 1.6s steps(4) infinite;
 }
